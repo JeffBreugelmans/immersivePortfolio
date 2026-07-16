@@ -3,3 +3,6 @@ dist/
 .env
 .env.local
 vite.config.js.timestamp-*.mjs
+__pycache__/
+*.pyc
+.venv/
