@@ -3,8 +3,17 @@
 // Chat overlay wired to the REAL Proxie contract (verified against
 // avatar-chat/main.py and chat-block.html -- not a guess):
 //
-//   POST <PROXIE_ENDPOINT>  body: { message, session_id }
+//   POST <PROXIE_ENDPOINT>  body: { message, session_id, scene_context }
 //   -> text/event-stream, lines of: data: {"token": "..."}\n\n
+//
+// scene_context is a short "World -- Scene: description" string built from
+// manifest.js for whichever scene the visitor is currently standing in
+// (via sceneManager.getCurrentSceneId()), so "what is this?" answers about
+// the scene instead of the chatbot itself. main.py folds it into the
+// system messages for that one turn only -- it's not saved into the
+// session's stored history, since the scene changes over time and old
+// turns shouldn't get stamped with whatever scene was current when they
+// happened.
 //   -> an optional trailing "---LINKS---" marker, followed by
 //      "Title|https://url" lines, same convention chat-block.html renders
 //      as link pills.
@@ -25,6 +34,8 @@
 // backend adds it, but until then every scene change here has to happen
 // via portal clicks in-world, not from chat.
 
+import { sceneById } from "./manifest.js";
+
 const PROXIE_ENDPOINT =
   import.meta.env.VITE_PROXIE_ENDPOINT || "https://jeff-avatar-proxy.jeff-d02.workers.dev/";
 
@@ -35,10 +46,32 @@ const TELEPORT_MARKER = "---TELEPORT:"; // proposed convention, not live yet -- 
 // conversation continuity with Proxie's server-side session memory.
 const SESSION_ID = crypto.randomUUID();
 
+// Same three avatar states + same hosted images as the existing 2D
+// chat-block.html widget on jeffxr.com (Squarespace CDN, already public --
+// no need to duplicate the files into this repo). Kept identical on
+// purpose so Proxie reads as the same character across both surfaces.
+const AVATAR_HELLO =
+  "https://images.squarespace-cdn.com/content/v1/63d97f26da579b2cafb101da/a3e81bda-8aec-460b-916c-54539a05d053/avatar_hello.PNG?format=500w";
+const AVATAR_THINKING =
+  "https://images.squarespace-cdn.com/content/v1/63d97f26da579b2cafb101da/8bf6ca11-2e71-4271-b99d-6dd0afbb3b92/avatar-thinking.PNG?format=500w";
+const AVATAR_IDLE =
+  "https://images.squarespace-cdn.com/content/v1/63d97f26da579b2cafb101da/96334f3a-aece-411d-89bf-6f1491fde54c/avatar-idle.PNG?format=500w";
+
 export function initChatOverlay(sceneManager) {
   const form = document.querySelector("#chat-form");
   const input = document.querySelector("#chat-input");
   const log = document.querySelector("#chat-log");
+  const avatarImg = document.querySelector("#avatar-img");
+
+  // Fade-swap, matching chat-block.html's setAvatar() exactly.
+  function setAvatar(src) {
+    if (!avatarImg) return;
+    avatarImg.style.opacity = "0";
+    setTimeout(() => {
+      avatarImg.src = src;
+      avatarImg.style.opacity = "1";
+    }, 220);
+  }
 
   function appendMessage(role, text) {
     const line = document.createElement("div");
@@ -77,6 +110,13 @@ export function initChatOverlay(sceneManager) {
     appendMessage("system", "-- now in: " + e.detail.scene.title + " --");
   });
 
+  function currentSceneContext() {
+    const sceneId = sceneManager.getCurrentSceneId();
+    const scene = sceneId ? sceneById[sceneId] : null;
+    if (!scene) return "";
+    return `${scene.worldTitle} -- ${scene.title}: ${scene.description}`;
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const message = input.value.trim();
@@ -90,11 +130,17 @@ export function initChatOverlay(sceneManager) {
     let fullText = "";
     let firstToken = true;
 
+    setAvatar(AVATAR_THINKING);
+
     try {
       const res = await fetch(PROXIE_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, session_id: SESSION_ID }),
+        body: JSON.stringify({
+          message,
+          session_id: SESSION_ID,
+          scene_context: currentSceneContext(),
+        }),
       });
       if (!res.ok) throw new Error("HTTP " + res.status);
 
@@ -146,8 +192,11 @@ export function initChatOverlay(sceneManager) {
         const sceneId = parts[0].slice(teleportIdx + TELEPORT_MARKER.length).split(/[\s-]*$/)[0].trim();
         if (sceneId && window.teleportTo) window.teleportTo(sceneId);
       }
+
+      setAvatar(AVATAR_IDLE);
     } catch (err) {
       replyEl.textContent = "Proxie request failed (" + err.message + ").";
+      setAvatar(AVATAR_IDLE);
     } finally {
       input.disabled = false;
       input.focus();

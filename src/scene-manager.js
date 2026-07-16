@@ -9,6 +9,13 @@ import { sceneById, defaultSceneId } from "./manifest.js";
 
 const PORTAL_RADIUS = 2.5;
 
+// portal.js triggers on proximity (walking through a portal), not just
+// click. Without a cooldown, arriving in a scene where a return portal
+// happens to spawn near you would immediately re-trigger and bounce you
+// straight back. Must stay >= however long a teleport-request round trip
+// (event -> loadScene -> new portals mounted) takes -- 1.5s is generous.
+const POST_TELEPORT_COOLDOWN_MS = 1500;
+
 export function initSceneManager() {
   const root = document.querySelector("#current-scene-root");
   const portalRoot = document.querySelector("#portal-root");
@@ -19,7 +26,7 @@ export function initSceneManager() {
   function loadScene(sceneId) {
     const scene = sceneById[sceneId];
     if (!scene) {
-      console.warn(`[scene-manager] Unknown sceneId "${sceneId}" — check manifest.js`);
+      console.warn(`[scene-manager] Unknown sceneId "${sceneId}" -- check manifest.js`);
       return;
     }
     currentSceneId = sceneId;
@@ -29,7 +36,7 @@ export function initSceneManager() {
 
     // Marble export. Until a real scene.glb is dropped into
     // public/worlds/<world>/<scene>/marble/, this 404s quietly in the
-    // console and you'll just see the fallback ground below — expected
+    // console and you'll just see the fallback ground below -- expected
     // for scenes you haven't generated yet.
     const model = document.createElement("a-entity");
     model.setAttribute("gltf-model", scene.glb);
@@ -58,8 +65,10 @@ export function initSceneManager() {
     });
 
     if (sceneLabel) {
-      sceneLabel.textContent = `${scene.worldTitle} — ${scene.title}`;
+      sceneLabel.textContent = `${scene.worldTitle} -- ${scene.title}`;
     }
+
+    window.__portalCooldownUntil = Date.now() + POST_TELEPORT_COOLDOWN_MS;
 
     window.dispatchEvent(new CustomEvent("scene-changed", { detail: { sceneId, scene } }));
   }

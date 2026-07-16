@@ -33,11 +33,19 @@
 
     <div id="chat-overlay">
       <div id="chat-header">
-        <span id="scene-label">Loading…</span>
+        <img
+          id="avatar-img"
+          src="https://images.squarespace-cdn.com/content/v1/63d97f26da579b2cafb101da/a3e81bda-8aec-460b-916c-54539a05d053/avatar_hello.PNG?format=500w"
+          alt="Jeff avatar"
+        />
+        <div id="chat-header-text">
+          <span id="avatar-name">JB Proxie</span>
+          <span id="scene-label">Loading...</span>
+        </div>
       </div>
       <div id="chat-log"></div>
       <form id="chat-form">
-        <input id="chat-input" type="text" placeholder="Ask Proxie about this scene…" autocomplete="off" />
+        <input id="chat-input" type="text" placeholder="Ask Proxie about this scene..." autocomplete="off" />
         <button type="submit">Send</button>
       </form>
     </div>
