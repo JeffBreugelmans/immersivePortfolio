@@ -1,0 +1,45 @@
+# Career World Explorer — static file server — systemd service
+# Same pattern as jeff-avatar.service / jeff-awe-proxy.service in avatar-chat.
+#
+# Prerequisites on the Spark, one time:
+#   cd /home/jeff/git/immersivePortfolio
+#   npm install && npm run build          # produces dist/
+#   python3 -m venv .venv
+#   .venv/bin/pip install -r server/requirements.txt
+#
+# Installation:
+#   sudo cp jeff-worlds.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now jeff-worlds
+#
+# Check status:
+#   sudo systemctl status jeff-worlds
+#   journalctl -u jeff-worlds -f
+#
+# After each redeploy (new scenes, code changes):
+#   cd /home/jeff/git/immersivePortfolio && git pull && npm run build
+#   sudo systemctl restart jeff-worlds
+
+[Unit]
+Description=Career World Explorer — WebXR static host
+Documentation=https://github.com/JeffBreugelmans/immersivePortfolio
+After=network.target
+
+[Service]
+Type=simple
+User=jeff
+Group=jeff
+WorkingDirectory=/home/jeff/git/immersivePortfolio/server
+ExecStart=/home/jeff/git/immersivePortfolio/.venv/bin/uvicorn worlds_static:app --host 127.0.0.1 --port 8010 --log-level info
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=jeff-worlds
+
+# Security hardening (matches jeff-avatar.service)
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
