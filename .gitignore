@@ -6,3 +6,11 @@ vite.config.js.timestamp-*.mjs
 __pycache__/
 *.pyc
 .venv/
+
+# Reference materials (photos, videos, source GLBs used to prompt Marble)
+# stay local -- Marble generation only ever runs from Jeff's laptop, and
+# the Spark only needs the final scene.glb output, not the prompting
+# inputs. Keep the folder structure itself (.gitkeep) so a fresh clone
+# still has the right layout to drop new reference material into.
+public/**/reference/*
+!public/**/reference/.gitkeep
