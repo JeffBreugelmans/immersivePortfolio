@@ -96,26 +96,32 @@ port-based option above doesn't require:
 Default to the port-based approach and only switch if venue testing shows
 it's blocked.
 
-## 5. Proxie chat — CORS check (action needed, not yet done here)
+## 5. Proxie chat -- CORS check (resolved)
 
 The chat overlay (`src/proxie-chat.js`) calls the existing Cloudflare
 Worker (`jeff-avatar-proxy.jeff-d02.workers.dev`), the same one
-`chat-block.html` already uses — this reuses the Worker's existing API-key
+`chat-block.html` already uses -- this reuses the Worker's existing API-key
 injection, so no secret needs to live in this frontend.
 
-**What to verify (the Worker's source isn't in this repo, so this couldn't
-be checked automatically):** if the Worker enforces an `Origin` allowlist
-(likely, given `main.py`'s own CORS whitelist is locked to `jeffxr.com` +
-localhost), it needs the new WebXR app's origin added —
-`https://dgxspark.tail8341fc.ts.net:8443` (or the venue's actual browser
-origin, if different). Without this, the chat overlay's `fetch()` calls
-will fail with a CORS error in the browser console even though the Worker
-and FastAPI are both healthy. Check the Worker script in your Cloudflare
-dashboard (Workers & Pages → jeff-avatar-proxy) for its CORS headers.
+**Resolved -- no action needed.** Checked the Worker's source directly in
+the Cloudflare dashboard (Workers & Pages -> jeff-avatar-proxy -> Edit code).
+It does not enforce an origin allowlist at all: both the OPTIONS preflight
+handler and the actual POST response hardcode
+`"Access-Control-Allow-Origin": "*"`. Unlike `main.py`'s CORS whitelist
+(locked to `jeffxr.com` + localhost), the Worker accepts requests from any
+origin, including the WebXR app's `https://dgxspark.tail8341fc.ts.net:8443`.
+This is why chat already worked from `jeffxr.com/worlds` without any Worker
+changes. Confirmed working in practice (July 2026 test on mobile WebXR).
 
-## 6. Scene-triggered teleportation — not built yet
+Worth knowing for later: the wildcard `*` is permissive by design or by
+oversight -- either way, anyone can call this Worker from any origin as long
+as they hit it directly (the `X-API-Key` is what actually gates access, not
+CORS). Not a hackathon blocker, but revisit if this ever needs tightening
+post-demo.
 
-Right now Proxie has no way to tell the WebXR app to change scenes — the
+## 6. Scene-triggered teleportation -- not built yet
+
+Right now Proxie has no way to tell the WebXR app to change scenes -- the
 `/chat` endpoint only streams `{"token": "..."}` and an optional
 `---LINKS---` block (see `avatar-chat/README.md`). `src/proxie-chat.js`
 already parses defensively for a proposed `---TELEPORT:<sceneId>---`
@@ -126,7 +132,7 @@ marker, but nothing emits it yet. To make Proxie scene-aware:
    the scene ids from `src/manifest.js` and instructing the model to
    append `---TELEPORT:<sceneId>---` when a topic clearly maps to one of
    them.
-2. No `main.py` code change should be needed — the think-block stripper
+2. No `main.py` code change should be needed -- the think-block stripper
    and streaming logic already forward arbitrary trailing text verbatim,
    the same way `---LINKS---` passes through untouched today.
 
