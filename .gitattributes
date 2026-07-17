@@ -1,0 +1,11 @@
+# Pin line endings to LF everywhere -- this app is deployed on the same
+# Ubuntu Spark as avatar-chat. Prevents the same Windows-checkout CRLF
+# noise seen in avatar-chat from ever showing up here.
+* text=auto eol=lf
+
+# Binary assets -- don't run text normalization on these regardless.
+*.glb binary
+*.gltf binary
+*.png binary
+*.jpg binary
+*.jpeg binary

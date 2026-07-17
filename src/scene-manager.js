@@ -9,17 +9,32 @@ import { sceneById, defaultSceneId } from "./manifest.js";
 
 const PORTAL_RADIUS = 2.5;
 
+// Portals are placed PORTAL_RADIUS from scene center (see the angle math
+// below), so spawning at dead center on every load guarantees you're
+// PORTAL_RADIUS away from all of them -- well outside portal.js's
+// PROXIMITY_TRIGGER_DISTANCE (1.3m). Confirmed bug without this: teleport
+// never used to move the camera, so walking into scene A's portal at e.g.
+// (0, 1.2, -2.5) could land you inside scene B with ITS portal back to A
+// placed at that exact same coordinate (both computed the same way, by
+// index, independent of which direction you arrived from) -- an instant
+// re-trigger loop the moment the cooldown below expired. If you ever
+// shrink PORTAL_RADIUS, keep it well above PROXIMITY_TRIGGER_DISTANCE.
+const SPAWN_POSITION = "0 1.6 0";
+
 // portal.js triggers on proximity (walking through a portal), not just
-// click. Without a cooldown, arriving in a scene where a return portal
-// happens to spawn near you would immediately re-trigger and bounce you
-// straight back. Must stay >= however long a teleport-request round trip
-// (event -> loadScene -> new portals mounted) takes -- 1.5s is generous.
+// click. Without a cooldown, the frame right after loadScene() runs
+// (before the new portal entities exist yet) shouldn't be judged at all.
+// Must stay >= however long a teleport-request round trip (event ->
+// loadScene -> new portals mounted) takes -- 1.5s is generous. The real
+// bounce-prevention is SPAWN_POSITION above; this is just a small buffer
+// on top of it.
 const POST_TELEPORT_COOLDOWN_MS = 1500;
 
 export function initSceneManager() {
   const root = document.querySelector("#current-scene-root");
   const portalRoot = document.querySelector("#portal-root");
   const sceneLabel = document.querySelector("#scene-label");
+  const cameraRig = document.querySelector("#camera-rig");
 
   let currentSceneId = null;
 
@@ -66,6 +81,10 @@ export function initSceneManager() {
 
     if (sceneLabel) {
       sceneLabel.textContent = `${scene.worldTitle} -- ${scene.title}`;
+    }
+
+    if (cameraRig) {
+      cameraRig.setAttribute("position", SPAWN_POSITION);
     }
 
     window.__portalCooldownUntil = Date.now() + POST_TELEPORT_COOLDOWN_MS;
