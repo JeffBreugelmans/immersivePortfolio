@@ -137,11 +137,14 @@ injection, so no secret needs to live in this frontend.
 the Cloudflare dashboard (Workers & Pages -> jeff-avatar-proxy -> Edit code).
 It does not enforce an origin allowlist at all: both the OPTIONS preflight
 handler and the actual POST response hardcode
-`"Access-Control-Allow-Origin": "*"`. Unlike `main.py`'s CORS whitelist
-(locked to `jeffxr.com` + localhost), the Worker accepts requests from any
-origin. This is why chat already worked from `jeffxr.com/worlds` without
-any Worker changes, and will keep working after this URL switch too, since
-the Worker doesn't care what origin it's called from.
+`"Access-Control-Allow-Origin": "*"`. The Worker accepts requests from any
+origin, so this was never actually a blocker -- chat already worked from
+`jeffxr.com/worlds` without any Worker changes, and works after this URL
+switch too, since the Worker doesn't care what origin it's called from.
+
+Separately, `avatar-chat/main.py`'s own CORS whitelist (used for direct
+callers of Proxie's API, not the Worker) has also been updated to include
+`https://dgxspark.tail8341fc.ts.net` alongside `jeffxr.com` + localhost.
 
 Worth knowing for later: the wildcard `*` is permissive by design or by
 oversight -- either way, anyone can call this Worker from any origin as long
