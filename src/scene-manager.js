@@ -1,8 +1,10 @@
 // scene-manager.js
 //
 // Loads the current scene's Marble glTF export, places portal hotspots for
-// every connected scene (per manifest.js "entryPortals"), and exposes
-// window.teleportTo(sceneId) so both portal clicks and Proxie chat
+// every connected scene (per manifest.js "entryPortals"), renders any
+// additional "props" (per-scene models/images/video from Marble, Tripo, or
+// your own existing assets -- see manifest.js's header comment), and
+// exposes window.teleportTo(sceneId) so both portal clicks and Proxie chat
 // responses can trigger a scene change through the same path.
 
 import { sceneById, defaultSceneId } from "./manifest.js";
@@ -30,6 +32,53 @@ const SPAWN_POSITION = "0 1.6 0";
 // on top of it.
 const POST_TELEPORT_COOLDOWN_MS = 1500;
 
+// Builds the A-Frame entity for one manifest.js "props" entry. "source"
+// (marble/tripo/custom) is documentation only, not read here -- it never
+// affects how a prop is rendered, only how it's labeled in the manifest
+// for future reference.
+function createPropEntity(prop) {
+  let el;
+
+  switch (prop.kind) {
+    case "glb":
+      el = document.createElement("a-entity");
+      el.setAttribute("gltf-model", prop.src);
+      el.setAttribute("shadow", "receive: true; cast: true");
+      if (prop.scale) el.setAttribute("scale", prop.scale);
+      break;
+
+    case "image":
+      el = document.createElement("a-image");
+      el.setAttribute("src", prop.src);
+      if (prop.width) el.setAttribute("width", prop.width);
+      if (prop.height) el.setAttribute("height", prop.height);
+      break;
+
+    case "video":
+      el = document.createElement("a-video");
+      el.setAttribute("src", prop.src);
+      if (prop.width) el.setAttribute("width", prop.width);
+      if (prop.height) el.setAttribute("height", prop.height);
+      // autoplay/loop/muted -- muted is required for browsers to allow
+      // autoplay at all; visitors can still be shown sound-on controls
+      // later if a scene needs it, this is just a sane default.
+      el.setAttribute("autoplay", "true");
+      el.setAttribute("loop", "true");
+      el.setAttribute("muted", "true");
+      break;
+
+    default:
+      console.warn(`[scene-manager] Unknown prop kind "${prop.kind}" for prop "${prop.id}" -- skipping`);
+      return null;
+  }
+
+  el.setAttribute("position", prop.position ?? "0 0 0");
+  if (prop.rotation) el.setAttribute("rotation", prop.rotation);
+  el.dataset.propId = prop.id;
+  el.dataset.propSource = prop.source ?? "unknown";
+  return el;
+}
+
 export function initSceneManager() {
   const root = document.querySelector("#current-scene-root");
   const portalRoot = document.querySelector("#portal-root");
@@ -49,10 +98,10 @@ export function initSceneManager() {
     root.innerHTML = "";
     portalRoot.innerHTML = "";
 
-    // Marble export. Until a real scene.glb is dropped into
-    // public/worlds/<world>/<scene>/marble/, this 404s quietly in the
-    // console and you'll just see the fallback ground below -- expected
-    // for scenes you haven't generated yet.
+    // Marble export -- the whole-room environment. Until a real scene.glb
+    // is dropped into public/<world>/<scene>/marble/, this 404s quietly
+    // in the console and you'll just see the fallback ground below --
+    // expected for scenes you haven't generated yet.
     const model = document.createElement("a-entity");
     model.setAttribute("gltf-model", scene.glb);
     model.setAttribute("shadow", "receive: true");
@@ -64,6 +113,16 @@ export function initSceneManager() {
     ground.setAttribute("height", 30);
     ground.setAttribute("color", "#222");
     root.appendChild(ground);
+
+    // Props: Tripo objects, your own GLBs, reference images/video --
+    // anything layered into the scene on top of the Marble environment.
+    // Same 404-quietly behavior as the main model if a prop's file isn't
+    // there yet, so it's safe to list props in the manifest before the
+    // actual asset exists.
+    (scene.props ?? []).forEach((prop) => {
+      const el = createPropEntity(prop);
+      if (el) root.appendChild(el);
+    });
 
     scene.entryPortals.forEach((targetId, i) => {
       const angle = (i / Math.max(scene.entryPortals.length, 1)) * Math.PI * 2;
