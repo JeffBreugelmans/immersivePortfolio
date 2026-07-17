@@ -12,6 +12,7 @@
     "aframe": "^1.6.0"
   },
   "devDependencies": {
+    "dotenv": "^17.4.2",
     "vite": "^5.4.0"
   }
 }
