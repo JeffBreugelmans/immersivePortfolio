@@ -25,6 +25,11 @@ import { GaussianSplatLoaderSystem } from "./gaussianSplatLoader";
 import { PortalSystem } from "./portals";
 import { DesktopControlsSystem } from "./desktopControls";
 import { GazeContextSystem } from "./gazeContext";
+import { InteractionSystem } from "./interactions";
+import { FadeSystem } from "./fade";
+import { AudioManagerSystem } from "./audio";
+import { CompanionSystem } from "./companion";
+import { DebugOverlaySystem } from "./debugOverlay";
 import { initSceneManager } from "./sceneManager";
 import { initChatOverlay } from "./proxie-chat.js";
 
@@ -121,7 +126,12 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
       .registerSystem(GaussianSplatLoaderSystem)
       .registerSystem(PortalSystem)
       .registerSystem(DesktopControlsSystem)
-      .registerSystem(GazeContextSystem);
+      .registerSystem(GazeContextSystem)
+      .registerSystem(InteractionSystem)
+      .registerSystem(FadeSystem)
+      .registerSystem(AudioManagerSystem)
+      .registerSystem(CompanionSystem)
+      .registerSystem(DebugOverlaySystem);
 
     // Invisible floor so XR teleport/slide locomotion always has a
     // walkable surface, even before a scene's collider.glb exists.

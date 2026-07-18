@@ -72,6 +72,20 @@
 
 const BASE = import.meta.env.BASE_URL; // e.g. "/worlds/"
 
+// Shared SFX library (AudioManagerSystem, src/audio.ts). Interaction
+// configs reference these by key: interaction.click.sfx = "click".
+// Files come from Mint generation (see planning/asset-tracker) -- missing
+// files no-op silently, so keys can be wired before assets exist.
+export const sfxLibrary = {
+  "portal-whoosh": `${BASE}shared/audio/portal-whoosh.mp3`,
+  "hud-blip": `${BASE}shared/audio/hud-blip.mp3`,
+  click: `${BASE}shared/audio/click.mp3`,
+  chime: `${BASE}shared/audio/chime.mp3`,
+  hum: `${BASE}shared/audio/hum.mp3`,
+  "headset-don": `${BASE}shared/audio/headset-don.mp3`,
+  lever: `${BASE}shared/audio/lever.mp3`,
+};
+
 export const worlds = [
   {
     id: "afternow",

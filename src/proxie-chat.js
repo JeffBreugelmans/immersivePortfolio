@@ -163,11 +163,33 @@ export function initChatOverlay(sceneManager) {
     reflectMuteState();
   });
 
+  // ----------------------------------------------------------------
+  // Speaking / streaming state broadcast. The companion avatar keys its
+  // talk animation off these, and the audio manager ducks the ambient
+  // loop. Double-keyed (TTS utterances AND SSE stream activity) because
+  // speechSynthesis voices are unverified on Quest browser -- if TTS
+  // never fires there, stream activity still drives the talk state.
+  // ----------------------------------------------------------------
+  let activeUtterances = 0;
+  function setSpeaking(on) {
+    window.__proxieSpeaking = on;
+    window.dispatchEvent(new CustomEvent(on ? "proxie-speaking-started" : "proxie-speaking-ended"));
+  }
+  function utteranceStarted() {
+    if (++activeUtterances === 1) setSpeaking(true);
+  }
+  function utteranceDone() {
+    if (activeUtterances > 0 && --activeUtterances === 0) setSpeaking(false);
+  }
+
   function speak(text) {
     const cleaned = text.trim();
     if (!ttsSupported || ttsMuted || !cleaned) return;
     const utterance = new SpeechSynthesisUtterance(cleaned);
     utterance.rate = 1.05;
+    utterance.onstart = utteranceStarted;
+    utterance.onend = utteranceDone;
+    utterance.onerror = utteranceDone;
     window.speechSynthesis.speak(utterance);
   }
 
@@ -209,6 +231,7 @@ export function initChatOverlay(sceneManager) {
     const speaker = makeSentenceSpeaker();
 
     setAvatar(AVATAR_THINKING);
+    window.dispatchEvent(new CustomEvent("proxie-stream-started"));
 
     try {
       const res = await fetch(PROXIE_ENDPOINT, {
@@ -278,6 +301,7 @@ export function initChatOverlay(sceneManager) {
       replyEl.textContent = "Proxie request failed (" + err.message + ").";
       setAvatar(AVATAR_IDLE);
     } finally {
+      window.dispatchEvent(new CustomEvent("proxie-stream-ended"));
       input.disabled = false;
       input.focus();
     }

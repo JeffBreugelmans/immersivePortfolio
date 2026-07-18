@@ -27,6 +27,13 @@ import {
 import { GaussianSplatLoader, GaussianSplatLoaderSystem } from "./gaussianSplatLoader";
 import { createPortal } from "./portals";
 import { registerGazeTarget, unregisterGazeTarget } from "./gazeContext";
+import { fadeThrough } from "./fade";
+import {
+  attachClickTrigger,
+  registerInteractive,
+  unregisterInteractive,
+  type InteractionConfig,
+} from "./interactions";
 import { sceneById, defaultSceneId } from "./manifest.js";
 
 const PORTAL_RADIUS = 2.5;
@@ -92,9 +99,11 @@ interface PropEntry {
   scale?: number | [number, number, number];
   width?: number;
   height?: number;
+  interaction?: InteractionConfig;
+  role?: string;
 }
 
-async function spawnProp(world: World, prop: PropEntry): Promise<Entity | null> {
+async function spawnProp(world: World, prop: PropEntry, sceneId: string): Promise<Entity | null> {
   let object3D: THREE.Object3D;
   let cleanupVideo: HTMLVideoElement | null = null;
 
@@ -160,15 +169,21 @@ async function spawnProp(world: World, prop: PropEntry): Promise<Entity | null> 
   if (cleanupVideo) object3D.userData.video = cleanupVideo;
 
   const entity = world.createTransformEntity(object3D).addComponent(Interactable);
-  if (prop.kind === "glb") {
+  if (prop.kind === "glb" && prop.interaction?.pickup !== false) {
     // Hand-grabbable in XR (hand tracking / controllers); inert on desktop
-    // where the grab system doesn't run.
+    // where the grab system doesn't run. `interaction.pickup: false` opts
+    // out (e.g. a monitor shouldn't be stealable).
     entity.addComponent(DistanceGrabbable, {
       movementMode: MovementMode.MoveAtSource,
       translate: true,
       rotate: true,
       scale: false,
     });
+  }
+
+  if (prop.interaction) {
+    registerInteractive(object3D, prop.id, sceneId, prop.interaction);
+    if (prop.interaction.click) attachClickTrigger(world, object3D, prop.id);
   }
 
   registerGazeTarget(object3D, {
@@ -224,6 +239,9 @@ export function initSceneManager(world: World): SceneManager {
       if (!entity) continue;
       if (entity.object3D) {
         unregisterGazeTarget(entity.object3D);
+        if (entity.object3D.userData.propId) {
+          unregisterInteractive(entity.object3D.userData.propId);
+        }
         entity.object3D.userData.video?.pause?.();
         disposeObject3D(entity.object3D);
       }
@@ -279,7 +297,7 @@ export function initSceneManager(world: World): SceneManager {
 
     // Props: Tripo objects, custom GLBs, images/video screens.
     for (const prop of scene.props ?? []) {
-      sceneEntities.push(await spawnProp(world, prop));
+      sceneEntities.push(await spawnProp(world, prop, sceneId));
       if (token !== loadToken) return;
     }
 
@@ -292,15 +310,27 @@ export function initSceneManager(world: World): SceneManager {
     splatSystem.replayAnimation(envEntity).catch(() => {});
   }
 
-  window.addEventListener("teleport-request", (e) => {
-    loadScene((e as CustomEvent).detail.sceneId).catch((err) =>
-      console.error("[sceneManager] Scene load failed:", err)
-    );
-  });
-  window.teleportTo = (sceneId: string) => {
-    loadScene(sceneId).catch((err) => console.error("[sceneManager] Scene load failed:", err));
-  };
+  // Every teleport goes through a fade-to-black (FadeSystem) so the splat
+  // swap reads as a clean cut instead of a hard pop -- especially on
+  // Quest, where the DOM loading overlay is invisible in-session. The
+  // fade back in happens when the load settles, success or not, so a bad
+  // sceneId can never strand the visitor on a black screen.
+  function fadedLoad(sceneId: string): void {
+    fadeThrough(() => {
+      loadScene(sceneId)
+        .catch((err) => console.error("[sceneManager] Scene load failed:", err))
+        .finally(() => {
+          window.dispatchEvent(new CustomEvent("fade-request", { detail: { toBlack: false } }));
+        });
+    });
+  }
 
+  window.addEventListener("teleport-request", (e) => {
+    fadedLoad((e as CustomEvent).detail.sceneId);
+  });
+  window.teleportTo = (sceneId: string) => fadedLoad(sceneId);
+
+  // Initial load: no fade (the loading overlay covers it).
   loadScene(defaultSceneId).catch((err) =>
     console.error("[sceneManager] Initial scene load failed:", err)
   );
