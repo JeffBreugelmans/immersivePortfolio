@@ -58,6 +58,17 @@ canvas tarp" -- hides generation artifacts, adds mood. Keep the windmill
 in-frame of the doorway in every iteration; it's the Easter-egg anchor
 and the hero-moment composition depends on it being visible.
 
+### v1 verdict -> v2 goes IMAGE-FIRST
+v1 (walkthrough + Jeff review): believable hangar shell and aircraft,
+BUT no windmill, the view out the doors is more-hangar-and-parking
+instead of polder, aircraft read as silver prop planes / a Chinook-ish
+transport rather than an F-16, and the generation camera sat low by the
+door wall. v2 follows the 2D-first workflow (NEXT_STEPS): compose a 2D
+pre-viz FROM the intended standing point (eye height 1.6m, F-16 nose
+left, open doors framing polder + windmill center-right, golden light),
+get Jeff's thumbs-up, then `--image` it into Marble with a short style
+modifier. Keep v1's world live meanwhile.
+
 ## Final prompt used
 v1, verbatim (2026-07-18).
 

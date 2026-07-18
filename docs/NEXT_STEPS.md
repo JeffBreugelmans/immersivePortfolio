@@ -328,6 +328,36 @@ what `public/afternow/scene-01-holographic-studio/props/AfterNowCustomEnvt.glb`
 prop for S3 Holo Stage presumably; move it to
 `public/career/scene-01-holo-stage/props/` + add a manifest entry.
 
+## 2D-first generation workflow (ADOPTED 2026-07-18, after S1 v1 review)
+
+S1 v1 taught us: text-only prompts produce roughly-right rooms with
+wrong details (no windmill, "polder" turned into more hangar), and splat
+quality only holds in a few-meter sweet zone around the generation
+camera. Plan decision #3 (pre-viz before spending) is now the hard rule,
+with a composition insight that makes it more than a style check:
+
+**The pre-viz image's viewpoint BECOMES the world's sweet spot.** Marble
+anchors generation on the input image, the generation camera lands at
+the image's viewpoint, and our walk box + spawn now sit exactly there.
+So compose every pre-viz as *the literal view from inside the roped-off
+area*:
+1. Camera at standing eye height (~1.6m) -- v1's camera was low+odd,
+   which is where the floating/wrong-height feel came from.
+2. ALL hero content in one frame at correct scale (S1: F-16 nose one
+   side, open doors framing polder + windmill, golden light).
+3. Content the visitor should get close to belongs near the camera.
+
+Flow per scene: 2D image (Mint gen or real reference photo -- photos
+beat renders when clean, see PROJECT_BRIEF rule of thumb) -> Jeff
+thumbs-up -> `node scripts/marble-generate.mjs --image <approved.png>`
+with a SHORT style modifier -> integrate. Iterations on the image are
+cheap; Marble credits only burn after sign-off. Drop approved images in
+each scene's `reference/` folder.
+
+Mint MCP note: needs OAuth, which this laptop session can't complete --
+generate images in the Mint web app (12k tokens available), or connect
+the MCP in a fresh session and ask for "review mode".
+
 ## Deploy reminders
 
 - Spark needs Node >= 20.19 to build now (`docs/DEPLOYMENT.md` §0).
