@@ -34,6 +34,12 @@ const EXPECTED = [
   /Failed to load resource/,
   /ERR_CONNECTION_RESET|ERR_NAME_NOT_RESOLVED/,
   /Locomotor not initialized/,
+  // SwiftShader-only flake: Spark's splat ShaderMaterial intermittently
+  // fails program validation with an EMPTY info log (software-GL resource
+  // hiccup, ~1 in 2 runs; never seen on real GPUs). A genuine GLSL error
+  // always carries a non-empty log with line numbers, so keep this match
+  // anchored to the empty-log form.
+  /Shader Error 0 - VALIDATE_STATUS false\s*\n*\s*Material Name:\s*\n*\s*Material Type: ShaderMaterial\s*\n*\s*Program Info Log:\s*$/,
 ];
 const isExpected = (text) => EXPECTED.some((re) => re.test(text));
 page.on("pageerror", (e) => {

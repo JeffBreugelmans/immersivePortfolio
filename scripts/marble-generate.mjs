@@ -169,23 +169,32 @@ async function main() {
   }
 
   const args = parseArgs(process.argv.slice(2));
-  if (!args.world || !args.scene || !args.prompt) {
+  if (!args.world || !args.scene || (!args.prompt && !args["from-operation"])) {
     console.error('Usage: node scripts/marble-generate.mjs --world <id> --scene <id> --prompt "..." [--image path]');
+    console.error('       node scripts/marble-generate.mjs --world <id> --scene <id> --from-operation <opId> [--full-res]');
     process.exit(1);
   }
 
   const destDir = path.resolve("public", args.world, args.scene, "marble");
   await fs.mkdir(destDir, { recursive: true });
 
-  console.log(`Requesting Marble generation for ${args.world}/${args.scene}...`);
-  const genOp = await generateWorld({
-    displayName: `${args.world}/${args.scene}`,
-    prompt: args.prompt,
-    imagePath: args.image,
-  });
-  console.log(`Operation ${genOp.operation_id} submitted, polling (usually ~5 min)...`);
-
-  const genDone = await pollOperation(genOp.operation_id, { label: "world generation" });
+  let genDone;
+  if (args["from-operation"]) {
+    // Re-download assets from an already-completed generation (asset URLs
+    // are signed but the operation record persists) -- costs no tokens.
+    // Used e.g. to fetch the full-res splat after the fact.
+    console.log(`Fetching existing operation ${args["from-operation"]}...`);
+    genDone = await pollOperation(args["from-operation"], { label: "existing operation" });
+  } else {
+    console.log(`Requesting Marble generation for ${args.world}/${args.scene}...`);
+    const genOp = await generateWorld({
+      displayName: `${args.world}/${args.scene}`,
+      prompt: args.prompt,
+      imagePath: args.image,
+    });
+    console.log(`Operation ${genOp.operation_id} submitted, polling (usually ~5 min)...`);
+    genDone = await pollOperation(genOp.operation_id, { label: "world generation" });
+  }
   // The completed operation's response carries the id under world_id (not
   // id) in the current API; fall back to parsing the marble URL.
   const worldId =
@@ -237,6 +246,12 @@ async function main() {
     console.log(`Saved ${meshPath}`);
   }
 
+  // On --from-operation re-downloads, keep the original prompt on record.
+  const priorMeta = await fs
+    .readFile(path.join(destDir, "metadata.json"), "utf8")
+    .then((t) => JSON.parse(t))
+    .catch(() => ({}));
+
   await fs.writeFile(
     path.join(destDir, "metadata.json"),
     JSON.stringify(
@@ -244,7 +259,7 @@ async function main() {
         generatedAt: new Date().toISOString(),
         worldId,
         worldMarbleUrl: genDone.response.world_marble_url,
-        prompt: args.prompt,
+        prompt: args.prompt ?? priorMeta.prompt ?? null,
         image: args.image ?? null,
         model: MODEL,
         spzVariant: "500k",

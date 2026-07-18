@@ -75,10 +75,11 @@ const gltfLoader = new GLTFLoader();
 // initSceneManager): applies to every Marble-generated splat + collider.
 const MARBLE_FLIP_X = Math.PI;
 
-async function spawnCollider(world: World, url: string): Promise<Entity | null> {
+async function spawnCollider(world: World, url: string, scale = 1): Promise<Entity | null> {
   try {
     const gltf = await gltfLoader.loadAsync(url);
     gltf.scene.rotation.x = MARBLE_FLIP_X; // same OpenCV->three.js flip as the splat
+    gltf.scene.scale.setScalar(scale); // keep in lockstep with the splat's envScale
     gltf.scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) child.visible = false;
     });
@@ -273,15 +274,39 @@ export function initSceneManager(world: World): SceneManager {
     locomotor?.teleport(world.player.position);
 
     // Environment splat, falling back to the committed placeholder until
-    // the real scene.spz has been generated.
-    envEntity.setValue(GaussianSplatLoader, "splatUrl", scene.splat);
+    // the real scene.spz has been generated. Desktop browsers get the
+    // full-res variant when the manifest lists one (splatHiRes -- too
+    // heavy for git/Quest, present only where it was rsync'd); a 404
+    // falls through to the 500k splat, then to the placeholder.
+    const envScale = scene.envScale ?? 1;
     envEntity.object3D!.rotation.x = MARBLE_FLIP_X;
-    try {
-      await splatSystem.load(envEntity, { animate: false });
-    } catch {
-      if (token !== loadToken) return;
+    envEntity.object3D!.scale.setScalar(envScale);
+    const isMobileXrBrowser = /OculusBrowser|Quest|Pico|Android/i.test(navigator.userAgent);
+    // Software GL (SwiftShader in headless/cloud harnesses, llvmpipe in
+    // VMs) chokes on the 2M-splat shader -- give it the 500k build too.
+    const glCtx = world.renderer.getContext();
+    const dbgExt = glCtx.getExtension("WEBGL_debug_renderer_info");
+    const glRenderer = dbgExt ? String(glCtx.getParameter(dbgExt.UNMASKED_RENDERER_WEBGL)) : "";
+    const isSoftwareGL = /swiftshader|llvmpipe|software/i.test(glRenderer);
+    const splatCandidates = [
+      ...(scene.splatHiRes && !isMobileXrBrowser && !isSoftwareGL ? [scene.splatHiRes] : []),
+      scene.splat,
+    ];
+    let splatLoaded = false;
+    for (const url of splatCandidates) {
+      envEntity.setValue(GaussianSplatLoader, "splatUrl", url);
+      try {
+        await splatSystem.load(envEntity, { animate: false });
+        splatLoaded = true;
+        break;
+      } catch {
+        if (token !== loadToken) return;
+      }
+    }
+    if (!splatLoaded) {
       console.info(`[sceneManager] No splat at ${scene.splat} yet -- using placeholder`);
       envEntity.object3D!.rotation.x = 0; // placeholder is already y-up
+      envEntity.object3D!.scale.setScalar(1);
       envEntity.setValue(GaussianSplatLoader, "splatUrl", PLACEHOLDER_SPLAT);
       await splatSystem.load(envEntity, { animate: false }).catch((err) => {
         console.error("[sceneManager] Placeholder splat failed to load too:", err);
@@ -291,19 +316,37 @@ export function initSceneManager(world: World): SceneManager {
 
     // XR walkable surface from Marble's low-detail collision mesh
     // (additional to the always-present invisible flat floor).
+    // Marble puts the world origin at the generation camera, so the real
+    // floor is somewhere below y=0 (and envScale moves it further):
+    // raycast straight down against the collider and stand the player on
+    // it -- desktop eye height and XR locomotion then both start from
+    // the actual ground instead of floating at the camera's altitude.
+    let floorY = 0;
     if (scene.collider) {
-      sceneEntities.push(await spawnCollider(world, scene.collider));
+      const colliderEntity = await spawnCollider(world, scene.collider, envScale);
+      sceneEntities.push(colliderEntity);
       if (token !== loadToken) return;
+      if (colliderEntity?.object3D) {
+        colliderEntity.object3D.updateMatrixWorld(true);
+        const down = new THREE.Raycaster(new THREE.Vector3(0, 50, 0), new THREE.Vector3(0, -1, 0));
+        const hit = down.intersectObject(colliderEntity.object3D, true)[0];
+        if (hit) {
+          floorY = hit.point.y;
+          world.player.position.y = floorY;
+          locomotor?.teleport(world.player.position);
+        }
+      }
     }
 
-    // Portals on the 2.5m circle, same angle math as the old version.
+    // Portals on the 2.5m circle around the spawn, ring centers at
+    // chest height above the actual floor.
     scene.entryPortals.forEach((targetId: string, i: number) => {
       const angle = (i / Math.max(scene.entryPortals.length, 1)) * Math.PI * 2;
       sceneEntities.push(
         createPortal(world, {
           targetScene: targetId,
           label: sceneById[targetId]?.title ?? targetId,
-          position: [Math.sin(angle) * PORTAL_RADIUS, 1.2, -Math.cos(angle) * PORTAL_RADIUS],
+          position: [Math.sin(angle) * PORTAL_RADIUS, floorY + 1.2, -Math.cos(angle) * PORTAL_RADIUS],
         })
       );
     });

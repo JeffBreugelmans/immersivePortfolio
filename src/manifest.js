@@ -116,6 +116,14 @@ export const worlds = [
         // (aircraft, roof trusses, golden light) is behind the default
         // facing. Verified via headless screenshots 2026-07-18.
         spawnYawDeg: 180,
+        // Marble generated the hangar under-scale (floor-to-roof ~7.5m in
+        // the collider; a Chinook alone is 5.7m tall). Jeff's review:
+        // "very small... taller than the planes". Scales splat + collider.
+        envScale: 1.75,
+        // Full-res 2M-splat variant (gitignored, rsync'd to the Spark --
+        // see DEPLOYMENT.md): served to desktop browsers; Quest and
+        // anything missing the file falls back to the 500k scene.spz.
+        splatHiRes: `${BASE}roots/scene-01-hangar-polder/marble/scene-fullres.spz`,
         entryPortals: ["scene-02-perception-lab", "scene-03-lightworks"],
         props: [],
       },
