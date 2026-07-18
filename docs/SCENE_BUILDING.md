@@ -20,15 +20,36 @@ is an array `[x, y, z]` relative to the scene root; `rotation` is
 
 Reference points already established by `sceneManager.ts`:
 
-- The player spawns at the scene center (`0 0 0`, desktop eye height
-  1.6m) on every scene load.
-- Portals sit `2.5` meters out from center (`PORTAL_RADIUS`), positioned
-  at `1.2` meters up, and trigger within `1.3` meters.
+- The player spawns at the scene center (`0 0 0` in XZ) on every scene
+  load, facing the manifest's optional `spawnYawDeg` (default straight
+  ahead, -Z). The spawn's Y is ground-snapped: a downward raycast
+  against the Marble collider stands the player on the actual floor
+  (Marble puts the world origin at its generation camera, so the floor
+  is usually somewhat below y=0 -- e.g. S1's is at y = -0.96). Prop
+  positions are still authored in raw world coordinates, so eyeball
+  prop heights against the scene's floor Y, not against 0.
+- The visitor is confined to a walkable box centered on the spawn
+  (manifest `walkBounds: { width, depth }`, default 4x4m -- the splat
+  "sweet zone"), edged by a procedural safety-tape barrier in any scene
+  with a real splat. See `src/walkBounds.ts` for why.
+- Portals ring the spawn just INSIDE that box (radius
+  `min(2.5, halfBounds - 0.2)`), centers `1.2` meters above the floor,
+  walk-in trigger scaled to `0.45 * radius`.
+- The whole Marble environment (splat + collider) can be scaled per
+  scene via manifest `envScale` (S1 runs 1.75 -- Marble generated the
+  hangar under-scale).
 
 Use those as a rough sense of scale when guessing a first-pass position
 before refining visually (next section).
 
 ## 1. Generating a Marble environment
+
+**2D-first is the rule** (adopted after S1 v1 -- full rationale and
+composition rules in `docs/NEXT_STEPS.md`): compose/approve a 2D
+pre-viz image of the exact view from the intended standing point, THEN
+generate with `--image` plus a short style modifier. The image's
+viewpoint becomes the world's quality sweet spot, which is where the
+spawn and walk box sit.
 
 1. Prompt-tune in that scene's `prompts.md`, using reference images/video
    in the sibling `reference/` folder (prompt-tuning input only -- never
@@ -51,12 +72,22 @@ before refining visually (next section).
    (Marble's low-detail collision mesh -- becomes the XR walk/teleport
    surface), and `metadata.json` straight into that scene's `marble/`
    folder. The manifest already points at those filenames by convention --
-   no code change needed.
-4. Reload the scene and sanity-check orientation: if the world renders
-   upside-down or mirrored (Marble uses OpenCV coordinates), flip the
-   environment entity in `sceneManager.ts` -- the commented
-   `envEntity.object3D.rotation.x = Math.PI` line is there for exactly
-   this. Verify once on the first generated scene; it then applies to all.
+   no code change needed. `--full-res` also grabs the 2M-splat
+   `scene-fullres.spz`: gitignored (28MB-class), scp it to the Spark
+   manually and list it as manifest `splatHiRes` -- desktop GPUs load
+   the 500k first for fast time-to-world, then hot-swap the full-res in
+   the background; Quest and software-GL stay on 500k.
+   `--from-operation <opId>` re-downloads any of this from a finished
+   generation without spending tokens.
+4. Orientation is handled: Marble delivers OpenCV-convention (+y down)
+   splats/colliders and `sceneManager.ts` flips both globally (verified
+   on S1). Per-scene knobs to tune on first load: `spawnYawDeg` (face
+   the hero view), `envScale` (Marble scenes can come out undersized --
+   sanity-check against a known object; S1 needed 1.75), `walkBounds`
+   (size the roped-off area to what the splat renders well).
+5. Sanity-check with headless screenshots before asking for a human
+   pass: `node scripts/screenshot.mjs --gpu [--scene id] [--look deg]
+   [--walk ms]` against a served build (`node scripts/serve-dist.mjs`).
 
 Until a scene has a real `scene.spz`, the app shows the committed
 placeholder splat (`public/placeholder/scene.spz`, from the SensAI

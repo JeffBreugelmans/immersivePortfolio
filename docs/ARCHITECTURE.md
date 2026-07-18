@@ -69,8 +69,12 @@ geometry/material disposal in `sceneManager.ts`.
 - `src/desktopControls.ts` -- drag-to-look + WASD for the desktop-first
   audience; inert during XR sessions and scene loads.
 - `src/portals.ts` -- portal ring/label entities + `PortalSystem`
-  (pulse animation, 1.3m proximity trigger, click trigger, arrival
-  cooldown guard).
+  (pulse animation, per-portal proximity trigger, click trigger,
+  arrival cooldown guard).
+- `src/walkBounds.ts` -- `WalkBoundsSystem`: per-frame XZ clamp keeping
+  the visitor inside the scene's walkable box (manifest `walkBounds`,
+  default 4x4m) -- the splat quality "sweet zone". The visible
+  counterpart (safety-tape barrier) is built by `sceneManager.ts`.
 - `src/gazeContext.ts` -- center-of-view raycast + frustum check over
   registered objects; publishes `window.__gazeContext` / `gaze-changed`
   for the chat overlay.

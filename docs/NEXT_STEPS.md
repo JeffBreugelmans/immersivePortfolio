@@ -358,6 +358,38 @@ Mint MCP note: needs OAuth, which this laptop session can't complete --
 generate images in the Mint web app (12k tokens available), or connect
 the MCP in a fresh session and ask for "review mode".
 
+## SESSION HANDOFF (2026-07-18 evening) -- start here
+
+State: S1 Hangar v1 is LIVE at jeffxr.com/worlds (spark serving latest
+main) with today's full fix stack: orientation flip, envScale 1.75,
+ground-snapped spawn, 4x4 safety-tape walk box, portals inside the
+tape, RNLAF placard, 500k-then-full-res background splat upgrade.
+QA evidence + verdicts: `planning/reference/s1-hangar-qa/README.md`.
+
+**Mint is set up, pending OAuth**: the Mint MCP is registered in this
+project's Claude Code config (`claude mcp add --transport http mint
+https://mcp.mint.gg/mcp`, local scope) and the official
+`mint-threejs-skills` skill is installed globally
+(`~\.claude\skills\`). First session after restart: run `/mcp`,
+complete the Mint sign-in, then ask Mint for **review mode** so
+generations need approval before spending from the 12k pool.
+
+First moves for the next session, in order:
+1. Mint 2D pre-viz for S1 v2 + the other 4 scenes per the 2D-first
+   workflow below (composition rules there). Jeff approves each image.
+2. S1 v2 Marble regen from the approved image (`--image`), keep v1
+   until v2 verifies better in the same headless screenshot pass.
+3. Parallel Mint queue while worlds cook: per-scene ambient audio
+   (final-only in MCP beta, start early), rigged Proxie avatar
+   candidate.
+4. Placard texts for S2-S5 from Jeff -> `placard` props (see S1's
+   manifest entry for the pattern).
+Deploy after each green run: push main -> spark `git pull && npm run
+build` (nvm node 22; plain `ssh spark` gets v18). scp any new
+`scene-fullres.spz` (gitignored) into the matching `marble/` folder.
+avatar-chat companion deploy: `bash scripts/deploy-companion-mode.sh`
+on the spark (status unknown -- verify with Jeff whether he ran it).
+
 ## Deploy reminders
 
 - Spark needs Node >= 20.19 to build now (`docs/DEPLOYMENT.md` §0).

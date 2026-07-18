@@ -1,6 +1,8 @@
 # Hackathon Master Plan (SIGGRAPH LA — Worlds in Action)
 
-Status: **DRAFT for Jeff's morning review — nothing generated yet.**
+Status: **GENERATION UNDERWAY (2026-07-18): S1 Hangar v1 live at
+jeffxr.com/worlds; 2D-first pre-viz adopted for v2 + remaining scenes —
+see NEXT_STEPS "SESSION HANDOFF" for current state.**
 Build progress: foundation systems (TECH_SPEC B, C.0, D, E-billboard,
 debug overlay, speaking events) are implemented and smoke-tested — see
 the tracker's DONE rows and NEXT_STEPS "Overnight build progress".
