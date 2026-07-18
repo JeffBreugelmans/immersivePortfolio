@@ -94,6 +94,17 @@ is now readable. What matters for this project:
   & 3DGS, Tripo/fal.ai, MCP, PICO, ReactVision, Volinga VFX) are all
   linked from the page.
 
+## Team + master plan (added overnight 2026-07-18)
+
+Jeff approved a bigger push: 3-5 flagship scenes (quality over quantity),
+rich interactions beyond portals, and an embodied Proxie companion. The
+working plan now lives in `docs/HACKATHON_PLAN.md` with a reviewable
+task/asset tracker in `planning/` — start there. Two persistent agent
+teammates were added under `.claude/agents/` (cinematic-world-builder,
+xr-performance-engineer); invoke them by name from any session on this
+repo. The feature queue below predates that plan — HACKATHON_PLAN.md
+supersedes it where they disagree.
+
 ## Feature queue (agreed, not yet built)
 
 1. **Rigged JB Proxie companion avatar** (Mint or Tripo rigged GLB):
