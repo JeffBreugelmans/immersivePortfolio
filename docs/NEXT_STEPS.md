@@ -140,17 +140,25 @@ installation's chunky individually-lit-panel look).
   projector layers is genuinely uncorrelated noise on its own, and that
   the incremental tap-one-at-a-time reveal already matches the existing
   lever interaction design — no new plumbing needed).
-- **S5 Even Realities design refined** from Jeff's reference render:
-  glasses rest on a **desk with a warm lamp** (not a shelf), with a
-  gaze-glow affordance to draw the eye; the in-world HUD uses his REAL
-  SIGGRAPH 2026 guide app branding (wordmark, dates, byline) instead of
-  placeholder schedule copy; confirmed the HUD should be ONE head-locked
-  panel, matching the real G2's binocular fusion (not per-eye renders).
+- **S5 Even Realities design refined twice** from Jeff's material:
+  1. Reference render: glasses rest on a **desk with a warm lamp** (not
+     a shelf), gaze-glow affordance draws the eye, single head-locked
+     HUD panel confirmed (matches real G2 binocular fusion).
+  2. **Real simulator captures**: Jeff supplied 5 actual screenshots
+     from the Even Realities G2 simulator running his real SIGGRAPH 2026
+     guide app (transparent PNG) — title, welcome menu, starred items,
+     sessions list, session detail. HUD is now a **carousel** through
+     these real captures (click left/right third of the panel to page —
+     reuses the mini-game's screen-third click pattern, no swipe-gesture
+     plumbing needed) instead of a single static composed image.
+     Transparency is a free win: the S5 alcove shows through around the
+     green UI, like a real see-through HUD.
   `docs/WORLD_DESIGNS.md` and `docs/TECH_SPEC.md` §C.2 updated
   throughout (also fixed stale "G1" -> "G2" references). **Blocked on**:
-  the reference render image itself landing on disk (shared inline,
-  same gap as the portrait before — ask Jeff to push it, e.g. to
-  `planning/reference/s5-lightworks/`).
+  both the reference render AND the 5 screen captures landing on disk
+  (all shared inline, same gap as the portrait before) — Jeff is pushing
+  them to `planning/reference/s5-lightworks/` (render) and
+  `planning/reference/s5-lightworks/hud-captures/` (5 captures).
 
 **Tooling note**: lost `scripts/build_tracker.py` (the scratchpad
 generator, never committed) to a self-truncating write-then-read bug —

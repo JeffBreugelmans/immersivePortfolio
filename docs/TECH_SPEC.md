@@ -274,7 +274,7 @@ manifest header comment, 1h cross-platform verification incl. IWER).
 
 ---
 
-## C. Wearable transitions (item 3) — 4.5h
+## C. Wearable transitions (item 3) — 5h
 
 Two marquee "physical metaphor" moments, both thin layers on §B plus one
 shared new primitive: a **FadeSystem** that also upgrades every portal
@@ -339,7 +339,7 @@ checks it too.
 **Non-VR fallback**: click = full experience minus the physical don.
 Nothing gated.
 
-### C.2 Even Realities glasses -> green HUD — 2h
+### C.2 Even Realities glasses -> green HUD — 2h (+0.5h carousel)
 
 > **REFINED (2026-07-19, Jeff's reference render)**: glasses sit on a
 > **desk** (not a shelf) with a warm-lit lamp beside it for ambience,
@@ -349,8 +349,17 @@ Nothing gated.
 > real G2's two micro-displays combine perceptually into ONE floating
 > image at a comfortable focal distance ("binocular vision") — we do
 > not render separate per-eye content, exactly as already specced below.
-> Jeff also supplied the REAL app branding to use as HUD content instead
-> of a generic placeholder (see updated content block).
+>
+> **UPGRADED AGAIN (same day): real screen captures, not a mockup.**
+> Jeff supplied 5 actual screenshots from the Even Realities G2
+> simulator running his real SIGGRAPH 2026 guide app, transparent
+> background: (1) title/splash, (2) welcome/main menu, (3) starred-items
+> list, (4) sessions list, (5) a session detail view — real speaker
+> names, real times, his real on-screen nav hints ("swipe = scroll",
+> "tap = open/select", "double-tap = close app"). Scope for the exhibit:
+> a lightweight **carousel through these 5 real captures**, not a
+> reimplementation of the app's full interactivity. **Files pending**
+> (Jeff pushing to the repo, same pattern as the S5 portrait).
 
 Manifest:
 
@@ -366,7 +375,13 @@ Manifest:
     pickup: true,
   },
   role: "wearable-hud",
-  hud: { content: "siggraph-guide" },   // key into a static content table
+  hud: {
+    // 5 real screen captures, transparent PNG, cycled as a carousel --
+    // NOT a content-table key anymore now that the source is real art.
+    screens: [
+      "title.png", "welcome.png", "starred.png", "sessions.png", "session-detail.png",
+    ],
+  },
 }
 ```
 
@@ -374,24 +389,48 @@ Manifest:
 via the same 0.35m/300ms check as C.1; second activation toggles off,
 plus `Esc`/`G` key and an on-overlay ✕):
 
-- **Desktop/mobile**: DOM overlay — monochrome green (#3dff9c on
-  rgba(0,10,4,0.55)), monospace, subtle scanline via repeating-linear-
-  gradient, CSS only.
+- **Desktop/mobile**: DOM overlay, `<img>` swapped per screen (each PNG
+  loaded once, cached) over a dark scrim so the transparent art reads;
+  monospace label under the panel: "← / → to browse", arrow keys or
+  click-left/right-third also page.
 - **XR**: head-locked quad, 0.9m x 0.45m at z=-1.0 from camera, tilted
-  -8°; `CanvasTexture` 1024x512 **rendered once** at first toggle (static
-  content — no per-frame canvas work), `transparent:true, opacity:0.9,
-  depthTest:false, renderOrder:998`. 1 draw call, 2MB texture, zero
+  -8°. Each of the 5 PNGs loaded as its own `THREE.Texture` (small files,
+  no CanvasTexture composition needed since Jeff's captures ARE the
+  final art) with `transparent:true, opacity:1, depthTest:false,
+  renderOrder:998` — **the transparency is a free authenticity win**:
+  the S5 alcove shows through around the green UI exactly like a real
+  see-through smart-glasses display, not a solid dark panel. Swapping
+  `material.map` between the 5 preloaded textures is the entire "screen
+  change" — 1 draw call regardless of which screen is showing, zero
   per-frame cost. ONE quad, not one per eye — matches the real G2's
   binocular fusion Jeff described. (True `layers`-based viewport overlay
   is a stretch polish; the head-locked quad is the ship-it version and
   reads perfectly on Quest.)
-- **Content** (real, from Jeff's own guide app, not invented): SIGGRAPH
-  2026 wordmark/logo mark, "Los Angeles · 19-23 JUL", "Unofficial
-  SIGGRAPH 2026 Guide for the Even Realities G2", "by Jeffrey Breugelmans
-  / afternow.io · jeffxr.com", same green-phosphor monochrome style as
-  Jeff's reference render. **Source image pending** (Jeff shared inline,
-  not yet on disk — same as the S5 portrait before he pushed it via git;
-  ask him to push this one too) to trace the exact logo mark and layout.
+- **Content** (real captures, not invented): the 5 screens listed above.
+  Order is fixed (title -> welcome -> starred -> sessions -> detail),
+  matching the natural flow of the real app. **Files pending** on disk —
+  same push-to-repo pattern as the S5 portrait.
+
+**Paging (the "swipe between them" ask).** Jeff's real app uses
+swipe/tap/double-tap; the exhibit scope is simpler on purpose (5 fixed
+captures, not his app's full navigation tree). Reuses the same
+"click-thirds" spatial pattern already established by the mini-game's
+gaze-steering (§G) for consistency across the app:
+
+- Click (or gaze-dwell 1s) on the **left third** of the HUD panel ->
+  previous screen (wraps). **Right third** -> next screen (wraps).
+  Works identically on desktop (mouse), mobile (tap), and VR (controller/
+  hand ray click on the quad — same `Interactive` click-with-`point`
+  data the framework already carries, just split left/right by local UV
+  X on the hit).
+- No swipe-gesture detection needed (no new input plumbing) — click
+  zones deliver the "browse between captures" feel Jeff wants at zero
+  extra system cost.
+- A subtle `< >` arrow glyph baked into the DOM/quad framing (not part
+  of Jeff's real captures) signals the paging affordance on first HUD
+  open; fades after the first page turn.
+- Event: `hud-page {index: number}` — AudioManager plays a soft page-turn
+  blip; no other listeners needed.
 
 **Discoverability (the "glow effect to draw attention" ask)**: the
 `gaze.effect:"glow"` config above is the existing Interactive framework
@@ -404,7 +443,9 @@ CompanionSystem can comment). Register the worn state as a gaze-context
 line? No — keep it simple: the glasses prop's `description` already tells
 Proxie what they are.
 
-**Estimate C total: 4.5h** (FadeSystem 1h, Vive 1.5h, HUD 2h).
+**Estimate C total: 5h** (FadeSystem 1h, Vive 1.5h, HUD 2h + 0.5h for the
+5-screen carousel/paging — trivial since it's texture-swap + click-third
+routing, no new systems).
 
 ---
 
@@ -966,7 +1007,7 @@ below). Times are my engineering hours.
    started (audio is final-only and slow — start it FIRST).
 
 **Tomorrow afternoon (visible wins, ~7.5h)**
-5. §C FadeSystem + Vive wearable + glasses HUD (4.5h) — fade also
+5. §C FadeSystem + Vive wearable + glasses HUD carousel (5h) — fade also
    polishes every portal jump.
 6. §D Audio manager (3h) — placeholder loops if Mint hasn't landed.
 7. First Quest 3 pass on the deployed URL at end of block (TTS/mic/audio
