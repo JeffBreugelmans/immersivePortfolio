@@ -120,14 +120,23 @@ Walking the 7 NEEDS-JEFF decision rows one at a time in chat. So far:
   (REVISED). Source image: his Even Realities G2/R1 review portrait,
   cropped to drop logo/text/product inset (busy elements don't survive
   5-level quantization; faces do). Resolved screen click opens
-  `youtu.be/sEDTmvGg-QY`. **Blocked on**: the actual image file landing
-  on disk — Jeff shared it inline in chat but it wasn't saved to an
-  uploads path this time (unlike the cat photos), so I can't run the
-  bake script yet. Ask him to attach it the same way as the cats, or
-  drop it straight into `planning/reference/` and push.
+  `youtu.be/sEDTmvGg-QY`. **Source image received** (`planning/reference/cats/profileProjection.jpg`,
+pushed by Jeff) and the bake mechanic is **validated**: prototype at
+`scripts/prototypes/bake-projector-image-prototype.py` (Python/numpy,
+stand-in for the eventual Node production script), preview renders in
+`planning/reference/s5-lightworks/`. Resolution bumped from the initial
+30x30 to **60x60** per Jeff's request for stronger likeness (tested
+30/45/60/80 side by side — 60 was the recommended sweet spot, confirm on
+next review pass if he wants 80 instead). Grid resolution costs nothing
+performance-wise (whole texture is a few KB); the tradeoff is purely
+aesthetic (finer = more photographic, coarser = closer to the real
+installation's chunky individually-lit-panel look).
+- **Proxie yelp beat: APPROVED** ("I love that comedy beat! definitely
+  implement it") — build as speced in WORLD_DESIGNS S2(d)/TECH_SPEC, no
+  mannequin-arm fallback needed.
 
-5 decisions remain: yelp approval, S5 NDA pass, reference photos,
-S4 Mint-vs-Marble, coupons check.
+4 decisions remain: S5 NDA pass, reference photos, S4 Mint-vs-Marble,
+coupons check.
 
 ## Overnight build progress (2026-07-19, pre-review)
 
