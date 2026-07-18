@@ -104,8 +104,9 @@ gating keys off the scene_context only /worlds sends), scene_context cap
 teleport-marker strip in chat-block.html. To deploy: merge on the Spark,
 copy the new section into the live gitignored system_prompt.txt (keep
 the DYNAMICALLY ADDED KNOWLEDGE entries), restart jeff-avatar.service.
-Bonus intel from the prompt file: the cats are Pumpkin, Poppy, and
-Pepper (tracker updated — still need coat colors + photos).
+Cats fully resolved (2026-07-19): Pumpkin (orange tabby), Pepper (gray
+tabby), Poppy (marbled orange/gray/white) — reference photos + casting
+in `planning/reference/cats/`, tracker rows unblocked.
 
 ## Overnight build progress (2026-07-19, pre-review)
 
