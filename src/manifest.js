@@ -6,6 +6,11 @@
 // trigger a teleport by returning { action: "teleport", sceneId: "..." }
 // alongside its chat reply. Keep ids stable once Proxie is wired up.
 //
+// ROSTER (RESTRUCTURED 2026-07-19, docs/WORLD_DESIGNS.md): 9 scenes
+// consolidated to 5 flagship scenes across 2 worlds. See that doc for
+// full concept/prompt/prop/interaction detail per scene; this file is
+// just the runtime structure.
+//
 // Folder convention: each scene's assets live at
 //   public/<worldId>/<sceneId>/marble/scene.spz    <- Marble Gaussian splat
 //                                                     (500k variant; committed)
@@ -33,7 +38,13 @@
 //
 // "entryPortals" describes which other scenes this scene has a visible
 // portal/teleport point to, so you can wire hub navigation without
-// hardcoding it in scene code.
+// hardcoding it in scene code. Portal graph (WORLD_DESIGNS §1):
+//   S1 Hangar <-> S2 Perception Lab <-> S3 Holo Stage <-> S5 Lightworks
+//                                          <-> (Vive) S4 Second Studio
+//   S5 Lightworks <-> S1 Hangar (loop closes: jet engines to light engines)
+// S4 is a cul-de-sac -- only reachable via the Vive wearable-teleport
+// prop in S3 (TECH_SPEC C.1), not a ring portal; its entryPortals still
+// lists S3 so window.teleportTo/Proxie can still jump there directly.
 //
 // "props" is an optional list of additional assets layered into the scene
 // on top of the main Marble environment (splat). Three sources feed this,
@@ -54,7 +65,9 @@
 //     source: "marble" | "tripo" | "custom",
 //     label, description?,
 //     position: [x, y, z], rotation?: [xDeg, yDeg, zDeg],
-//     scale?: number | [x, y, z], width?, height? }
+//     scale?: number | [x, y, z], width?, height?,
+//     interaction?: { click?, gaze?, wave?, pickup? },  -- see src/interactions.ts
+//     role?: string }  -- routing key for feature systems (wearables, HUD, etc.)
 // "source" is documentation only. "label" + "description" feed the gaze
 // context system (src/gazeContext.ts): when a visitor looks at the prop
 // and asks Proxie about it, this text is what Proxie gets told the
@@ -88,100 +101,71 @@ export const sfxLibrary = {
 
 export const worlds = [
   {
-    id: "afternow",
-    title: "AfterNow",
+    id: "roots",
+    title: "Roots -- Netherlands & the Path to Human-Centered Design",
     scenes: [
       {
-        id: "scene-01-holographic-studio",
-        title: "Holographic Presentation Studio",
-        description: "Prez immersive presentations -- holographic presentation studio, HoloLens on podium",
-        splat: `${BASE}afternow/scene-01-holographic-studio/marble/scene.spz`,
-        collider: `${BASE}afternow/scene-01-holographic-studio/marble/collider.glb`,
-        entryPortals: ["scene-02-smart-glasses-lab"],
+        id: "scene-01-hangar-polder",
+        title: "The Hangar on the Polder",
+        description:
+          "Royal Netherlands Air Force maintenance hangar at golden hour -- F-16, Chinook, doors open onto a Dutch polder with a turning windmill. Where Jeff's engineering story begins.",
+        splat: `${BASE}roots/scene-01-hangar-polder/marble/scene.spz`,
+        collider: `${BASE}roots/scene-01-hangar-polder/marble/collider.glb`,
+        ambient: `${BASE}roots/scene-01-hangar-polder/audio/ambient.mp3`,
+        entryPortals: ["scene-02-perception-lab", "scene-03-lightworks"],
         props: [],
       },
       {
-        id: "scene-02-smart-glasses-lab",
-        title: "Even Realities Product Lab",
-        description: "Even Realities smart glasses work -- minimalist eyewear product design lab",
-        splat: `${BASE}afternow/scene-02-smart-glasses-lab/marble/scene.spz`,
-        collider: `${BASE}afternow/scene-02-smart-glasses-lab/marble/collider.glb`,
-        entryPortals: ["scene-01-holographic-studio", "scene-03-collaborative-vr-studio"],
-        props: [],
-      },
-      {
-        id: "scene-03-collaborative-vr-studio",
-        title: "Second Studio",
-        description: "Second Studio collaborative VR design -- shared virtual studio, translucent avatars",
-        splat: `${BASE}afternow/scene-03-collaborative-vr-studio/marble/scene.spz`,
-        collider: `${BASE}afternow/scene-03-collaborative-vr-studio/marble/collider.glb`,
-        entryPortals: ["scene-02-smart-glasses-lab"],
+        id: "scene-02-perception-lab",
+        title: "The Perception Lab",
+        description:
+          "One research lab spanning Jeff's Master's (rubber hand illusion) and PhD (eye-tracker + data-glove accessibility rig) -- Eindhoven on one bench, Northeastern on the other.",
+        splat: `${BASE}roots/scene-02-perception-lab/marble/scene.spz`,
+        collider: `${BASE}roots/scene-02-perception-lab/marble/collider.glb`,
+        ambient: `${BASE}roots/scene-02-perception-lab/audio/ambient.mp3`,
+        entryPortals: ["scene-01-hangar-polder", "scene-01-holo-stage"],
         props: [],
       },
     ],
   },
   {
-    id: "microsoft-consulting",
-    title: "Microsoft Consulting",
+    id: "career",
+    title: "XR & AI -- Building the Future of Work",
     scenes: [
       {
-        id: "scene-01-hybrid-telepresence",
-        title: "Hybrid Telepresence Meeting",
-        description: "Hybrid telepresence meetings -- video/VR/in-person attendees at one table",
-        splat: `${BASE}microsoft-consulting/scene-01-hybrid-telepresence/marble/scene.spz`,
-        collider: `${BASE}microsoft-consulting/scene-01-hybrid-telepresence/marble/collider.glb`,
-        entryPortals: ["scene-02-datacenter-training"],
+        id: "scene-01-holo-stage",
+        title: "The Holo Stage",
+        description:
+          "AfterNow Prez as a dark presentation theater -- podium HoloLens, floating hologram exhibits including Project Malta, a gear wall of headsets through the years.",
+        splat: `${BASE}career/scene-01-holo-stage/marble/scene.spz`,
+        collider: `${BASE}career/scene-01-holo-stage/marble/collider.glb`,
+        ambient: `${BASE}career/scene-01-holo-stage/audio/ambient.mp3`,
+        entryPortals: ["scene-02-perception-lab", "scene-03-lightworks", "scene-02-second-studio-construct"],
         props: [],
       },
       {
-        id: "scene-02-datacenter-training",
-        title: "Data Center Technician Training",
-        description: "Data center technician training -- projection-mapped server racks, 3D printer",
-        splat: `${BASE}microsoft-consulting/scene-02-datacenter-training/marble/scene.spz`,
-        collider: `${BASE}microsoft-consulting/scene-02-datacenter-training/marble/collider.glb`,
-        entryPortals: ["scene-01-hybrid-telepresence", "scene-03-optical-computing"],
+        id: "scene-02-second-studio-construct",
+        title: "Second Studio: The Construct",
+        description:
+          "Inside the Vive you just put on -- a mountaintop observation platform where Second Studio's VR sculpting tools once ran. Walk around a human-scale skyscraper sculpture.",
+        splat: `${BASE}career/scene-02-second-studio-construct/marble/scene.spz`,
+        collider: `${BASE}career/scene-02-second-studio-construct/marble/collider.glb`,
+        ambient: `${BASE}career/scene-02-second-studio-construct/audio/ambient.mp3`,
+        // Cul-de-sac: reachable via the Vive wearable-teleport prop in
+        // scene-01-holo-stage (TECH_SPEC C.1), not a ring portal. Listed
+        // here so window.teleportTo / Proxie can still jump directly.
+        entryPortals: ["scene-01-holo-stage"],
         props: [],
       },
       {
-        id: "scene-03-optical-computing",
-        title: "Optical Computing / Photonics",
-        description: "Optical computing / photonics -- Matrix-style glowing binary grid server room",
-        splat: `${BASE}microsoft-consulting/scene-03-optical-computing/marble/scene.spz`,
-        collider: `${BASE}microsoft-consulting/scene-03-optical-computing/marble/collider.glb`,
-        entryPortals: ["scene-02-datacenter-training"],
-        props: [],
-      },
-    ],
-  },
-  {
-    id: "education",
-    title: "Education (stretch)",
-    scenes: [
-      {
-        id: "scene-01-raf-hangar",
-        title: "Royal Netherlands Air Force Hangar",
-        description: "RNLAF maintenance hangar -- F-16s, Chinook, industrial lighting",
-        splat: `${BASE}education/scene-01-raf-hangar/marble/scene.spz`,
-        collider: `${BASE}education/scene-01-raf-hangar/marble/collider.glb`,
-        entryPortals: ["scene-02-tu-eindhoven"],
-        props: [],
-      },
-      {
-        id: "scene-02-tu-eindhoven",
-        title: "TU Eindhoven Research Lab",
-        description: "Rubber hand illusion setup + navigation/route-planning trust research",
-        splat: `${BASE}education/scene-02-tu-eindhoven/marble/scene.spz`,
-        collider: `${BASE}education/scene-02-tu-eindhoven/marble/collider.glb`,
-        entryPortals: ["scene-01-raf-hangar", "scene-03-northeastern"],
-        props: [],
-      },
-      {
-        id: "scene-03-northeastern",
-        title: "Northeastern University Lab",
-        description: "Driving simulator rig + eye-tracking/data-glove research",
-        splat: `${BASE}education/scene-03-northeastern/marble/scene.spz`,
-        collider: `${BASE}education/scene-03-northeastern/marble/collider.glb`,
-        entryPortals: ["scene-02-tu-eindhoven"],
+        id: "scene-03-lightworks",
+        title: "Lightworks",
+        description:
+          "A datacenter cathedral in three zones: server-repair training bay, four-projector optical-computing gallery, and the Even Realities frontier desk. Light that teaches, light that computes, light you can wear.",
+        splat: `${BASE}career/scene-03-lightworks/marble/scene.spz`,
+        collider: `${BASE}career/scene-03-lightworks/marble/collider.glb`,
+        ambient: `${BASE}career/scene-03-lightworks/audio/ambient.mp3`,
+        entryPortals: ["scene-01-holo-stage", "scene-01-hangar-polder"],
         props: [],
       },
     ],
@@ -195,4 +179,6 @@ export const sceneById = Object.fromEntries(
   )
 );
 
-export const defaultSceneId = worlds[0].scenes[0].id;
+// Chronological entry point (WORLD_DESIGNS open question #1, RESOLVED
+// 2026-07-19): start at the hangar, not career-first.
+export const defaultSceneId = "scene-01-hangar-polder";

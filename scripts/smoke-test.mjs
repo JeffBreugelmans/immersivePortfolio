@@ -99,7 +99,7 @@ const teleport = await page.evaluate(
     new Promise((resolve) => {
       let sceneChanged = false;
       window.addEventListener("scene-changed", () => (sceneChanged = true), { once: true });
-      window.teleportTo("scene-02-smart-glasses-lab");
+      window.teleportTo("scene-02-perception-lab");
       const check = setInterval(() => {
         const overlayOpacity = document.getElementById("fade-overlay")?.style.opacity;
         if (sceneChanged && overlayOpacity === "0") {
