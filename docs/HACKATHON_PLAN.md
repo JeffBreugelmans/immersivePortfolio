@@ -1,6 +1,9 @@
 # Hackathon Master Plan (SIGGRAPH LA — Worlds in Action)
 
 Status: **DRAFT for Jeff's morning review — nothing generated yet.**
+Build progress: foundation systems (TECH_SPEC B, C.0, D, E-billboard,
+debug overlay, speaking events) are implemented and smoke-tested — see
+the tracker's DONE rows and NEXT_STEPS "Overnight build progress".
 Companion tracker: `planning/asset-tracker.xlsx` (same content as
 `planning/asset-tracker.csv`, which is the diffable source of truth).
 This doc is the narrative plan; the tracker is the checklist.

@@ -94,6 +94,27 @@ is now readable. What matters for this project:
   & 3DGS, Tripo/fal.ai, MCP, PICO, ReactVision, Volinga VFX) are all
   linked from the page.
 
+## Overnight build progress (2026-07-19, pre-review)
+
+Foundation systems from TECH_SPEC are BUILT and verified headless (11/11
+smoke checks green — `npm run smoke` against a served build; also
+`npm run typecheck` + `npm run build` clean):
+
+- Interactable framework (`src/interactions.ts`) — click/gaze/wave via
+  manifest `interaction:{...}`; nothing uses it yet until props land.
+- FadeSystem (`src/fade.ts`) — all teleports now fade through black.
+- AudioManagerSystem (`src/audio.ts`) + `sfxLibrary` in manifest — inert
+  until Mint audio files exist (missing files no-op by design).
+- Proxie companion billboard (`src/companion.ts`) — he's in the world
+  now, with the personal-space rules; rigged GLB swaps in later.
+- Speaking/stream events in `proxie-chat.js`; `?debug` FPS overlay.
+
+Still needs a REAL headset/browser pass: wave gesture, XR fade quad,
+audio unlock in-session, TTS voices on Quest (all flagged in TECH_SPEC
+§H risks). Known-benign console error "Locomotor not initialized" at
+startup is a pre-existing IWSDK async race — see scripts/smoke-test.mjs
+header; keep an eye on it in the first Quest session.
+
 ## Team + master plan (added overnight 2026-07-18)
 
 Jeff approved a bigger push: 3-5 flagship scenes (quality over quantity),
