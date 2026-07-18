@@ -21,6 +21,19 @@ cheap "not engaged" idle state.
 
 ## A. Backend touchpoint: `system_prompt.txt` additions (item 8) — 0.5h
 
+> **STATUS: PREPARED (2026-07-19).** A refined, surface-gated version of
+> this block now lives in the avatar-chat repo on branch
+> `claude/webxr-companion-prompt` (`system_prompt.template.txt`, "WEBXR
+> COMPANION MODE"). It improves on the draft below: companion behavior +
+> teleport marker apply ONLY when the per-turn scene-context system
+> message is present, so the 2D chat at jeffxr.com/chat keeps its current
+> formatting and can never receive a teleport marker (chat-block.html
+> also strips it defensively now). The branch also raises main.py's
+> scene_context cap 200→600 — the old cap silently truncated our
+> gaze-context payload. Remaining: Jeff merges on the Spark, copies the
+> section into the live (gitignored) system_prompt.txt, restarts
+> jeff-avatar.service. The draft below is kept for reference.
+
 Highest impact-per-hour on the list: the frontend already parses
 `---TELEPORT:<sceneId>---` defensively (`src/proxie-chat.js`, and
 `docs/DEPLOYMENT.md` §7 confirms no `main.py` change is needed — the

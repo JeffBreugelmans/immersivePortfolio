@@ -94,6 +94,19 @@ is now readable. What matters for this project:
   & 3DGS, Tripo/fal.ai, MCP, PICO, ReactVision, Volinga VFX) are all
   linked from the page.
 
+## avatar-chat: companion mode prepared (2026-07-19)
+
+Branch `claude/webxr-companion-prompt` on the avatar-chat repo carries
+the backend side of the embodied companion: surface-gated WEBXR
+COMPANION MODE in system_prompt.template.txt (2D chat page unaffected —
+gating keys off the scene_context only /worlds sends), scene_context cap
+200→600 in main.py (was truncating our gaze payload), and a defensive
+teleport-marker strip in chat-block.html. To deploy: merge on the Spark,
+copy the new section into the live gitignored system_prompt.txt (keep
+the DYNAMICALLY ADDED KNOWLEDGE entries), restart jeff-avatar.service.
+Bonus intel from the prompt file: the cats are Pumpkin, Poppy, and
+Pepper (tracker updated — still need coat colors + photos).
+
 ## Overnight build progress (2026-07-19, pre-review)
 
 Foundation systems from TECH_SPEC are BUILT and verified headless (11/11
