@@ -296,7 +296,7 @@ eye-level.
 | Rubber hand | Tripo GLB | `realistic prosthetic rubber right hand, pale silicone, resting flat palm-down, game ready` |
 | Paintbrush (grabbable) | Tripo GLB | `soft wide artist paintbrush, wooden handle, game ready` |
 | Toy hammer (grabbable) | Tripo GLB | `small rubber reflex hammer, orange head, game ready` |
-| Black biosensor data glove | Tripo GLB | `black fabric data glove with thin sensor strips along each finger and small circuit board on the back of the hand, wires to a connector, game ready` — **use Jeff's real glove photos as image input** (site has schematics/photos) |
+| Black biosensor data glove (RESOLVED art direction) | Tripo GLB | `black fabric data glove, thin white sensor line running down the back of the middle finger and across the knuckles, small circuit board on the back of the hand, wires to a connector, game ready` — image-condition from `planning/reference/phd research/dataglove uncovered.jpg` (labeled sensor diagram, received) |
 | Tobii eye tracker bar | Tripo GLB | `slim black eye tracker sensor bar with two small dark lenses, mounted below a monitor on a small stand, game ready` |
 | PhD monitor (the mini-game) | custom (engineer) | `image`/render-texture plane replacing the baked monitor face — see interactive #2 |
 | RISE award | Tripo GLB | `crystal glass research award trophy on a small wooden base, engraved rectangle, game ready` |
@@ -321,23 +321,39 @@ eye-level.
    the Proxie avatar (twitch, flinch) — if avatar anim-states slip, the
    fallback subject is a second mannequin arm with the same anims, and
    Proxie stands beside it narrating instead. Decide by Saturday noon.
-2. **The PhD rig — playable simulation (SECOND HERO)** — Jeff's actual
-   research mechanics, faithfully: the monitor on Bench B renders a live
-   mini tropical-island scene (render-to-texture; tiny three.js island —
-   water plane, sand, palms, one coconut target). *Gaze-dwell* at the
-   LEFT third of the screen → in-game camera rotates CCW; RIGHT third →
-   CW (exact mechanic from the dissertation). "Putting on" the data glove
-   (*pickup* the glove → it snaps to your hand / vanishes with a worn-glove
-   HUD wisp) arms the forward control: **squeezing grip (VR) = flexing the
-   hand = walk forward**; more squeeze = faster (his helicopter
-   speed-mapping, reused). Tobii bar under the monitor glows twin red IR
-   dots while gaze control is live. **Non-VR fallback:** mouse-hover on
-   screen thirds = gaze; hold left-click = flex. *Feasibility flag:*
-   render-to-texture island is the single riskiest custom build of the
-   hackathon — engineer should prototype it FIRST (Saturday morning); the
-   cheap fallback is Jeff's existing demo video (site asset) as a `video`
-   prop with gaze-highlighted hotspots, which still honors the mechanics
-   in narration.
+2. **The PhD rig — playable simulation (SECOND HERO, scope CONFIRMED
+   simple 2026-07-19)** — Jeff's actual research mechanics, faithfully
+   but deliberately minimal: the monitor on Bench B renders a live mini
+   tropical-island scene (render-to-texture; tiny three.js island —
+   water plane, sand, palms, one coconut target, styled after the real
+   Unity screenshot Jeff shared: a rope suspension bridge to a
+   torii-style wooden arch across mossy green hills). This is a screen
+   you watch and control **from inside the Perception Lab** — not a
+   separate scene/portal, confirmed. *Gaze-dwell* at the LEFT third of
+   the screen → in-game camera rotates CCW; RIGHT third → CW (exact
+   mechanic from the dissertation). "Putting on" the data glove (*pickup*
+   the glove → it snaps to your hand) arms the forward control:
+   **squeezing grip (VR) = flexing the hand = walk forward**. **Non-VR
+   fallback:** mouse-hover on screen thirds = gaze; hold left-click =
+   flex. The physical glove PROP animates in sync with this input on
+   BOTH platforms — fingers curl toward closed while flexed/squeezed
+   (VR: real pinch/squeeze strength; desktop: click-held = closed,
+   released = open) — so the desk prop visibly "performs" the walk
+   input, not just an abstract key-hold. Tobii bar under the monitor
+   glows twin dots while gaze control is live. *Confirmed scope:* thumb
+   (jump/throw) and wrist (camera-mode toggle) sensors from the real
+   glove are OUT of scope for the hackathon build — stretch only if time
+   allows, see (d)#2b below. *Feasibility flag:* render-to-texture
+   island is the single riskiest custom build of the hackathon — engineer
+   should prototype it FIRST (Saturday morning); the cheap fallback is
+   Jeff's existing demo video (site asset) as a `video` prop with
+   gaze-highlighted hotspots, which still honors the mechanics in
+   narration.
+2b. **Thumb-pad bubble (STRETCH, hand-tracking only)** — a small glowing
+   nub on the glove's thumb pad, poppable via a real pinch gesture
+   (reuses the pinch-strength signal already computed for walk control —
+   no new detection needed). Purely decorative/discoverable, not tied to
+   game logic; skip entirely if time is short.
 3. **Hue lamp hand-wave** — *hand-wave* over the lamp cycles gold → tulip
    orange → Philips blue. Placard notes the Eindhoven/Philips joke.
    **Non-VR:** click.
@@ -551,139 +567,131 @@ teleports work — its visible form is the headset, not a ring).
 ### S4 — SECOND STUDIO: THE CONSTRUCT
 `career/scene-02-second-studio-construct` (reframe of collaborative-vr-studio)
 
-**(a) Concept + hero moment.**
-You are *inside the Vive*. Not a room — a 2016-vintage VR workspace: a
-luminous wireframe grid floor stretching to a teal-void horizon, soft
-aurora gradients overhead, and Second Studio mid-session all around you:
-half-sculpted 3D models floating at working height, glowing spline ribbons
-frozen mid-draw, a ring-shaped tool palette hovering, and two translucent
-collaborator avatars paused mid-gesture — one offering a tool to the
-other (Second Studio's real tool-hand-off concept, frozen like Pompeii).
-**Hero moment:** the **tool hand-off**: reach out (or click) and *take the
-glowing sculpting tool from the avatar's open hand* — it snaps to you, the
-avatars bow slightly, and wherever you point, a live spline ribbon follows.
-Sculpting light inside a memory of 2016 VR: that's the screenshot, and
-it's Jeff's actual product concept made playable.
+**(a) Concept + hero moment — REDESIGNED 2026-07-19 from Jeff's real
+Second Studio footage.** Original design (abstract teal wireframe void)
+replaced: Jeff's actual product ran on a **floating mountaintop
+platform** — real sky, snow-capped peaks, clouds below, a simple modern
+deck with a guardrail, a work table with colorful low-poly furniture
+mid-sculpt, floating reference-photo panels, a "Save Scene" UI panel.
+You are *inside the Vive*: real, grounded, breathtaking, not abstract.
+Recreating Second Studio's full grab-a-tool-and-sculpt mechanic was
+judged too much scope for one scene among five — the interaction is
+deliberately simpler. **Hero moment:** walk up to and around a
+**human-scale (1.8m) sculpted hero model** standing on the platform —
+a stylized skyscraper, the kind of thing a Second Studio user might
+have designed — silhouetted against the mountain panorama. Simple,
+grounded, and it *is* the real product's mission (architectural/spatial
+design, sculpted in VR) made walkable rather than a rebuilt tool system.
 
-**(b) World generation — STRATEGY NOTE FIRST.**
-This is the one scene where photoreal Marble is the *wrong* tool tuned
-right: we want stylized unreality. Two paths, decided by pre-viz:
-- **Path A (recommended): Mint world generation.** Mint worlds export
-  `.spz` + collider (confirmed in NEXT_STEPS) and Mint demonstrably does
-  stylized spaces (see play.mint.gg/impossible-places). Saves a Marble
-  credit for retries elsewhere.
-- **Path B: Marble with a heavily stylized prompt** (below) if Mint's
-  output disappoints.
+**(b) World generation — RESOLVED: Marble, not Mint.** The mountain
+vista is photoreal territory — Marble's strength, not Mint's stylized
+lane (that reasoning applied to the OLD abstract-void concept, not this
+one). This also settles NEXT_STEPS decision 6.
 
-**World prompt (works for either generator, v1):**
+**World prompt (v1):**
 ```
-A vast stylized virtual reality workspace floating in a deep teal void,
-camera at standing eye height on an infinite glowing white wireframe grid
-floor. The horizon fades into soft cyan-to-teal gradient light, with faint
-aurora ribbons high above. Scattered around at chest height: abstract
-half-finished 3D sculptures made of glowing translucent surfaces and
-bright spline curves of light, frozen mid-creation. Soft cyan rim lighting
-on every object; gentle magenta accents on a few floating geometric
-primitives. No walls, no ceiling, no furniture. Palette: deep teal void,
-white wireframe lines, cyan glow, sparse magenta accents. The grid floor
-is perfectly flat and walkable in all directions for at least ten meters.
-Atmosphere: weightless, silent, dreamlike, clean. No photorealistic
-objects, no textures resembling wood or stone or concrete, no people, no
-text, no sky or clouds or sun, not a landscape, not outer space with
-stars.
+A modern minimalist observation platform floating high above a dramatic
+snow-capped mountain range, camera at standing eye height near the
+platform's center. Endless jagged peaks stretch to the horizon under a
+bright daytime sky, soft clouds drifting in the valleys far below. The
+platform is a simple pale circular deck with a low glass guardrail at
+the edge, open to the sky and mountains on all sides -- no walls, no
+roof. A plain wooden work table with two simple modern chairs sits to
+one side, unoccupied. The deck is clean, minimal, and flat, walkable in
+every direction, at least eight meters across. Palette: pale platform
+grey, warm wood table, crisp white clouds, cool blue-grey mountain rock,
+bright open sky. Atmosphere: high-altitude clarity, thin drifting mist
+at the platform edge, quiet vastness. No people, no readable text or
+logos, no furniture beyond the one table and two chairs, not indoors,
+not nighttime, not a city skyline.
 ```
 
-**2D pre-viz (Mint image — MANDATORY before any world spend, highest
-style risk of the five):**
+**2D pre-viz (Mint image):**
 ```
-Inside a stylized VR creative workspace: infinite glowing wireframe grid
-floor in a deep teal void, floating half-sculpted translucent 3D shapes
-and glowing spline ribbons, soft aurora above, cyan and white with magenta
-accents, dreamlike, clean, first-person eye-level.
+Minimalist circular observation platform floating above snow-capped
+mountains, glass guardrail, clouds drifting below, bright open sky, one
+simple wood table with two chairs, clean modern deck, first-person
+eye-level, photoreal.
 ```
 
 **(c) Props.**
 
 | Prop | Source | Generation prompt / file |
 |---|---|---|
-| Void, grid, floating sculpt-shapes | Mint/Marble-baked | (world prompt) |
-| Translucent avatar A (offering) | Tripo GLB | `stylized translucent human figure standing with one arm extended forward palm up offering something, smooth featureless surface, game ready` — engineer applies fresnel-glow material |
-| Translucent avatar B (receiving) | Tripo GLB | `stylized translucent human figure reaching out to receive an object, smooth featureless surface, game ready` |
-| Sculpting tool (grabbable hero prop) | Tripo GLB | `futuristic hand-held 3D sculpting tool, slim wand with glowing tip and small ring guard, game ready` |
-| Ring tool palette | Tripo GLB | `floating ring-shaped user interface palette with segmented glowing buttons, sci-fi minimal, game ready` |
-| Delft-blue voxel tulip | Tripo GLB | `stylized tulip flower built from small cubes, delft blue and white ceramic pattern, game ready` — floating "finished sculpture" |
-| Wireframe windmill (far) | Tripo GLB | reuse S1 windmill GLB with wireframe material — distant silhouette on the grid horizon |
-| UI Shield panel | custom-from-Jeff | site render (`ToolUIrender`) as a floating `image` prop |
+| Platform, mountains, sky, table+chairs | Marble-baked | (world prompt) |
+| Skyscraper sculpture (HERO, human-scale) | Tripo GLB | `stylized modern skyscraper architectural model, 1.8 meters tall, clean geometric facade, small rooftop details, display-quality miniature, game ready` — the walk-around centerpiece |
+| Floating reference-photo panels | custom (engineer) | flat `image` props, small (~0.3m), a few scattered at working height near the table -- set dressing only, no generation needed beyond simple placeholder crops |
+| "Save Scene" panel | custom (engineer) | flat `image`/text panel, small, near the table edge -- Easter egg / gaze placard, non-functional |
+| Wireframe windmill (far) | Tripo GLB | reuse S1 windmill GLB, placed as a tiny detail on the horizon silhouette (optional, stretch) |
+| Delft-blue voxel tulip | Tripo GLB | `stylized tulip flower built from small cubes, delft blue and white ceramic pattern, game ready` — small sculpture on the table |
+
+**Stretch garnish (optional, only if time allows -- NOT the hero
+anymore):** two translucent collaborator avatars frozen mid-gesture near
+the table (`stylized translucent human figure, smooth featureless
+surface, game ready` x2), *gaze-dwell* triggers a quiet head-turn + nod
+(cheap, reuses the existing gaze-glow-style effect, no new system) —
+kept as ambient life, NOT wired to a tool-handoff/spline-drawing
+mechanic (that whole system is cut from scope, see TECH_SPEC).
 
 **(d) Interactive elements.**
 
-1. **Tool hand-off (HERO)** — *pickup* from avatar A's open palm (VR:
-   grab; the tool pulses to advertise). Once held, *pointing + holding
-   trigger draws a glowing spline ribbon* in the air (engineer: ribbon =
-   extruded tube along controller path, capped length, oldest fades —
-   perf-safe). **Non-VR fallback:** click the tool → cursor draws ribbons
-   on an invisible plane at 1.5m while held-click. This is Second Studio's
-   real workflow: select tool → draw spline.
-2. **Palette spin** — *hand-wave* through the ring palette spins it; each
-   detent changes your ribbon color/thickness (their real
-   tool-configuration concept, playable). **Non-VR:** click segments.
-3. **Avatar gaze-wake** — *gaze-dwell* on either frozen avatar: it turns
-   its head toward you and nods, then refreezes. Quiet, slightly uncanny,
-   very Second-Studio-multiuser. **Non-VR:** same via gaze ray.
-4. **Remove headset (exit)** — a floating Vive hangs at the scene edge in
-   a shaft of light; *pickup/click* = "taking the headset off": reverse
-   iris to S3. Also *proximity* prompt after 4 minutes idle ("Proxie:
-   whenever you're ready — the stage is still there").
+1. **Walk the skyscraper (HERO)** — no trigger needed beyond walking
+   around it; *gaze-dwell* on it triggers a subtle glow/highlight
+   (existing Interactive framework, zero new code) so it reads as
+   inspectable. **Non-VR:** identical, desktop gaze ray.
+2. **Voxel tulip gaze-glint** — small discoverable detail on the table,
+   same glow-on-gaze treatment as other worlds' garnish props.
+3. *(Stretch only)* **Avatar gaze-wake** — see above, cut from hero
+   status but cheap enough to keep as ambient flavor if time allows.
+4. **Remove headset (exit)** — a floating Vive rests at the platform's
+   edge; *pickup/click* = "taking the headset off": reverse fade to S3,
+   same mechanic as putting it on (TECH_SPEC §C.1). Also *proximity*
+   prompt after 4 minutes idle ("Proxie: whenever you're ready — the
+   stage is still there").
 
-**(e) Easter eggs.** The Delft-blue voxel tulip (sculpture of the week);
-the wireframe windmill on the horizon (the Netherlands follows Jeff even
-into cyberspace); a floating panel showing the honest-to-god tool-path
-code **"11312"** rendered as glowing digits — placard explains the deep
-cut; a wireframe cat sculpture sitting at the grid's edge, tail flicking
-(cat bonus round: all three cats exist across the worlds *plus* one made
-of wireframe, because in VR you can have as many cats as you want).
+**(e) Easter eggs.** The "Save Scene" panel (functionless nostalgia —
+placard explains it was real UI); scattered reference-photo panels near
+the table (glimpses of what was being designed); the Delft-blue voxel
+tulip; optional distant wireframe windmill silhouette on the horizon (the
+Netherlands follows Jeff even to a mountaintop).
 
 **(f) Proxie placards.**
 
-- **Sculpting tool** — "Second Studio's core loop: pick a tool, set its
-  constraints, draw in the air. Jeff mapped every tool configuration in the
-  system — take it from the avatar's hand and try the last one he left
-  running."
-- **Tool hand-off avatars** — "Collaborators could pass a configured tool
-  directly to each other — settings and all. These two have been mid-
-  hand-off since 2016. Feel free to intercept."
-- **Ring palette** — "One of Jeff's UI studies made real: a palette that
-  adapts to your height and hand. His ergonomic formulas resized the whole
-  interface to each user automatically."
-- **Floating '11312' panel** — "Every tool setting had an address: 1-1-3-1-2
-  meant circle shape, spline format, grid off. Store it, analyze it,
-  replicate it — Jeff's notation for sharing exactly how something was
-  made."
+- **Skyscraper sculpture** — "This is what Second Studio was built for:
+  architects, designers, and creators sculpting real spatial ideas in
+  VR, at true scale. Jeff was VP of Product — walk around this one the
+  way a client would have, checking proportions from every angle."
+- **"Save Scene" panel** — "Real UI, frozen in time. Every session here
+  ended with a click on a panel exactly like this one."
+- **Reference-photo panels** — "Second Studio users often sculpted
+  against real photo references pinned right in the air beside their
+  work — no separate monitor needed."
 - **Voxel tulip** — "Someone sculpted a Delft-blue tulip and left it
   running. No further comment from the Dutchman."
 - Scene line: "This is the inside of the Vive you just put on — Second
-  Studio, one of the first SaaS VR collaboration platforms, where Jeff was
-  VP of Product. Everything glowing here was drawable."
+  Studio, one of the first SaaS VR collaboration platforms, where Jeff
+  was VP of Product. A mountaintop studio, because why sculpt indoors?"
 
 **(g) Portals.** ⇵ S3 only (the floating Vive = exit; `entryPortals:
 ["scene-01-holo-stage"]`). Deliberately a cul-de-sac: nested worlds should
 feel nested.
 
 **(h) Open questions.**
-- Blessing for Path A (Mint world) vs. holding all environments to Marble
-  for pipeline uniformity?
-- The Second Studio trailer exists on the site — want it floating in the
-  void as a `video` prop "memory screen," or does live footage break the
-  dream?
-- Any real Second Studio brand color to hit precisely?
+- ~~Mint vs Marble~~ RESOLVED: Marble (photoreal mountain vista).
+- The Second Studio trailer exists on the site — want it floating near
+  the table as a `video` prop "memory screen," or does live footage
+  break the dream?
+- Any real Second Studio brand color to hit precisely on the table/chairs?
+- Skyscraper sculpture: fine as a generic stylized building, or is there
+  a specific real building/design language you'd want referenced?
 
 **Audio (Mint):**
-- Ambient loop: `ethereal weightless synth pad, soft slow shimmering
-  chimes, deep quiet space, dreamlike, no rhythm, seamless loop`
-- SFX 1 (draw): `smooth continuous glowing energy ribbon hum, pitch gently
-  following movement, short loop`
-- SFX 2 (hand-off): `crystalline pickup chime with soft harmonic tail,
-  one-shot`
+- Ambient loop: `high altitude open air, soft steady wind, distant faint
+  clouds movement, quiet vast mountain silence, no music, seamless loop`
+- SFX 1 (skyscraper gaze-glow): `soft architectural glass chime, gentle
+  rising tone, one-shot`
+- SFX 2 (Vive doff/exit): `virtual reality headset removal, soft fabric
+  rustle, deep digital whoosh into silence, one-shot`
 
 ---
 
@@ -897,76 +905,91 @@ Assumption: Marble ≈ 9-world budget, Tripo arriving tomorrow, Mint 12k
 live now. Rule: **nothing expensive before its cheap pre-viz passes.**
 
 **Tonight / first thing (Mint images — cheap, do all five):**
-1. Pre-viz S4 Construct (style risk: can anything do "stylized void" well?)
-2. Pre-viz S5 Lightworks (darkness risk for splats)
-3. Pre-viz S1 Hangar (aircraft-fidelity risk)
+1. Pre-viz S5 Lightworks (darkness risk for splats)
+2. Pre-viz S1 Hangar (aircraft-fidelity risk)
+3. Pre-viz S4 Construct (RESOLVED direction, low risk now — mountain
+   vistas are squarely photoreal Marble territory)
 4. Pre-viz S2 + S3 (low risk, sanity only)
 → ~10 image generations including one retry each ≈ small Mint spend.
 
-**Marble/Mint worlds, in this order (each: generate → orientation check →
-commit spz+collider → log in prompts.md):**
-1. **S1 Hangar** — first *Marble* run doubles as the pipeline shakedown
+**Marble worlds, in this order (each: generate → orientation check →
+commit spz+collider → log in prompts.md). All five now go through Marble
+— S4's Mint-vs-Marble question is RESOLVED (Marble; 42k tokens confirmed
+loaded, well clear of a 5-world budget):**
+1. **S1 Hangar** — first Marble run doubles as the pipeline shakedown
    (splat orientation flip, collider walk test) on our highest-wow scene;
    if aircraft fail we learn earliest, with the tarp fallback ready.
-2. **S4 Construct via Mint world** (parallel to #1, different pool — zero
-   Marble cost to try; if it fails, S4 takes a Marble slot as Path B).
-3. **S5 Lightworks** — the darkness experiment; needs slack for a v2.
+2. **S5 Lightworks** — the darkness experiment; needs slack for a v2.
+3. **S4 Construct** — mountain-vista platform, low risk, simple geometry.
 4. **S2 Perception Lab** — low risk, two-bench layout may need a v2.
 5. **S3 Holo Stage** — lowest risk (simple geometry, empty shelf).
-Budget math: 5 baseline Marble runs (or 4 if Mint carries S4) against ~9
-credits → 4-5 retries banked, weighted toward S1/S5.
+Budget math: 5 Marble runs against 42k tokens — comfortably banked for
+retries, weighted toward S1/S5.
 
-**Tripo queue (the moment tokens land — hero interactions first):**
-1. Data glove (image-conditioned — S2 hero#2 blocker)
-2. HTC Vive (S3 hero — the door)
-3. Even Realities G2 (S5 finale)
+**Tripo queue (Pro month confirmed — hero interactions first):**
+1. Data glove (image-conditioned from the received sensor diagram — S2
+   hero#2 blocker, art direction RESOLVED: black fabric, white sensor
+   line on the middle finger)
+2. HTC Vive (image-conditioned from the received product shot — S3 hero,
+   the door)
+3. Even Realities G2 (image-conditioned from the received portrait — S5
+   finale)
 4. Rubber hand + brush + hammer (S2 hero#1 set)
 5. Server sled + modules (S5 zone 1)
-6. Sculpting tool + two avatars (S4 hero)
-7. HoloLens 2, Quest, projectors, ring palette
+6. Skyscraper sculpture (S4 hero, REVISED from sculpting-tool+avatars —
+   simpler scope, see S4 redesign)
+7. HoloLens 2, Quest, projectors
 8. Cats ×3 + wireframe cat, windmill, RISE award, garnish props
 9. Proxie avatar (or Mint animation-set path per NEXT_STEPS) — parallel
    track with the engineer, since anim-states gate the rubber-hand hero.
+Ring palette and the two S4 collaborator avatars are CUT from the queue
+(stretch-only if time allows — see S4 redesign).
 
 **Engineer's custom-build priorities (flagged feasibility items):**
 1. Render-to-texture island mini-game (S2 — riskiest custom build; video
-   fallback specced)
+   fallback specced; island styled after Jeff's real Unity screenshot —
+   rope bridge, torii-style arch, mossy hills)
 2. Additive projector planes + sum reveal (S5 hero — shader-simple, test
    early anyway)
-3. G2 HUD screen-space overlay (S5) — content RESOLVED, real app branding
-4. Vive-don transition overlay reusing teleport (S3→S4)
+3. G2 HUD screen-space carousel (S5) — content RESOLVED, 9 real app
+   screens
+4. Vive-don/doff transition overlay reusing teleport (S3⇵S4)
 5. Proxie anim states: idle / twitch / flinch / nod
-6. Spline-ribbon drawing (S4)
+6. Data-glove finger-curl animation synced to flex/pinch/click input
+   (small addition, both platforms — see S2 rig)
 7. Audio manager (queue item 3, spec above)
+~~Spline-ribbon drawing (S4)~~ CUT from scope — the tool-handoff/drawing
+mechanic is dropped in favor of the simpler walk-around-the-skyscraper
+hero; keep only if there's spare time as a stretch garnish, not on the
+critical path.
+
+**Token pools CONFIRMED 2026-07-19:** Mint 12k · Marble (World Labs) 42k
+· Tripo3D one month Pro (verification pending, see NEXT_STEPS). All
+comfortably clear of the 5-Marble-world + full Tripo-queue + Mint-audio
+budget below — coupons/credits check is effectively resolved by having
+real numbers rather than needing the Notion page.
 
 **Mint 12k rough allocation:** pre-viz images ~1.5k · audio (5 loops + 11
-SFX) ~3k · S4 world (if Path A) ~2k · flat-texture props ~1k · Proxie
-avatar/animation contingency ~2k · **reserve ~2.5k**. (Coefficients are
-guesses — check the Coupons & Credits Notion page before first spend, per
-NEXT_STEPS.)
+SFX) ~3k · flat-texture props ~1k · Proxie avatar/animation contingency
+~2k · **reserve ~4.5k** (S4 no longer needs a Mint-world allocation now
+that it's Marble). Coefficients are guesses, not hard limits.
 
 ---
 
-## 6. OPEN QUESTIONS FOR JEFF (consolidated, the ones that block builds)
+## 6. OPEN QUESTIONS FOR JEFF
 
-1. **Entry scene:** chronological (S1 Hangar) or lead with career
-   firepower (S3 Holo Stage) for judges with 4 minutes? My vote: S1 —
-   the windmill-to-Matrix arc is the product story ("any career, as
-   worlds"), and Proxie can always fast-teleport judges.
-2. **Cats:** names, coat colors, one reference photo each. Blocks three
-   Tripo props and possibly the S5 reveal image.
-3. **S5 reveal image:** portrait / cats / logo?
-4. **Proxie yelp** in the rubber-hand bit — approve the comedy beat?
-5. **NDA pass** over every S5 placard above (I believe they're all
-   public-site-derived, but you're the arbiter).
-6. **Reference photos** you can drop in `reference/` tomorrow morning:
-   data glove, Vive, any RNLAF-era shot, Prez captures. (G2 glasses + S5 portrait source already received.)
-   Each strong photo converts a risky text-only generation into a safe
-   image-led one.
-7. **Path A blessing** for S4 (Mint world) — pipeline uniformity vs. a
-   free Marble credit.
+**All 7 original blocking decisions resolved as of 2026-07-19** — see
+`planning/asset-tracker.xlsx`/`.csv` (Phase 0 rows) for the live record:
+entry scene (S1), cats cast + photos, S5 reveal image (real bit-plane
+portrait), Proxie yelp (approved), S5 NDA pass (approved w/ one
+correction), reference photos (received — data glove, Vive, mini-game
+island, Second Studio env; RNLAF/Prez still welcome, not blocking), and
+S4 world-gen path (Marble, resolved via the Second Studio redesign
+below). Remaining small open items are noted inline in each scene's
+section (h): Second Studio trailer placement, brand-color precision,
+skyscraper sculpture styling.
 
 Everything above is drafted to drop straight into per-scene `prompts.md`
-files and a restructured `src/manifest.js` the moment you say go.
+files and a restructured `src/manifest.js` the moment generation starts.
 Don't hold back was the brief — this is five rooms I'd genuinely want to
 get lost in. Tot morgen.

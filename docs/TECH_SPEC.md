@@ -808,14 +808,34 @@ mechanics (Tobii eye tracker + data glove). Highest wow, highest cost,
 and the one real frame-budget risk (a second scene render). Budgeted
 hard below; built after B/C/D because those de-risk the demo first.
 
+> **SCOPE CONFIRMED (2026-07-19)**: exactly the design below — gaze
+> thirds steer, hand flex/click walks, station lives inside S2 (not a
+> separate scene). Jeff's real data-glove diagram additionally shows a
+> thumb-pressure sensor (jump/throw) and wrist-flex sensor (camera-mode
+> toggle) — explicitly OUT of scope for the hackathon build, stretch
+> only if time allows. One confirmed addition: the physical glove prop
+> should visibly perform the flex input (see below), not just sit inert.
+
 ### Station composition
 
 - **Monitor prop**: GLB shell (<=8k tris) + separate screen plane whose
   material maps the render target texture. `pickup: false`.
-- **Black data glove** (Tripo, <=15k tris) and **Tobii bar** (thin box +
-  4 emissive dots, ~200 tris, hand-built primitives — not worth a
-  generation) sit on the desk as ordinary glb props with rich
-  `label`/`description` so Proxie can explain the research when gazed at.
+- **Black data glove** (Tripo, <=15k tris — art direction RESOLVED: black
+  fabric, thin white sensor line down the back of the middle finger and
+  across the knuckles, image-conditioned from Jeff's real sensor-diagram
+  photo) and **Tobii bar** (thin box + 4 emissive dots, ~200 tris,
+  hand-built primitives — not worth a generation) sit on the desk as
+  ordinary glb props with rich `label`/`description` so Proxie can
+  explain the research when gazed at.
+- **Glove finger-curl animation** (confirmed addition, both platforms):
+  a simple 2-pose blend (open <-> closed fist) on the glove GLB, driven
+  by the same 0-1 flex/pinch/click-held value already computed for walk
+  speed below — the desk prop visibly "performs" the input instead of
+  sitting inert. Trivial: one blend-shape or bone-rotation lerp per
+  engaged frame, ~0.05ms.
+- *(Stretch, hand-tracking only)* a small glowing nub on the glove's
+  thumb pad, poppable via the same pinch-strength signal (no new
+  detection) — decorative discoverable garnish, not tied to game logic.
 - Floor decal ring marking the play spot (optional polish).
 
 ### Manifest schema addition

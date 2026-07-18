@@ -186,7 +186,62 @@ cached COUNTIF values may show stale in a raw preview until then.
   jeffxr.com/work/msr already says. Noted here only as an internal
   planning guardrail.
 
-3 decisions remain: reference photos, S4 Mint-vs-Marble, coupons check.
+## All 7 tracker decisions resolved (2026-07-19)
+
+Final three closed out together:
+
+- **Reference photos received**: data-glove sensor diagram (labeled,
+  unlocks real mechanics beyond gaze+flex — see below), Tobii tracker,
+  a real screenshot of the PhD Unity island (rope bridge, torii-style
+  arch, mossy hills — now the mini-game island's visual reference),
+  a clean HTC Vive product shot, and **real Second Studio footage**
+  that triggered a redesign (next point).
+- **S4 REDESIGNED, which resolves the Mint-vs-Marble question**: the
+  real Second Studio ran on a mountain-vista floating platform, not an
+  abstract void — the design (`docs/WORLD_DESIGNS.md` S4) now matches
+  that reality. Full tool-grab/spline-drawing mechanic judged too much
+  scope for one of five scenes; hero interaction simplified to walking
+  around a static human-scale (1.8m) skyscraper sculpture. Photoreal
+  mountain vista is Marble's strength — **S4 world-gen path: Marble**,
+  resolved. Cut from scope (stretch-only): sculpting tool, two
+  collaborator avatars, ring palette, the "11312" code panel, spline-
+  ribbon drawing system. Exit mechanic (grab Vive to take headset off)
+  unchanged.
+- **Mini-game scope CONFIRMED simple**: gaze-thirds steering + hand-flex/
+  click-forward only, exactly as speced — station lives inside S2, not a
+  separate scene (double-checked, confirmed). Thumb (jump/throw) and
+  wrist (camera-mode toggle) sensors from the real glove are OUT of
+  scope, stretch-only. New confirmed detail: the glove PROP animates
+  (2-pose finger curl) synced to the same input driving the walk speed,
+  on both VR and desktop — the desk prop visibly performs the action.
+  Optional stretch: a pinch-poppable glowing nub on the thumb pad,
+  hand-tracking only, purely decorative.
+- **Token pools all confirmed**: Mint 12k, **Marble (World Labs) 42k**
+  (was the "coupons/credits" open item — resolved by having real
+  numbers), Tripo3D one month Pro (verification pending — see below).
+  Comfortably clear of the full 5-Marble-world + Tripo-queue + Mint-audio
+  budget.
+
+**Tracker status: 0 NEEDS JEFF rows remaining** (96 total: 14 DONE, 57
+REVIEW, 7 CUT, 2 READY, 16 TODO). Generation can start.
+
+### Tripo Pro verification (open, needs Jeff)
+
+Jeff has a free month of Tripo Pro and asked for API verification. I
+don't have his `TRIPO3D_API_KEY` in this cloud session (`.env.local` is
+gitignored and this session is a separate sandbox, not his laptop/Spark)
+and Tripo's public docs don't surface a dedicated
+account/balance/subscription-tier endpoint — so there's no safe way to
+verify from here without him pasting a secret into chat, which isn't
+advisable. Two safer options for Jeff:
+1. Check https://platform.tripo3d.ai account/billing page directly (most
+   reliable for confirming plan tier).
+2. Run a real test generation locally: add the key to `.env.local`
+   (never commit it) on whichever machine will run the scripts, then
+   `node scripts/tripo-generate.mjs --world education --scene
+   scene-02-tu-eindhoven --prop-id test --prompt "a plain wooden block,
+   game ready"` — a successful task response confirms the key works end
+   to end, which matters more for the hackathon than the plan-tier label.
 
 ## Overnight build progress (2026-07-19, pre-review)
 
