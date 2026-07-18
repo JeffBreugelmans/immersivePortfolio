@@ -22,6 +22,26 @@ production build.
    placeholder splat (upright — non-generated scenes correctly skip the
    Marble flip). Proves splat -> portal -> teleport -> fallback end to end.
 
+## Round 2 (post Jeff's review: scale/height/quality fixes)
+
+5. **5-fixed-spawn-human-height.png** — envScale 1.75 + collider ground
+   snap + full-res splat: standing ON the floor at human eye height,
+   aircraft towering, hangar reads big. Size/height fixed.
+6. **6-deep-walk-splat-smear.png** — the catch: ~4m into the hangar,
+   looking around, the splat collapses into smears. Content far off the
+   generation camera's viewpoint is unconstrained — inherent to
+   single-view splat generation, full-res does not fix it.
+7. **7-deep-walk-roof-lookup.png** — 8m deep looking up: roof structure
+   holds up better than mid-space content at the same distance.
+
+Takeaway: there is a "sweet zone" of a few meters around the spawn
+where everything looks great; deep exploration degrades. Options:
+choreograph scenes around the sweet zone (design content to be viewed
+from near spawn), and/or try `marble-1.1-plus` (the larger-scene model)
+for a regen. Live-site note: over Tailscale Funnel the world becomes
+interactive at ~35-60s (500k splat ~25s + collider ~20s); the full-res
+upgrade arrives in the background at ~2min without blocking.
+
 Open observations for the finishing pass:
 - Portal rings sit on a 2.5m circle around the spawn; in S1 the
   Lightworks ring is dead-center in the hero view and trivially easy to
