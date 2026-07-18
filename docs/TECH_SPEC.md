@@ -571,19 +571,78 @@ adapter once the asset exists (asset generation is parallel-track).
 
 ## F. Projector-grid station (item 4, optical computing scene) — 3h
 
-Visitors SEE optical addition: 4 overlapping projected binary grids whose
-sum produces brightness levels on a screen. All shader math — **no
-lights, no render targets, no textures required**.
+> **REVISED (2026-07-19, Jeff's design)**: the receiving screen now
+> reconstructs a REAL target image via bit-plane decomposition, not
+> procedural noise. Below is the updated design; the original
+> pure-procedural fallback is kept as Plan B if the baking pipeline
+> isn't ready in time.
+
+Visitors SEE optical addition: 4 overlapping projected binary masks
+whose sum reconstructs a real image, exactly mirroring how Jeff's actual
+optical all-reduce research summed GPU data streams through light. All
+four off = noise; all four on = the picture resolves. This is **more
+faithful to the source research** than a purely decorative pattern, and
+**cheaper at runtime** than the procedural version (one texture sample +
+a dot product, vs. four hash evaluations per pixel).
+
+### Offline bake (once, not runtime)
+
+A prep script (`scripts/bake-projector-image.mjs`, Node + a JS PNG lib —
+no new runtime dependency) takes a source image and produces ONE packed
+mask texture:
+
+1. Crop/letterbox to the station's aspect ratio, downsample to a coarse
+   grid (default **32x24 cells** — matches the chunky, individually-lit
+   feel of Jeff's reference photo of the real installation while staying
+   legible for a portrait; tune per source image).
+2. Quantize luminance to 5 levels (0-4) per cell.
+3. For each cell with target level N, **randomly choose which N of the 4
+   projectors are "on"** for that cell (seeded RNG for reproducibility).
+   This randomization is what makes the partial-reveal (1-3 projectors)
+   look like resolving noise instead of a predictable wipe — cells don't
+   all light up in the same projector order.
+4. Write one RGBA8 PNG at grid resolution: R/G/B/A channels = projector
+   0/1/2/3's on-off bit for that cell (0 or 1). One texture, four masks.
+5. Upscale with `NEAREST` filtering at render time so cells render as
+   crisp blocks (matches the reference photo's blocky look), not blurred.
+
+**Source image (Jeff's pick, 2026-07-19):** his Even Realities G2/R1
+review portrait (Louvre pyramid background), **cropped to the portrait
+only** — drop the logo/headline text and the product-shot inset, since
+small text and multiple composited elements disintegrate at 5-level
+quantization; faces read well in low-tone halftone (same reason ID-style
+halftone portraits work at low resolution). File pending from Jeff;
+lives at `public/microsoft-consulting/scene-03-optical-computing/props/`
+once baked. **Click-to-link**: the resolved screen opens
+`https://youtu.be/sEDTmvGg-QY` (Jeff's G2/R1 review) in a new tab via a
+plain `interaction.click` handler — reuses the existing framework,
+zero new plumbing.
 
 ### Scene composition (all one station, ~11 draw calls)
 
-1. **Receiving screen**: 2m x 2m plane, one `ShaderMaterial`. Fragment
-   shader computes 4 procedural binary grids (hash-based 8x8 cells, each
-   with its own animated scroll offset) masked by 4 `uniform float
-   uEnabled[4]`, sums them, maps 0-4 to 5 visible brightness steps with a
-   faint per-projector tint so you can tell WHO is contributing:
+1. **Receiving screen**: 2m x 2m plane, one `ShaderMaterial` sampling the
+   baked mask texture once and summing the enabled channels:
 
 ```glsl
+uniform float uEnabled[4];         // which projectors are currently on
+uniform sampler2D uMaskTex;        // baked bit-plane texture (NEAREST filter)
+void main() {
+  vec4 bits = texture2D(uMaskTex, vUv);           // R,G,B,A = projector 0..3 bit
+  float sum = dot(bits, vec4(uEnabled[0], uEnabled[1], uEnabled[2], uEnabled[3]));
+  vec3 base = vec3(0.02, 0.05, 0.03);
+  vec3 lit  = vec3(0.35, 1.0, 0.55) * (sum / 4.0);   // Matrix green, 5 steps
+  gl_FragColor = vec4(base + lit, 1.0);
+}
+```
+
+   **Fallback (Plan B) if the bake isn't ready**: swap `uMaskTex` sampling
+   for the original procedural hash grids below — same `uEnabled`
+   contract, same lever wiring, just decorative noise instead of a
+   reconstructed image. Safe to ship this and upgrade later; the station
+   composition, manifest, and lever system are identical either way.
+
+```glsl
+// Plan B: procedural noise grids (no target image, no bake step)
 uniform float uEnabled[4];
 uniform float uTime;
 float grid(vec2 uv, float seed) {
@@ -645,14 +704,19 @@ Wave on levers optional garnish via manifest. Nothing VR-only.
 
 ### Perf budget
 
-- Fragment cost: pure ALU hash math on a 2m plane — negligible even
-  fullscreen-ish on Quest (<0.2ms worst case standing at the screen).
-- 11 draw calls, ~3k tris, **zero textures, zero lights, zero RTT**.
-- `uTime` updated once/frame; when the station's scene isn't loaded the
-  system's query is empty -> 0 work.
+- Bake path: one texture2D sample + a 4-component dot product per pixel
+  — cheaper than the procedural hash version. 32x24 RGBA8 texture is
+  ~3KB, trivial VRAM.
+- Plan B (procedural) fragment cost: pure ALU hash math on a 2m plane —
+  negligible even fullscreen-ish on Quest (<0.2ms worst case standing at
+  the screen).
+- 11 draw calls, ~3k tris either way, zero lights, zero RTT.
+- `uTime` (Plan B only) updated once/frame; when the station's scene
+  isn't loaded the system's query is empty -> 0 work.
 
 ### Build estimate: **3h** (1.5h shader + station spawn, 1h lever wiring
-through §B, 0.5h placement/tuning in-scene).
+through §B, 0.5h placement/tuning in-scene) **+ 1h** for the bake script
+and click-to-link handler if going with the reconstructed-image version.
 
 ---
 

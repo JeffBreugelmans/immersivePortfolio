@@ -108,6 +108,27 @@ Cats fully resolved (2026-07-19): Pumpkin (orange tabby), Pepper (gray
 tabby), Poppy (marbled orange/gray/white) — reference photos + casting
 in `planning/reference/cats/`, tracker rows unblocked.
 
+## Tracker review in progress (2026-07-19, live with Jeff)
+
+Walking the 7 NEEDS-JEFF decision rows one at a time in chat. So far:
+- **Entry scene: S1 Hangar** (chronological) — confirmed.
+- **S5 reveal image: redesigned, not just picked.** Jeff proposed a real
+  bit-plane decomposition (quantize a source image to 5 luminance levels,
+  randomly split each cell's target level across 4 binary projector
+  masks that sum back to the original) instead of the original
+  decorative procedural-noise shader — see `docs/TECH_SPEC.md` §F
+  (REVISED). Source image: his Even Realities G2/R1 review portrait,
+  cropped to drop logo/text/product inset (busy elements don't survive
+  5-level quantization; faces do). Resolved screen click opens
+  `youtu.be/sEDTmvGg-QY`. **Blocked on**: the actual image file landing
+  on disk — Jeff shared it inline in chat but it wasn't saved to an
+  uploads path this time (unlike the cat photos), so I can't run the
+  bake script yet. Ask him to attach it the same way as the cats, or
+  drop it straight into `planning/reference/` and push.
+
+5 decisions remain: yelp approval, S5 NDA pass, reference photos,
+S4 Mint-vs-Marble, coupons check.
+
 ## Overnight build progress (2026-07-19, pre-review)
 
 Foundation systems from TECH_SPEC are BUILT and verified headless (11/11
