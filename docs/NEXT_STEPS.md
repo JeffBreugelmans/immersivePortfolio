@@ -154,11 +154,14 @@ installation's chunky individually-lit-panel look).
      Transparency is a free win: the S5 alcove shows through around the
      green UI, like a real see-through HUD.
   `docs/WORLD_DESIGNS.md` and `docs/TECH_SPEC.md` §C.2 updated
-  throughout (also fixed stale "G1" -> "G2" references). **Blocked on**:
-  both the reference render AND the 5 screen captures landing on disk
-  (all shared inline, same gap as the portrait before) — Jeff is pushing
-  them to `planning/reference/s5-lightworks/` (render) and
-  `planning/reference/s5-lightworks/hud-captures/` (5 captures).
+  throughout (also fixed stale "G1" -> "G2" references). **RECEIVED**:
+  all **9** real simulator captures landed in
+  `planning/reference/s5-lightworks/hud-captures/` (Jeff's actual app —
+  richer than the 5 originally discussed: adds speakers list/detail and
+  expo list/detail). Carousel design updated to page through all 9 via
+  their numeric filename order. Tracker row flipped to READY. Reference
+  render for the projector-wall portrait also received earlier
+  (`planning/reference/cats/profileProjection.jpg`).
 
 **Tooling note**: lost `scripts/build_tracker.py` (the scratchpad
 generator, never committed) to a self-truncating write-then-read bug —

@@ -351,15 +351,20 @@ Nothing gated.
 > not render separate per-eye content, exactly as already specced below.
 >
 > **UPGRADED AGAIN (same day): real screen captures, not a mockup.**
-> Jeff supplied 5 actual screenshots from the Even Realities G2
+> Jeff supplied **9** actual screenshots from the Even Realities G2
 > simulator running his real SIGGRAPH 2026 guide app, transparent
-> background: (1) title/splash, (2) welcome/main menu, (3) starred-items
-> list, (4) sessions list, (5) a session detail view — real speaker
-> names, real times, his real on-screen nav hints ("swipe = scroll",
-> "tap = open/select", "double-tap = close app"). Scope for the exhibit:
-> a lightweight **carousel through these 5 real captures**, not a
-> reimplementation of the app's full interactivity. **Files pending**
-> (Jeff pushing to the repo, same pattern as the S5 portrait).
+> background, **received and committed**
+> (`planning/reference/s5-lightworks/hud-captures/`): loading/title,
+> welcome menu, starred items, sessions list, session detail, speakers
+> list, speaker detail, expo list, expo detail — real speaker names,
+> real companies, real booth numbers, his real on-screen nav hints
+> ("swipe = scroll", "tap = open/select", "double-tap = close app"). All
+> 9 are `576x288` RGBA (exactly 2:1, matching the panel below) at
+> 8-17KB each — ~100KB total, trivial VRAM. Numeric filename prefixes
+> (`0_loading.png` … `8_expo_detail.png`) give the canonical paging
+> order. Scope for the exhibit: a lightweight **carousel through these 9
+> real captures**, not a reimplementation of the app's full
+> interactivity.
 
 Manifest:
 
@@ -376,10 +381,14 @@ Manifest:
   },
   role: "wearable-hud",
   hud: {
-    // 5 real screen captures, transparent PNG, cycled as a carousel --
+    // 9 real screen captures, transparent PNG, cycled as a carousel --
     // NOT a content-table key anymore now that the source is real art.
+    // Paths relative to planning/reference/s5-lightworks/hud-captures/
+    // (final location TBD when copied into the scene's props/ folder).
     screens: [
-      "title.png", "welcome.png", "starred.png", "sessions.png", "session-detail.png",
+      "0_loading.png", "1_welcome.png", "2_starred.png", "3_sessions.png",
+      "4_session_detail.png", "5_speakers.png", "6_speaker_detail.png",
+      "7_expo.png", "8_expo_detail.png",
     ],
   },
 }
@@ -406,13 +415,14 @@ plus `Esc`/`G` key and an on-overlay ✕):
   binocular fusion Jeff described. (True `layers`-based viewport overlay
   is a stretch polish; the head-locked quad is the ship-it version and
   reads perfectly on Quest.)
-- **Content** (real captures, not invented): the 5 screens listed above.
-  Order is fixed (title -> welcome -> starred -> sessions -> detail),
-  matching the natural flow of the real app. **Files pending** on disk —
-  same push-to-repo pattern as the S5 portrait.
+- **Content** (real captures, not invented): the 9 screens listed above,
+  RECEIVED and committed. Order is fixed by filename prefix (loading ->
+  welcome -> starred -> sessions -> session detail -> speakers -> speaker
+  detail -> expo -> expo detail), matching the natural flow of the real
+  app.
 
 **Paging (the "swipe between them" ask).** Jeff's real app uses
-swipe/tap/double-tap; the exhibit scope is simpler on purpose (5 fixed
+swipe/tap/double-tap; the exhibit scope is simpler on purpose (9 fixed
 captures, not his app's full navigation tree). Reuses the same
 "click-thirds" spatial pattern already established by the mini-game's
 gaze-steering (§G) for consistency across the app:

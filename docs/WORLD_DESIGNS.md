@@ -790,12 +790,15 @@ small warm-lit alcove near the viewer, cinematic, photoreal, eye-level.
    render. *Pickup* the glasses → screen-edge fade, then a **monochrome
    green HUD** composites over your view as ONE head-locked panel
    (matches the real G2's binocular fusion — not two per-eye renders).
-   The HUD is now **5 real screen captures from Jeff's actual simulator**
-   (title, welcome menu, starred items, sessions list, session detail —
-   transparent PNGs, so the alcove shows through around the green UI just
-   like a real see-through display) — genuine app content, not invented
-   copy. *Click the left/right third of the panel to page between the 5
-   screens* (Jeff's "swipe between them" ask, delivered as click-zones —
+   The HUD is now **9 real screen captures from Jeff's actual simulator**
+   (RECEIVED, `planning/reference/s5-lightworks/hud-captures/`): loading/
+   title, welcome menu, starred items, sessions list, session detail,
+   speakers list, speaker detail, expo list, expo detail — real speaker
+   names/companies, real booth numbers, transparent PNGs so the alcove
+   shows through around the green UI just like a real see-through
+   display — genuine app content, not invented copy. *Click the
+   left/right third of the panel to page between the 9 screens* (Jeff's
+   "swipe between them" ask, delivered as click-zones —
    same spatial pattern as the PhD mini-game's screen-third steering, so
    the app has one consistent "click sides of a panel" language). *Pickup
    again / click center* to take them off. **Non-VR:** click toggles;
