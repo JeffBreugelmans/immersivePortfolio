@@ -2,7 +2,7 @@
 
 Decision (confirmed): host everything on the DGX Spark, same box as Proxie.
 Bandwidth is not a concern -- Sonic fiber tested at 6.8 Gbps down / 7.1 Gbps
-up symmetric, so serving 9 scenes' worth of Marble GLBs is well within
+up symmetric, so serving 9 scenes' worth of Marble splats is well within
 headroom. The remaining risk is uptime (power/ISP/crash during the exact
 demo window), not throughput -- worth a quick sanity check the morning of
 the demo, not a blocker.
@@ -11,6 +11,20 @@ This adds a **second, independent service** alongside Proxie -- it does not
 touch `jeff-avatar.service` or `main.py`. If this new service crashes,
 Proxie's existing chat keeps working; if Proxie has an issue, the worlds
 still load.
+
+## 0. Node version check (new since the IWSDK migration)
+
+The frontend build now requires **Node >= 20.19** (Vite 7 + IWSDK). Check
+on the Spark before building:
+
+```bash
+node --version    # must be >= 20.19; if older, upgrade via nvm:
+# nvm install 22 && nvm alias default 22
+```
+
+`npm install` picks up the repo's `.npmrc` (`legacy-peer-deps=true`) --
+needed because SparkJS's peer range predates the pinned super-three r181.
+Nothing to configure manually; just don't delete `.npmrc`.
 
 ## 1. Get the code onto the Spark and build
 
@@ -90,7 +104,7 @@ to do here):** Tailscale's own docs don't clearly state whether
 `--set-path` strips the `/worlds` prefix before forwarding to the backend
 or keeps the full original path. Rather than gamble on one behavior:
 
-1. `vite.config.js` sets `base: "/worlds/"`, so the built `index.html`
+1. `vite.config.ts` sets `base: "/worlds/"`, so the built `index.html`
    references its JS/CSS as `/worlds/assets/...`.
 2. `src/manifest.js` builds every `glb` path from
    `import.meta.env.BASE_URL` instead of a hardcoded string, so it

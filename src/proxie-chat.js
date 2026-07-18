@@ -62,6 +62,8 @@ export function initChatOverlay(sceneManager) {
   const input = document.querySelector("#chat-input");
   const log = document.querySelector("#chat-log");
   const avatarImg = document.querySelector("#avatar-img");
+  const micButton = document.querySelector("#chat-mic");
+  const muteButton = document.querySelector("#chat-mute");
 
   // Fade-swap, matching chat-block.html's setAvatar() exactly.
   function setAvatar(src) {
@@ -114,14 +116,111 @@ export function initChatOverlay(sceneManager) {
     const sceneId = sceneManager.getCurrentSceneId();
     const scene = sceneId ? sceneById[sceneId] : null;
     if (!scene) return "";
-    return `${scene.worldTitle} -- ${scene.title}: ${scene.description}`;
+    let context = `${scene.worldTitle} -- ${scene.title}: ${scene.description}`;
+
+    // Gaze awareness (src/gazeContext.ts): tell Proxie what the visitor is
+    // physically looking at, so "what is this?" has a referent. The
+    // backend needs no changes -- this just rides along inside the
+    // scene_context string it already folds into the system prompt.
+    const gaze = window.__gazeContext;
+    if (gaze?.lookingAt) {
+      const { label, description } = gaze.lookingAt;
+      context += `. The visitor is currently looking at: ${label}` + (description ? ` -- ${description}` : "");
+    }
+    const others = (gaze?.visible ?? [])
+      .filter((v) => v.id !== gaze?.lookingAt?.id)
+      .map((v) => v.label)
+      .slice(0, 6);
+    if (others.length) {
+      context += `. Also visible on screen: ${others.join(", ")}`;
+    }
+    return context;
   }
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const message = input.value.trim();
+  // ----------------------------------------------------------------
+  // Voice output: speak Proxie's reply sentence-by-sentence as the SSE
+  // stream produces it (browser speechSynthesis -- works on desktop and
+  // Quest browser, nothing server-side). Muted via the header toggle.
+  // ----------------------------------------------------------------
+  let ttsMuted = localStorage.getItem("proxie-tts-muted") === "1";
+  const ttsSupported = "speechSynthesis" in window;
+
+  function reflectMuteState() {
+    if (!muteButton) return;
+    if (!ttsSupported) {
+      muteButton.hidden = true;
+      return;
+    }
+    muteButton.textContent = ttsMuted ? "🔇" : "🔊";
+    muteButton.classList.toggle("muted", ttsMuted);
+  }
+  reflectMuteState();
+
+  muteButton?.addEventListener("click", () => {
+    ttsMuted = !ttsMuted;
+    localStorage.setItem("proxie-tts-muted", ttsMuted ? "1" : "0");
+    if (ttsMuted && ttsSupported) window.speechSynthesis.cancel();
+    reflectMuteState();
+  });
+
+  // ----------------------------------------------------------------
+  // Speaking / streaming state broadcast. The companion avatar keys its
+  // talk animation off these, and the audio manager ducks the ambient
+  // loop. Double-keyed (TTS utterances AND SSE stream activity) because
+  // speechSynthesis voices are unverified on Quest browser -- if TTS
+  // never fires there, stream activity still drives the talk state.
+  // ----------------------------------------------------------------
+  let activeUtterances = 0;
+  function setSpeaking(on) {
+    window.__proxieSpeaking = on;
+    window.dispatchEvent(new CustomEvent(on ? "proxie-speaking-started" : "proxie-speaking-ended"));
+  }
+  function utteranceStarted() {
+    if (++activeUtterances === 1) setSpeaking(true);
+  }
+  function utteranceDone() {
+    if (activeUtterances > 0 && --activeUtterances === 0) setSpeaking(false);
+  }
+
+  function speak(text) {
+    const cleaned = text.trim();
+    if (!ttsSupported || ttsMuted || !cleaned) return;
+    const utterance = new SpeechSynthesisUtterance(cleaned);
+    utterance.rate = 1.05;
+    utterance.onstart = utteranceStarted;
+    utterance.onend = utteranceDone;
+    utterance.onerror = utteranceDone;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // Feeds streaming tokens in; flushes complete sentences out to speak().
+  function makeSentenceSpeaker() {
+    let spokenUpTo = 0;
+    return {
+      push(fullText) {
+        const speakable = fullText.split(LINKS_MARKER)[0];
+        // Flush every complete sentence we haven't spoken yet.
+        const re = /[.!?](?:\s|$)/g;
+        re.lastIndex = spokenUpTo;
+        let match;
+        let flushEnd = spokenUpTo;
+        while ((match = re.exec(speakable)) !== null) flushEnd = re.lastIndex;
+        if (flushEnd > spokenUpTo) {
+          speak(speakable.slice(spokenUpTo, flushEnd));
+          spokenUpTo = flushEnd;
+        }
+      },
+      finish(fullText) {
+        const speakable = fullText.split(LINKS_MARKER)[0].trimEnd();
+        if (spokenUpTo < speakable.length) speak(speakable.slice(spokenUpTo));
+      },
+    };
+  }
+
+  async function sendMessage(message) {
     if (!message) return;
 
+    if (ttsSupported) window.speechSynthesis.cancel();
     appendMessage("user", message);
     input.value = "";
     input.disabled = true;
@@ -129,8 +228,10 @@ export function initChatOverlay(sceneManager) {
     const replyEl = appendMessage("proxie", "...");
     let fullText = "";
     let firstToken = true;
+    const speaker = makeSentenceSpeaker();
 
     setAvatar(AVATAR_THINKING);
+    window.dispatchEvent(new CustomEvent("proxie-stream-started"));
 
     try {
       const res = await fetch(PROXIE_ENDPOINT, {
@@ -170,6 +271,7 @@ export function initChatOverlay(sceneManager) {
               }
               fullText += data.token;
               replyEl.textContent = fullText.split(LINKS_MARKER)[0].trimEnd();
+              speaker.push(fullText);
             }
             if (data.error) {
               replyEl.textContent = "Proxie encountered an error. Please try again.";
@@ -183,6 +285,7 @@ export function initChatOverlay(sceneManager) {
       const parts = fullText.split(LINKS_MARKER);
       replyEl.textContent = parts[0].trimEnd();
       if (parts[1]) renderLinks(parts[1]);
+      speaker.finish(fullText);
 
       // Proposed teleport marker -- inert until the backend actually emits
       // it (see header comment). Safe to leave in: it just won't match
@@ -198,8 +301,78 @@ export function initChatOverlay(sceneManager) {
       replyEl.textContent = "Proxie request failed (" + err.message + ").";
       setAvatar(AVATAR_IDLE);
     } finally {
+      window.dispatchEvent(new CustomEvent("proxie-stream-ended"));
       input.disabled = false;
       input.focus();
     }
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    sendMessage(input.value.trim());
   });
+
+  // ----------------------------------------------------------------
+  // Voice input: push-to-talk via the Web Speech API. Feature-detected --
+  // Chrome/Edge desktop have it; where it's missing (Firefox, some
+  // headset browsers) the mic button simply never appears and typing
+  // remains the path. Hold the button (or click to toggle) to dictate;
+  // the interim transcript previews in the input, and the final result
+  // sends as a normal message so the whole pipeline (gaze context, SSE,
+  // TTS reply) is identical to typing.
+  // ----------------------------------------------------------------
+  const SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (micButton && SpeechRecognitionImpl) {
+    micButton.hidden = false;
+
+    let recognition = null;
+    let listening = false;
+
+    function stopListening() {
+      listening = false;
+      micButton.classList.remove("listening");
+      recognition?.stop();
+    }
+
+    function startListening() {
+      if (listening) return;
+      listening = true;
+      micButton.classList.add("listening");
+
+      recognition = new SpeechRecognitionImpl();
+      recognition.lang = navigator.language || "en-US";
+      recognition.interimResults = true;
+      recognition.continuous = false;
+
+      let finalTranscript = "";
+      recognition.onresult = (event) => {
+        let interim = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          if (result.isFinal) finalTranscript += result[0].transcript;
+          else interim += result[0].transcript;
+        }
+        input.value = (finalTranscript + interim).trim();
+      };
+      recognition.onerror = (event) => {
+        if (event.error === "not-allowed") {
+          appendMessage("system", "-- microphone permission denied; type instead --");
+          micButton.hidden = true;
+        }
+        stopListening();
+      };
+      recognition.onend = () => {
+        listening = false;
+        micButton.classList.remove("listening");
+        const message = input.value.trim();
+        if (message) sendMessage(message);
+      };
+      recognition.start();
+    }
+
+    micButton.addEventListener("click", () => {
+      if (listening) stopListening();
+      else startListening();
+    });
+  }
 }

@@ -6,18 +6,31 @@
 // trigger a teleport by returning { action: "teleport", sceneId: "..." }
 // alongside its chat reply. Keep ids stable once Proxie is wired up.
 //
+// ROSTER (RESTRUCTURED 2026-07-19, docs/WORLD_DESIGNS.md): 9 scenes
+// consolidated to 5 flagship scenes across 2 worlds. See that doc for
+// full concept/prompt/prop/interaction detail per scene; this file is
+// just the runtime structure.
+//
 // Folder convention: each scene's assets live at
-//   public/<worldId>/<sceneId>/marble/scene.glb   <- Marble export goes here
-//   public/<worldId>/<sceneId>/reference/         <- your reference photos
+//   public/<worldId>/<sceneId>/marble/scene.spz    <- Marble Gaussian splat
+//                                                     (500k variant; committed)
+//   public/<worldId>/<sceneId>/marble/collider.glb <- Marble low-detail
+//                                                     collision mesh (XR
+//                                                     locomotion surface)
+//   public/<worldId>/<sceneId>/reference/          <- your reference photos
 //                                                     (Marble PROMPT tuning
 //                                                     inputs only -- stays
 //                                                     local, gitignored)
-//   public/<worldId>/<sceneId>/props/             <- everything in "props"
+//   public/<worldId>/<sceneId>/props/              <- everything in "props"
 //                                                     below lives here
-//   public/<worldId>/<sceneId>/prompts.md         <- prompt iteration notes
+//   public/<worldId>/<sceneId>/prompts.md          <- prompt iteration notes
+//
+// Until a scene's real scene.spz exists, the app falls back to the
+// committed sample splat at public/placeholder/scene.spz (from the SensAI
+// template) so every scene is walkable from day one.
 //
 // Asset paths below are built from import.meta.env.BASE_URL rather than
-// hardcoded absolute paths. BASE_URL reflects vite.config.js's "base"
+// hardcoded absolute paths. BASE_URL reflects vite.config.ts's "base"
 // setting (currently "/worlds/", since the app is served under /worlds on
 // the Spark) -- this keeps every reference correct automatically if the
 // hosting path ever changes, instead of needing to update N hardcoded
@@ -25,13 +38,19 @@
 //
 // "entryPortals" describes which other scenes this scene has a visible
 // portal/teleport point to, so you can wire hub navigation without
-// hardcoding it in scene code.
+// hardcoding it in scene code. Portal graph (WORLD_DESIGNS §1):
+//   S1 Hangar <-> S2 Perception Lab <-> S3 Holo Stage <-> S5 Lightworks
+//                                          <-> (Vive) S4 Second Studio
+//   S5 Lightworks <-> S1 Hangar (loop closes: jet engines to light engines)
+// S4 is a cul-de-sac -- only reachable via the Vive wearable-teleport
+// prop in S3 (TECH_SPEC C.1), not a ring portal; its entryPortals still
+// lists S3 so window.teleportTo/Proxie can still jump there directly.
 //
 // "props" is an optional list of additional assets layered into the scene
-// on top of the main Marble environment (glb above). Three sources feed
-// this, and the app doesn't care which one a given prop came from -- they
-// all end up as plain files under props/ and get rendered the same way:
-//   - World Labs Marble: the whole-room environment (the top-level "glb"
+// on top of the main Marble environment (splat). Three sources feed this,
+// and the app doesn't care which one a given prop came from -- they all
+// end up as plain files under props/ and get rendered the same way:
+//   - World Labs Marble: the whole-room environment (the top-level "splat"
 //     field, not a prop) -- best for the space itself.
 //   - Tripo (or similar): focused single-object models -- best for a
 //     specific recognizable product/prop that a whole-room generation
@@ -42,13 +61,20 @@
 //     ever prompt-tuning input, never rendered.
 //
 // Each prop entry:
-//   { id, kind: "glb" | "image" | "video", src, source: "marble" | "tripo" | "custom",
-//     position, rotation?, scale?, width?, height? }
-// "source" is documentation only (shows up in comments/metadata, doesn't
-// change rendering) -- it's there so six months from now it's still
-// obvious which pipeline produced which file. width/height apply to
-// image and video (plane dimensions in meters); scale/rotation apply to
-// glb. Position is required for all kinds.
+//   { id, kind: "glb" | "image" | "video", src,
+//     source: "marble" | "tripo" | "custom",
+//     label, description?,
+//     position: [x, y, z], rotation?: [xDeg, yDeg, zDeg],
+//     scale?: number | [x, y, z], width?, height?,
+//     interaction?: { click?, gaze?, wave?, pickup? },  -- see src/interactions.ts
+//     role?: string }  -- routing key for feature systems (wearables, HUD, etc.)
+// "source" is documentation only. "label" + "description" feed the gaze
+// context system (src/gazeContext.ts): when a visitor looks at the prop
+// and asks Proxie about it, this text is what Proxie gets told the
+// visitor is looking at -- write it like a museum placard, one or two
+// sentences. width/height apply to image and video (plane dimensions in
+// meters); scale/rotation apply to glb. Position is required for all
+// kinds (three.js Y-up, meters, [0,0,0] = scene center at floor level).
 //
 // Large binaries (a big video file, a heavy custom GLB) belong here
 // rather than reference/ since these ship in the built app -- but check
@@ -59,93 +85,87 @@
 
 const BASE = import.meta.env.BASE_URL; // e.g. "/worlds/"
 
+// Shared SFX library (AudioManagerSystem, src/audio.ts). Interaction
+// configs reference these by key: interaction.click.sfx = "click".
+// Files come from Mint generation (see planning/asset-tracker) -- missing
+// files no-op silently, so keys can be wired before assets exist.
+export const sfxLibrary = {
+  "portal-whoosh": `${BASE}shared/audio/portal-whoosh.mp3`,
+  "hud-blip": `${BASE}shared/audio/hud-blip.mp3`,
+  click: `${BASE}shared/audio/click.mp3`,
+  chime: `${BASE}shared/audio/chime.mp3`,
+  hum: `${BASE}shared/audio/hum.mp3`,
+  "headset-don": `${BASE}shared/audio/headset-don.mp3`,
+  lever: `${BASE}shared/audio/lever.mp3`,
+};
+
 export const worlds = [
   {
-    id: "afternow",
-    title: "AfterNow",
+    id: "roots",
+    title: "Roots -- Netherlands & the Path to Human-Centered Design",
     scenes: [
       {
-        id: "scene-01-holographic-studio",
-        title: "Holographic Presentation Studio",
-        description: "Prez immersive presentations -- holographic presentation studio, HoloLens on podium",
-        glb: `${BASE}afternow/scene-01-holographic-studio/marble/scene.glb`,
-        entryPortals: ["scene-02-smart-glasses-lab"],
+        id: "scene-01-hangar-polder",
+        title: "The Hangar on the Polder",
+        description:
+          "Royal Netherlands Air Force maintenance hangar at golden hour -- F-16, Chinook, doors open onto a Dutch polder with a turning windmill. Where Jeff's engineering story begins.",
+        splat: `${BASE}roots/scene-01-hangar-polder/marble/scene.spz`,
+        collider: `${BASE}roots/scene-01-hangar-polder/marble/collider.glb`,
+        ambient: `${BASE}roots/scene-01-hangar-polder/audio/ambient.mp3`,
+        entryPortals: ["scene-02-perception-lab", "scene-03-lightworks"],
         props: [],
       },
       {
-        id: "scene-02-smart-glasses-lab",
-        title: "Even Realities Product Lab",
-        description: "Even Realities smart glasses work -- minimalist eyewear product design lab",
-        glb: `${BASE}afternow/scene-02-smart-glasses-lab/marble/scene.glb`,
-        entryPortals: ["scene-01-holographic-studio", "scene-03-collaborative-vr-studio"],
-        props: [],
-      },
-      {
-        id: "scene-03-collaborative-vr-studio",
-        title: "Second Studio",
-        description: "Second Studio collaborative VR design -- shared virtual studio, translucent avatars",
-        glb: `${BASE}afternow/scene-03-collaborative-vr-studio/marble/scene.glb`,
-        entryPortals: ["scene-02-smart-glasses-lab"],
+        id: "scene-02-perception-lab",
+        title: "The Perception Lab",
+        description:
+          "One research lab spanning Jeff's Master's (rubber hand illusion) and PhD (eye-tracker + data-glove accessibility rig) -- Eindhoven on one bench, Northeastern on the other.",
+        splat: `${BASE}roots/scene-02-perception-lab/marble/scene.spz`,
+        collider: `${BASE}roots/scene-02-perception-lab/marble/collider.glb`,
+        ambient: `${BASE}roots/scene-02-perception-lab/audio/ambient.mp3`,
+        entryPortals: ["scene-01-hangar-polder", "scene-01-holo-stage"],
         props: [],
       },
     ],
   },
   {
-    id: "microsoft-consulting",
-    title: "Microsoft Consulting",
+    id: "career",
+    title: "XR & AI -- Building the Future of Work",
     scenes: [
       {
-        id: "scene-01-hybrid-telepresence",
-        title: "Hybrid Telepresence Meeting",
-        description: "Hybrid telepresence meetings -- video/VR/in-person attendees at one table",
-        glb: `${BASE}microsoft-consulting/scene-01-hybrid-telepresence/marble/scene.glb`,
-        entryPortals: ["scene-02-datacenter-training"],
+        id: "scene-01-holo-stage",
+        title: "The Holo Stage",
+        description:
+          "AfterNow Prez as a dark presentation theater -- podium HoloLens, floating hologram exhibits including Project Malta, a gear wall of headsets through the years.",
+        splat: `${BASE}career/scene-01-holo-stage/marble/scene.spz`,
+        collider: `${BASE}career/scene-01-holo-stage/marble/collider.glb`,
+        ambient: `${BASE}career/scene-01-holo-stage/audio/ambient.mp3`,
+        entryPortals: ["scene-02-perception-lab", "scene-03-lightworks", "scene-02-second-studio-construct"],
         props: [],
       },
       {
-        id: "scene-02-datacenter-training",
-        title: "Data Center Technician Training",
-        description: "Data center technician training -- projection-mapped server racks, 3D printer",
-        glb: `${BASE}microsoft-consulting/scene-02-datacenter-training/marble/scene.glb`,
-        entryPortals: ["scene-01-hybrid-telepresence", "scene-03-optical-computing"],
+        id: "scene-02-second-studio-construct",
+        title: "Second Studio: The Construct",
+        description:
+          "Inside the Vive you just put on -- a mountaintop observation platform where Second Studio's VR sculpting tools once ran. Walk around a human-scale skyscraper sculpture.",
+        splat: `${BASE}career/scene-02-second-studio-construct/marble/scene.spz`,
+        collider: `${BASE}career/scene-02-second-studio-construct/marble/collider.glb`,
+        ambient: `${BASE}career/scene-02-second-studio-construct/audio/ambient.mp3`,
+        // Cul-de-sac: reachable via the Vive wearable-teleport prop in
+        // scene-01-holo-stage (TECH_SPEC C.1), not a ring portal. Listed
+        // here so window.teleportTo / Proxie can still jump directly.
+        entryPortals: ["scene-01-holo-stage"],
         props: [],
       },
       {
-        id: "scene-03-optical-computing",
-        title: "Optical Computing / Photonics",
-        description: "Optical computing / photonics -- Matrix-style glowing binary grid server room",
-        glb: `${BASE}microsoft-consulting/scene-03-optical-computing/marble/scene.glb`,
-        entryPortals: ["scene-02-datacenter-training"],
-        props: [],
-      },
-    ],
-  },
-  {
-    id: "education",
-    title: "Education (stretch)",
-    scenes: [
-      {
-        id: "scene-01-raf-hangar",
-        title: "Royal Netherlands Air Force Hangar",
-        description: "RNLAF maintenance hangar -- F-16s, Chinook, industrial lighting",
-        glb: `${BASE}education/scene-01-raf-hangar/marble/scene.glb`,
-        entryPortals: ["scene-02-tu-eindhoven"],
-        props: [],
-      },
-      {
-        id: "scene-02-tu-eindhoven",
-        title: "TU Eindhoven Research Lab",
-        description: "Rubber hand illusion setup + navigation/route-planning trust research",
-        glb: `${BASE}education/scene-02-tu-eindhoven/marble/scene.glb`,
-        entryPortals: ["scene-01-raf-hangar", "scene-03-northeastern"],
-        props: [],
-      },
-      {
-        id: "scene-03-northeastern",
-        title: "Northeastern University Lab",
-        description: "Driving simulator rig + eye-tracking/data-glove research",
-        glb: `${BASE}education/scene-03-northeastern/marble/scene.glb`,
-        entryPortals: ["scene-02-tu-eindhoven"],
+        id: "scene-03-lightworks",
+        title: "Lightworks",
+        description:
+          "A datacenter cathedral in three zones: server-repair training bay, four-projector optical-computing gallery, and the Even Realities frontier desk. Light that teaches, light that computes, light you can wear.",
+        splat: `${BASE}career/scene-03-lightworks/marble/scene.spz`,
+        collider: `${BASE}career/scene-03-lightworks/marble/collider.glb`,
+        ambient: `${BASE}career/scene-03-lightworks/audio/ambient.mp3`,
+        entryPortals: ["scene-01-holo-stage", "scene-01-hangar-polder"],
         props: [],
       },
     ],
@@ -159,4 +179,6 @@ export const sceneById = Object.fromEntries(
   )
 );
 
-export const defaultSceneId = worlds[0].scenes[0].id;
+// Chronological entry point (WORLD_DESIGNS open question #1, RESOLVED
+// 2026-07-19): start at the hangar, not career-first.
+export const defaultSceneId = "scene-01-hangar-polder";

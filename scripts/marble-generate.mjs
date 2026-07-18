@@ -2,26 +2,28 @@
 // scripts/marble-generate.mjs
 //
 // Helper to call the World Labs Marble ("World API"), poll until
-// generation finishes, export a textured GLB, and download it straight
-// into the right scene folder.
+// generation finishes, and download the scene's Gaussian splat plus
+// collision mesh straight into the right scene folder.
 //
-// Verified against https://docs.worldlabs.ai/api and
-// https://docs.worldlabs.ai/api/reference/worlds/export (fetched live --
-// this is NOT inferred from the brief anymore). Three real steps, not two:
+// Since the IWSDK + SparkJS migration the app renders Marble worlds as
+// native Gaussian splats (.spz), and those need NO export step at all:
+// the completed generate operation's response already carries signed
+// URLs for everything --
 //
-//   1. POST /marble/v1/worlds:generate -> an Operation. Poll it until
-//      done. Its response.id is the world_id. The world's `assets.mesh`
-//      at this point only has a `collider_mesh_url` -- a low-detail
-//      collision mesh, not something you want to actually look at.
-//   2. POST /marble/v1/worlds/{world_id}:export with
-//      {"asset_type":"mesh","format":"glb","mesh_variant":"textured"}.
-//      This does NOT return the file directly -- per World Labs' own
-//      docs, "HQ mesh exports reuse the existing async mesh export
-//      service and return an in-progress operation." So this is a
-//      SECOND operation that also needs polling (same
-//      /marble/v1/operations/{operation_id} endpoint, different id).
-//   3. Once that export operation is done, response.url is the actual
-//      downloadable textured GLB.
+//   response.assets.splats.spz_urls["500k"]      <- web-friendly splat (default)
+//   response.assets.splats.spz_urls.full_res     <- full 2M-splat version (--full-res)
+//   response.assets.mesh.collider_mesh_url       <- low-detail collision GLB
+//                                                   (XR locomotion surface)
+//
+// So the normal flow is one operation: generate -> poll -> download
+// scene.spz + collider.glb.
+//
+// The OLD textured-mesh export path is kept behind --mesh for fallback/
+// comparison: POST /marble/v1/worlds/{world_id}:export with
+// {"asset_type":"mesh","format":"glb","mesh_variant":"textured"} returns
+// a SECOND operation to poll (per World Labs docs, "HQ mesh exports
+// reuse the existing async mesh export service"), whose response.url is
+// the downloadable scene.glb.
 //
 // Auth: WLT-Api-Key header (not Bearer -- confirmed from the platform's
 // own "make your first request" snippet at platform.worldlabs.ai/api-keys
@@ -36,7 +38,9 @@
 //     --world afternow \
 //     --scene scene-01-holographic-studio \
 //     --prompt "holographic presentation studio, HoloLens on podium, ..." \
-//     [--image path/to/reference.jpg]
+//     [--image path/to/reference.jpg] \
+//     [--full-res]   # ALSO download scene-fullres.spz (gitignored; heavy)
+//     [--mesh]       # ALSO run the legacy textured-GLB export -> scene.glb
 //
 // Image input uses the two-step upload flow (prepare_upload -> PUT bytes
 // -> reference media_asset_id) since local files aren't public URLs.
@@ -55,8 +59,13 @@ function parseArgs(argv) {
     if (argv[i].startsWith("--")) {
       const key = argv[i].slice(2);
       const value = argv[i + 1];
-      args[key] = value;
-      i++;
+      // Flags (--full-res, --mesh) have no value token after them.
+      if (value === undefined || value.startsWith("--")) {
+        args[key] = true;
+      } else {
+        args[key] = value;
+        i++;
+      }
     }
   }
   return args;
@@ -178,12 +187,47 @@ async function main() {
   const genDone = await pollOperation(genOp.operation_id, { label: "world generation" });
   console.log("\nWorld generated. World ID:", genDone.response.id);
 
-  console.log("Requesting textured mesh export...");
-  const glbUrl = await exportTexturedMesh(genDone.response.id);
+  const assets = genDone.response.assets ?? {};
+  const spzUrls = assets.splats?.spz_urls ?? {};
 
-  console.log("Downloading GLB...");
-  const destPath = path.join(destDir, "scene.glb");
-  await downloadTo(glbUrl, destPath);
+  // Primary asset: the web-friendly 500k splat the app renders.
+  const spzUrl = spzUrls["500k"] ?? spzUrls.full_res;
+  if (!spzUrl) {
+    throw new Error(`No splat URL in the generate response -- got assets.splats = ${JSON.stringify(assets.splats)}`);
+  }
+  const splatPath = path.join(destDir, "scene.spz");
+  console.log("Downloading Gaussian splat (500k)...");
+  await downloadTo(spzUrl, splatPath);
+  console.log(`Saved ${splatPath}`);
+
+  if (args["full-res"] && spzUrls.full_res) {
+    const fullResPath = path.join(destDir, "scene-fullres.spz");
+    console.log("Downloading full-res splat (gitignored -- heavy)...");
+    await downloadTo(spzUrls.full_res, fullResPath);
+    console.log(`Saved ${fullResPath}`);
+  }
+
+  // Low-detail collision mesh: becomes the XR teleport/walk surface.
+  let colliderSaved = false;
+  if (assets.mesh?.collider_mesh_url) {
+    const colliderPath = path.join(destDir, "collider.glb");
+    console.log("Downloading collision mesh...");
+    await downloadTo(assets.mesh.collider_mesh_url, colliderPath);
+    console.log(`Saved ${colliderPath}`);
+    colliderSaved = true;
+  } else {
+    console.warn("No collider_mesh_url in response -- XR locomotion will use the flat fallback floor.");
+  }
+
+  // Legacy textured-mesh export, only on request.
+  if (args.mesh) {
+    console.log("Requesting textured mesh export (legacy --mesh path)...");
+    const glbUrl = await exportTexturedMesh(genDone.response.id);
+    const meshPath = path.join(destDir, "scene.glb");
+    console.log("Downloading textured GLB...");
+    await downloadTo(glbUrl, meshPath);
+    console.log(`Saved ${meshPath}`);
+  }
 
   await fs.writeFile(
     path.join(destDir, "metadata.json"),
@@ -195,13 +239,17 @@ async function main() {
         prompt: args.prompt,
         image: args.image ?? null,
         model: MODEL,
+        spzVariant: "500k",
+        fullResDownloaded: Boolean(args["full-res"] && spzUrls.full_res),
+        colliderDownloaded: colliderSaved,
+        texturedMeshExported: Boolean(args.mesh),
       },
       null,
       2
     )
   );
 
-  console.log(`Saved to ${destPath}`);
+  console.log(`\nScene assets ready in ${destDir}`);
   console.log(`View in Marble: ${genDone.response.world_marble_url}`);
 }
 
