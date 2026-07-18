@@ -784,17 +784,22 @@ small warm-lit alcove near the viewer, cinematic, photoreal, eye-level.
    off, it collapses to noise again — cause and effect is the lesson.
    Clicking the resolved portrait opens `youtu.be/sEDTmvGg-QY` (Jeff's
    real G2/R1 review video) in a new tab. **Non-VR:** click toggles.
-3. **Even Realities try-on (Zone 3, Jeff's verbatim ask, REVISED)** —
-   glasses rest on a **desk** beside a warm-lit lamp (not a shelf), with
-   a *gaze-glow* affordance drawing the eye per Jeff's reference render.
-   *Pickup* the glasses → screen-edge fade, then a **monochrome green
-   HUD** composites over your view as ONE head-locked panel (matches the
-   real G2's binocular fusion — not two per-eye renders): SIGGRAPH 2026
-   wordmark, "Los Angeles · 19-23 JUL", "Unofficial SIGGRAPH 2026 Guide
-   for the Even Realities G2", "by Jeffrey Breugelmans / afternow.io ·
-   jeffxr.com" — Jeff's real app branding, not invented copy. Look around
-   and the HUD stays head-locked. *Pickup again / click* to take them
-   off. **Non-VR:** click toggles the overlay.
+3. **Even Realities try-on (Zone 3, Jeff's verbatim ask, REVISED AGAIN)**
+   — glasses rest on a **desk** beside a warm-lit lamp (not a shelf),
+   with a *gaze-glow* affordance drawing the eye per Jeff's reference
+   render. *Pickup* the glasses → screen-edge fade, then a **monochrome
+   green HUD** composites over your view as ONE head-locked panel
+   (matches the real G2's binocular fusion — not two per-eye renders).
+   The HUD is now **5 real screen captures from Jeff's actual simulator**
+   (title, welcome menu, starred items, sessions list, session detail —
+   transparent PNGs, so the alcove shows through around the green UI just
+   like a real see-through display) — genuine app content, not invented
+   copy. *Click the left/right third of the panel to page between the 5
+   screens* (Jeff's "swipe between them" ask, delivered as click-zones —
+   same spatial pattern as the PhD mini-game's screen-third steering, so
+   the app has one consistent "click sides of a panel" language). *Pickup
+   again / click center* to take them off. **Non-VR:** click toggles;
+   arrow keys or click-left/right-third also page.
 4. **Rack gaze-breath** — *gaze-dwell* on any rack makes its LED column
    breathe brighter toward you, a wave following your gaze down the aisle.
    Cheap, gorgeous, satisfies "lights up when looked at" in the career
