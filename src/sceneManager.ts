@@ -288,20 +288,44 @@ export function initSceneManager(world: World): SceneManager {
     const dbgExt = glCtx.getExtension("WEBGL_debug_renderer_info");
     const glRenderer = dbgExt ? String(glCtx.getParameter(dbgExt.UNMASKED_RENDERER_WEBGL)) : "";
     const isSoftwareGL = /swiftshader|llvmpipe|software/i.test(glRenderer);
-    const splatCandidates = [
-      ...(scene.splatHiRes && !isMobileXrBrowser && !isSoftwareGL ? [scene.splatHiRes] : []),
-      scene.splat,
-    ];
     let splatLoaded = false;
-    for (const url of splatCandidates) {
-      envEntity.setValue(GaussianSplatLoader, "splatUrl", url);
-      try {
-        await splatSystem.load(envEntity, { animate: false });
-        splatLoaded = true;
-        break;
-      } catch {
-        if (token !== loadToken) return;
-      }
+    envEntity.setValue(GaussianSplatLoader, "splatUrl", scene.splat);
+    try {
+      await splatSystem.load(envEntity, { animate: false });
+      splatLoaded = true;
+    } catch {
+      if (token !== loadToken) return;
+    }
+    if (splatLoaded && scene.splatHiRes && !isMobileXrBrowser && !isSoftwareGL) {
+      // Quality upgrade in the background: the 500k splat gets the
+      // visitor into the world fast (the public URL rides Tailscale
+      // Funnel, a few Mbps -- the 2M file alone took >60s there and
+      // black-screened the initial load when it was the primary).
+      // Download fully first, then swap, so the visitor never stares
+      // at an unloading environment. Blob first (no double-download),
+      // plain URL as fallback in case the loader needs the extension.
+      void (async () => {
+        try {
+          const res = await fetch(scene.splatHiRes);
+          if (!res.ok || token !== loadToken) return;
+          const blob = await res.blob();
+          if (token !== loadToken) return;
+          const blobUrl = URL.createObjectURL(blob);
+          try {
+            envEntity.setValue(GaussianSplatLoader, "splatUrl", blobUrl);
+            await splatSystem.load(envEntity, { animate: false });
+          } catch {
+            if (token !== loadToken) return;
+            envEntity.setValue(GaussianSplatLoader, "splatUrl", scene.splatHiRes);
+            await splatSystem.load(envEntity, { animate: false });
+          } finally {
+            URL.revokeObjectURL(blobUrl);
+          }
+          console.info(`[sceneManager] Upgraded ${scene.id} to full-res splat`);
+        } catch {
+          /* stay on the 500k splat */
+        }
+      })();
     }
     if (!splatLoaded) {
       console.info(`[sceneManager] No splat at ${scene.splat} yet -- using placeholder`);
