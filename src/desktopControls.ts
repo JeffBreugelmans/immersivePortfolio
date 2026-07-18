@@ -72,10 +72,13 @@ export class DesktopControlsSystem extends createSystem({}) {
     });
 
     // Fresh scene, fresh view: sceneManager respawns the player at the
-    // center, so face forward again too.
-    window.addEventListener("scene-changed", () => {
+    // center, so reset to the scene's spawn facing (manifest spawnYawDeg,
+    // default straight ahead) -- must match what sceneManager just set on
+    // the player rig or the first update() frame would snap it back.
+    window.addEventListener("scene-changed", (e: Event) => {
       this.sceneLoading = false;
-      this.yaw = 0;
+      const scene = (e as CustomEvent).detail?.scene as { spawnYawDeg?: number } | undefined;
+      this.yaw = MathUtils.degToRad(scene?.spawnYawDeg ?? 0);
       this.pitch = 0;
     });
   }

@@ -34,9 +34,23 @@ thin dust haze, quiet end-of-day stillness. No people, no text or signage
 with readable writing, no clutter blocking the central floor, no low
 ceilings, not night-time, not rain.
 ```
-Result: (pending -- first Marble run of the hackathon, doubles as the
-pipeline shakedown: verify splat orientation + collider walkability
-before committing to the other 4 scenes)
+Result: submitted 2026-07-18 as the pipeline-shakedown run (operation
+`cf3010f9-c7ff-4aa9-adf8-b50a16117dee`). Shakedown already caught one
+pipeline bug before any tokens were spent: both generate scripts loaded
+`.env` instead of `.env.local`, so the API keys were never picked up --
+fixed in `scripts/marble-generate.mjs` + `scripts/tripo-generate.mjs`.
+Visual verdict (headless desktop pass, screenshots in
+`planning/reference/s1-hangar-qa/`): interior reads as a real hangar --
+pitched steel roof trusses, panel walls, golden light pooling on the
+left, red gear visible. TWO pipeline findings, both fixed globally:
+(1) Marble splats+colliders arrive y-down (OpenCV convention) -> flip
+applied in `sceneManager.ts` for all Marble scenes (placeholder splat
+unaffected); (2) the generation camera sat by the hangar-door wall
+facing it, so `spawnYawDeg: 180` was added to the manifest schema to
+face visitors into the hangar. Still needs a human pass (Marble viewer
+or headset): is the F-16 recognizable (smeary at spawn distance)? Is
+the polder/windmill visible through the doors anywhere? If either
+fails, run v2 (tarped F-16 variant).
 
 If the F-16 comes out mangled (aircraft are hard to generate cleanly),
 v2 pivots to: append "the F-16's fuselage partially covered by a fitted
@@ -45,10 +59,10 @@ in-frame of the doorway in every iteration; it's the Easter-egg anchor
 and the hero-moment composition depends on it being visible.
 
 ## Final prompt used
-(fill in once generated)
+v1, verbatim (2026-07-18).
 
 ## Marble export
-- Operation ID:
+- Operation ID: `cf3010f9-c7ff-4aa9-adf8-b50a16117dee`
 - Exported to: `marble/scene.spz` + `marble/collider.glb`
 - Notes on lighting/mood (keep consistent with sibling scenes in this
   World for portal continuity): signature light color = warm gold

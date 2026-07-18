@@ -45,7 +45,8 @@
 // Image input uses the two-step upload flow (prepare_upload -> PUT bytes
 // -> reference media_asset_id) since local files aren't public URLs.
 
-import "dotenv/config";
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig({ path: [".env.local", ".env"] });
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -185,7 +186,14 @@ async function main() {
   console.log(`Operation ${genOp.operation_id} submitted, polling (usually ~5 min)...`);
 
   const genDone = await pollOperation(genOp.operation_id, { label: "world generation" });
-  console.log("\nWorld generated. World ID:", genDone.response.id);
+  // The completed operation's response carries the id under world_id (not
+  // id) in the current API; fall back to parsing the marble URL.
+  const worldId =
+    genDone.response.id ??
+    genDone.response.world_id ??
+    genDone.response.world_marble_url?.split("/").pop() ??
+    null;
+  console.log("\nWorld generated. World ID:", worldId);
 
   const assets = genDone.response.assets ?? {};
   const spzUrls = assets.splats?.spz_urls ?? {};
@@ -222,7 +230,7 @@ async function main() {
   // Legacy textured-mesh export, only on request.
   if (args.mesh) {
     console.log("Requesting textured mesh export (legacy --mesh path)...");
-    const glbUrl = await exportTexturedMesh(genDone.response.id);
+    const glbUrl = await exportTexturedMesh(worldId);
     const meshPath = path.join(destDir, "scene.glb");
     console.log("Downloading textured GLB...");
     await downloadTo(glbUrl, meshPath);
@@ -234,7 +242,7 @@ async function main() {
     JSON.stringify(
       {
         generatedAt: new Date().toISOString(),
-        worldId: genDone.response.id,
+        worldId,
         worldMarbleUrl: genDone.response.world_marble_url,
         prompt: args.prompt,
         image: args.image ?? null,

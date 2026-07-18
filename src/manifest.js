@@ -112,6 +112,10 @@ export const worlds = [
         splat: `${BASE}roots/scene-01-hangar-polder/marble/scene.spz`,
         collider: `${BASE}roots/scene-01-hangar-polder/marble/collider.glb`,
         ambient: `${BASE}roots/scene-01-hangar-polder/audio/ambient.mp3`,
+        // Generation camera sat by the hangar-door wall; the interior
+        // (aircraft, roof trusses, golden light) is behind the default
+        // facing. Verified via headless screenshots 2026-07-18.
+        spawnYawDeg: 180,
         entryPortals: ["scene-02-perception-lab", "scene-03-lightworks"],
         props: [],
       },

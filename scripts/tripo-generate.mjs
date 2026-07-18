@@ -49,7 +49,8 @@
 // still needs manual tuning (this script has no idea where in the scene
 // you want it), everything else is filled in.
 
-import "dotenv/config";
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig({ path: [".env.local", ".env"] });
 import fs from "node:fs/promises";
 import path from "node:path";
 

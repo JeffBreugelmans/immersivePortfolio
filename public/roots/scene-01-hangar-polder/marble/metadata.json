@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-07-18T20:30:00.319Z",
+  "worldMarbleUrl": "https://marble.worldlabs.ai/world/96d1714c-d58d-4bb4-8800-33c6b22cfdd6",
+  "prompt": "Interior of a Royal Netherlands Air Force maintenance hangar at golden hour, camera at standing eye height in the middle of the smooth concrete floor. Enormous hangar doors on one side are fully open to a flat Dutch polder landscape: green fields, a narrow canal, a bike path, and one traditional windmill in the middle distance under a warm late-afternoon sky. Low sun pours through the doorway in long golden god rays with visible dust motes; interior fill light is cool and industrial from high halide fixtures. A grey F-16 fighter jet stands near the open doors with an engine access panel open and a yellow maintenance stand beside it; a tandem-rotor Chinook helicopter sits deeper in the hangar in soft shadow. Red rolling tool chests, a workbench with hand tools, coiled air hoses, safety-yellow floor markings, a small break table with two chairs near a side wall. Palette: concrete grey, NATO green-grey aircraft, safety yellow accents, warm gold sunlight. The concrete floor is clean, flat, and walkable throughout, with a clear open area at least eight meters wide at the center. Atmosphere: thin dust haze, quiet end-of-day stillness. No people, no text or signage with readable writing, no clutter blocking the central floor, no low ceilings, not night-time, not rain.",
+  "image": null,
+  "model": "marble-1.1",
+  "spzVariant": "500k",
+  "fullResDownloaded": false,
+  "colliderDownloaded": true,
+  "texturedMeshExported": false,
+  "worldId": "96d1714c-d58d-4bb4-8800-33c6b22cfdd6"
+}

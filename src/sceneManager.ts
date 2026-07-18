@@ -71,9 +71,14 @@ function disposeObject3D(root: THREE.Object3D | undefined | null): void {
 
 const gltfLoader = new GLTFLoader();
 
+// Marble -> three.js orientation fix (see the envEntity comment in
+// initSceneManager): applies to every Marble-generated splat + collider.
+const MARBLE_FLIP_X = Math.PI;
+
 async function spawnCollider(world: World, url: string): Promise<Entity | null> {
   try {
     const gltf = await gltfLoader.loadAsync(url);
+    gltf.scene.rotation.x = MARBLE_FLIP_X; // same OpenCV->three.js flip as the splat
     gltf.scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) child.visible = false;
     });
@@ -215,9 +220,12 @@ export function initSceneManager(world: World): SceneManager {
     enableLod: true,
     lodSplatScale: 1.0,
   });
-  // If Marble splats arrive in OpenCV orientation (+y down) and render
-  // upside-down, flip the whole environment here:
-  // envEntity.object3D!.rotation.x = Math.PI;
+  // Marble delivers splats and colliders in OpenCV camera convention
+  // (+y down, +z forward); rotate pi about X to get three.js y-up.
+  // Verified on the first real generation (S1 hangar, 2026-07-18): the
+  // collider spanned y -6.6..+0.8 (whole hangar hanging downward) and the
+  // in-app view was floor-only with black above. The placeholder splat is
+  // already y-up, so the flip is applied per-load in loadScene, not here.
 
   let sceneEntities: (Entity | null)[] = [];
   let currentSceneId: string | null = null;
@@ -251,8 +259,11 @@ export function initSceneManager(world: World): SceneManager {
 
     // Respawn at scene center BEFORE the new portals exist -- guarantees
     // we're PORTAL_RADIUS from every portal on arrival (anti-bounce).
+    // spawnYawDeg (manifest, optional) faces the visitor toward the
+    // scene's hero view when the generation camera faced elsewhere;
+    // DesktopControlsSystem picks the same value up off scene-changed.
     world.player.position.set(0, 0, 0);
-    world.player.rotation.set(0, 0, 0);
+    world.player.rotation.set(0, THREE.MathUtils.degToRad(scene.spawnYawDeg ?? 0), 0);
     // Keep the XR locomotion physics engine in agreement, or it would
     // snap the player back to the pre-teleport spot on the next frame
     // when a session is active.
@@ -264,11 +275,13 @@ export function initSceneManager(world: World): SceneManager {
     // Environment splat, falling back to the committed placeholder until
     // the real scene.spz has been generated.
     envEntity.setValue(GaussianSplatLoader, "splatUrl", scene.splat);
+    envEntity.object3D!.rotation.x = MARBLE_FLIP_X;
     try {
       await splatSystem.load(envEntity, { animate: false });
     } catch {
       if (token !== loadToken) return;
       console.info(`[sceneManager] No splat at ${scene.splat} yet -- using placeholder`);
+      envEntity.object3D!.rotation.x = 0; // placeholder is already y-up
       envEntity.setValue(GaussianSplatLoader, "splatUrl", PLACEHOLDER_SPLAT);
       await splatSystem.load(envEntity, { animate: false }).catch((err) => {
         console.error("[sceneManager] Placeholder splat failed to load too:", err);

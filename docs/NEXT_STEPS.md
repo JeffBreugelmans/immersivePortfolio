@@ -292,6 +292,42 @@ supersedes it where they disagree.
    repo): frontend already parses it defensively -- see
    `docs/DEPLOYMENT.md` §7.
 
+## First world GENERATED + pipeline shakedown done (2026-07-18, laptop)
+
+S1 Hangar is real: `public/roots/scene-01-hangar-polder/marble/`
+(scene.spz 7.5MB + collider.glb 5.5MB, world
+`96d1714c-d58d-4bb4-8800-33c6b22cfdd6`). Shakedown findings, all fixed:
+
+- **dotenv bug**: both generate scripts loaded `.env` not `.env.local`;
+  keys were never picked up. Fixed in both scripts.
+- **Marble orientation CONFIRMED y-down** (the flagged unknown): flip
+  now applied globally in `sceneManager.ts` to Marble splats AND
+  colliders; placeholder splat stays unflipped. Diagnosed via collider
+  bbox, verified via headless screenshots
+  (`planning/reference/s1-hangar-qa/`, README there has the findings).
+- **New manifest field `spawnYawDeg`** (optional, per scene): S1's
+  generation camera sat by the door wall, so S1 spawns facing 180 into
+  the hangar. DesktopControlsSystem syncs to it on scene-changed.
+- **New tooling**: `scripts/serve-dist.mjs` (http static server --
+  vite preview's mkcert pops a UAC dialog on Windows, useless headless)
+  and `scripts/screenshot.mjs` (headless render checks: `--gpu`,
+  `--look <deg>`, `--walk <ms>`, `--scene <id>`). Smoke suite runs on
+  Windows via `CHROME_PATH` pointed at Edge; 11/11 green post-change.
+- **End-to-end verified desktop**: real splat renders -> walk into
+  portal -> fade teleport -> placeholder fallback scene renders upright.
+
+**Needs Jeff**: (1) eyeball the world in the Marble viewer (link in
+scene metadata.json) or headset -- F-16 recognizable? windmill visible?
+else v2 prompt; (2) run `bash scripts/deploy-companion-mode.sh` on the
+Spark (merges avatar-chat companion branch, fixes its teleport list to
+the 5-scene roster -- the branch predates the restructure -- patches
+live system_prompt.txt with backup, restarts jeff-avatar.service; my
+session's permission layer blocks ssh writes to those files); (3) decide
+what `public/afternow/scene-01-holographic-studio/props/AfterNowCustomEnvt.glb`
+(9.1MB, untracked, sitting in the OLD scene tree) is destined for -- a
+prop for S3 Holo Stage presumably; move it to
+`public/career/scene-01-holo-stage/props/` + add a manifest entry.
+
 ## Deploy reminders
 
 - Spark needs Node >= 20.19 to build now (`docs/DEPLOYMENT.md` §0).
