@@ -23,8 +23,8 @@ intentional.
 | `education/scene-03-northeastern` | **MERGE** (into S2) | Two universities, one lab. The story arc "how do people perceive? → can perception restore ability?" reads as a single chapter, and it halves generation cost while doubling prop density. The TU/NEU split was administrative, not narrative. |
 | `afternow/scene-01-holographic-studio` | **KEEP + upgrade** | **S3 — The Holo Stage** (Prez on HoloLens 2 + Quest; also hosts the gear wall with the Vive that transports you to S4) |
 | `afternow/scene-03-collaborative-vr-studio` | **KEEP, reframe** | **S4 — Second Studio: The Construct** (you don't walk here — you *put on the Vive* in S3 and wake up inside 2016 VR. The scene IS the inside of the headset.) |
-| `afternow/scene-02-smart-glasses-lab` | **CUT as a scene** | Even Realities becomes the **glasses-shelf interaction inside S5** (Jeff's grouping: Consulting/AI). A whole room for one pair of glasses was always going to feel empty; a shelf you grab them from is a moment. |
-| `microsoft-consulting/scene-02-datacenter-training` | **MERGE** | **S5 — Lightworks** (one Microsoft mega-scene: server-repair training bay on one side, 4-projector optical-computing gallery on the other, AI-frontier alcove with the Even Realities shelf as the finale) |
+| `afternow/scene-02-smart-glasses-lab` | **CUT as a scene** | Even Realities becomes the **glasses-on-a-desk interaction inside S5** (Jeff's grouping: Consulting/AI). A whole room for one pair of glasses was always going to feel empty; a desk you grab them from, lamp glowing beside it, is a moment. |
+| `microsoft-consulting/scene-02-datacenter-training` | **MERGE** | **S5 — Lightworks** (one Microsoft mega-scene: server-repair training bay on one side, 4-projector optical-computing gallery on the other, AI-frontier alcove with the Even Realities desk as the finale) |
 | `microsoft-consulting/scene-03-optical-computing` | **MERGE** (into S5) | Same building, same client, same "light as a tool" theme. Projection-mapped training and projected computation are literally the same technology pointed at different problems — that's the placard line, and it's true. |
 | `microsoft-consulting/scene-01-hybrid-telepresence` | **CUT as a scene** | Project Malta becomes **content on the Prez stage in S3** — which is historically accurate: Jeff presented the 4D framework *using Prez*. The user-representation-spectrum becomes a floating hologram exhibit. NDA-friendliest possible treatment, zero generation cost. |
 
@@ -73,7 +73,7 @@ the emotional work, over a neutral base. Portals always glow in the
 | S5 Lightworks | server-rack black, brushed steel | **emerald green** (rack LEDs, projector grids, HUD) | 6500K cold datacenter + green emissive | machine-room shimmer, projector beams visible in light haze |
 
 Roots world = **gold** (memory, warmth, the Netherlands). Career world =
-**cyan → green** (hologram light → machine light → the G1's green HUD).
+**cyan → green** (hologram light → machine light → the G2's green HUD).
 The arc "sunlight → screenlight → lasers → light-you-wear" is the whole
 biography told in lighting. Portals: gold-rimmed = toward the past,
 cyan/green-rimmed = toward the future.
@@ -700,16 +700,20 @@ mapped spotlight, a server sled half-out, a parts cart beside it: the
 NDA-safe *simulation of the simulation* — you do the repair his trainees
 did. **Zone 2 — Projector Gallery:** four gaming projectors on tripods
 aimed at one big wall, each casting a slice of binary grid. **Zone 3 —
-Frontier Alcove:** a small warm-lit shelf, out of place in the machine
-room, holding a pair of Even Realities glasses.
-**Hero moment (Zone 2):** each projector alone throws unreadable binary
-noise. Turn all four on and the overlapping grids **sum into a grayscale
-portrait made of light** — brightness levels adding exactly the way his
-optical all-reduce research added GPU data streams. Watching noise resolve
-into an image as you flip the fourth projector is the "staring at the
-Matrix" moment Jeff described — now the visitor gets to feel it.
-(Reveal image candidates: Jeff's portrait, or the three cats — see open
-questions. My vote: the cats. Judges will lose it.)
+Frontier Alcove:** a small warm-lit **desk** (REVISED from "shelf" per
+Jeff's reference render, 2026-07-19), out of place in the machine room —
+a triangular faceted lamp glowing beside it — holding a pair of Even
+Realities glasses that catch the lamp light (subtle gaze-glow affordance
+draws the eye, per the reference).
+**Hero moment (Zone 2, RESOLVED):** each projector alone throws
+unreadable binary noise. Turn all four on and the overlapping grids
+**sum into Jeff's own portrait made of light** (Even Realities G2/R1
+review photo, bit-plane decomposition — see TECH_SPEC §F, validated and
+approved 2026-07-19) — brightness levels adding exactly the way his
+optical all-reduce research added GPU data streams. Watching noise
+resolve into his face as you flip the fourth projector is the "staring
+at the Matrix" moment Jeff described — now the visitor gets to feel it.
+Click the resolved portrait to open his real G2/R1 review video.
 
 **(b) Marble world prompt (v1):**
 ```
@@ -721,8 +725,8 @@ At the far end of the walkway, one large clean matte white wall section,
 empty and evenly lit dimly, like a projection screen. Midway along one
 side, a single rack stands under a focused warm spotlight with a work area
 in front of it and space for a small cart. Near the entrance, a small
-recessed alcove with warm amber shelf lighting, contrasting with the cold
-room. Polished dark concrete floor, completely flat and walkable, central
+recessed alcove with a small wooden desk and warm amber lamp lighting,
+contrasting with the cold room. Polished dark concrete floor, completely flat and walkable, central
 walkway at least four meters wide and fifteen meters long. Palette: black
 racks, emerald green LEDs, cold white-blue light, one warm amber alcove.
 Atmosphere: deep server hum implied, cathedral-like, slightly hazy. No
@@ -752,8 +756,9 @@ small warm-lit alcove near the viewer, cinematic, photoreal, eye-level.
 | Replacement module (grabbable) | Tripo GLB | `clean new computer memory module, green circuit board, game ready` |
 | Parts cart | Tripo GLB | `small metal service cart with foam-lined top tray, game ready` |
 | 4 projectors on tripods | Tripo GLB (one, instanced) | `compact gaming projector on a tripod stand with glowing lens, game ready` |
-| Binary grids + sum image | custom (engineer) | additive-blend textured light planes; grids authored as textures (Mint image: `dense black and white binary square grid pattern, QR-like, flat texture` ×4 masks + 1 grayscale reveal image) |
-| Even Realities G1 glasses | Tripo GLB | `minimalist smart glasses with thin round frames, subtle temple modules, matte finish, game ready` — image-condition from Jeff's review video stills |
+| Baked bit-plane mask texture | custom bake script | RESOLVED: bit-plane decomposition of `planning/reference/cats/profileProjection.jpg` (Jeff's Even Realities review portrait), 80x80 grid, 5 luminance levels — see TECH_SPEC §F. Not a Mint generation. |
+| Desk + lamp (Zone 3) | Marble-baked or Tripo GLB | REVISED from "shelf": small desk with a triangular faceted warm-lit lamp beside it — see Jeff's reference render, `planning/reference/s5-lightworks/` (pending push) |
+| Even Realities G2 glasses | Tripo GLB | `minimalist smart glasses with thin rectangular frames, subtle temple modules, matte black finish, resting on a desk, game ready` — image-condition from Jeff's review video stills + reference render |
 | Retroreflective-marker mannequin hand | Tripo GLB | `mannequin hand on a stand with small reflective tape dots on fingertips, game ready` |
 | DGX Spark rack slice | Mint image | `small gold-bronze compact supercomputer in a server rack slot, flat texture` as an `image` prop on one rack + placard |
 | Cat #3 shadow rig | custom (engineer) | animated cutout occluder crossing a projector beam — no asset generation needed beyond a cat silhouette texture (Mint: `walking cat silhouette, side view, flat black on white, texture`) |
@@ -770,29 +775,34 @@ small warm-lit alcove near the viewer, cinematic, photoreal, eye-level.
    3-click sequence: sled, faulty part, new part. NDA-safe: generic
    hardware, invented layout, no real procedures — "a simulation of the
    simulation."
-2. **The Sum of Light (HERO, Zone 2)** — each projector has a chunky
-   glowing toggle: *click* (or *hand-wave through its beam* — wave
+2. **The Sum of Light (HERO, Zone 2, RESOLVED)** — each projector has a
+   chunky glowing toggle: *click* (or *hand-wave through its beam* — wave
    requirement, second instance) flips its grid on/off. 1-3 projectors:
-   shifting binary noise. All 4: the grids' brightness sums resolve into
-   the reveal image, held steady with a low chord. Turn one off, it
-   collapses to noise again — cause and effect is the lesson. **Non-VR:**
-   click toggles.
-3. **Even Realities try-on (Zone 3, Jeff's verbatim ask)** — *pickup* the
-   glasses from the warm shelf → screen-edge fade, then a **monochrome
-   green HUD** composites over your view (screen-space overlay, works in
-   VR and flat): top-left clock, then his SIGGRAPH guide app UI —
-   `SAT · ASU California Center — Grand`, `NOW: Worlds in Action Hack [02]`,
-   `NEXT: Demo judging`, a speaker card, and one incoming notification:
-   `JB Proxie: veel succes.` Look around and the HUD stays head-locked,
-   exactly like the G1. *Pickup again / click* to take them off. **Non-VR:**
-   click toggles the overlay.
+   genuine resolving noise (bit-plane decomposition, validated). All 4:
+   the grids' brightness sums resolve into **Jeff's own portrait**
+   (Even Realities G2/R1 review photo, 80x80 grid), held steady. Turn one
+   off, it collapses to noise again — cause and effect is the lesson.
+   Clicking the resolved portrait opens `youtu.be/sEDTmvGg-QY` (Jeff's
+   real G2/R1 review video) in a new tab. **Non-VR:** click toggles.
+3. **Even Realities try-on (Zone 3, Jeff's verbatim ask, REVISED)** —
+   glasses rest on a **desk** beside a warm-lit lamp (not a shelf), with
+   a *gaze-glow* affordance drawing the eye per Jeff's reference render.
+   *Pickup* the glasses → screen-edge fade, then a **monochrome green
+   HUD** composites over your view as ONE head-locked panel (matches the
+   real G2's binocular fusion — not two per-eye renders): SIGGRAPH 2026
+   wordmark, "Los Angeles · 19-23 JUL", "Unofficial SIGGRAPH 2026 Guide
+   for the Even Realities G2", "by Jeffrey Breugelmans / afternow.io ·
+   jeffxr.com" — Jeff's real app branding, not invented copy. Look around
+   and the HUD stays head-locked. *Pickup again / click* to take them
+   off. **Non-VR:** click toggles the overlay.
 4. **Rack gaze-breath** — *gaze-dwell* on any rack makes its LED column
    breathe brighter toward you, a wave following your gaze down the aisle.
    Cheap, gorgeous, satisfies "lights up when looked at" in the career
    world too. **Non-VR:** desktop gaze ray.
 
-**(e) Easter eggs.** The reveal image itself (if we go cats); the
-retroreflective-dot mannequin hand by the training bay ("Yes, I put
+**(e) Easter eggs.** The resolved portrait itself (a very meta easter
+egg — Jeff's own face made of light, in the room about light-as-a-tool);
+the retroreflective-dot mannequin hand by the training bay ("Yes, I put
 retroreflective tape on my fingers and forehead" — placard quotes him
 verbatim); the DGX Spark slice in one rack — gaze placard reveals Proxie
 himself lives in this building, technically; one orange tulip in a
@@ -816,10 +826,12 @@ in Dutch.
 - **The sum wall** — "In the real system, overlapping projected grids
   summed GPU data mid-air — an optical all-reduce for AI training,
   bypassing the network entirely. Papers pending; the light is already
-  convinced."
+  convinced. Watch closely — the fourth projector reveals more than
+  data."
 - **Even Realities glasses** — "Jeff's current frontier: AI on your face.
-  He built a SIGGRAPH guide app for these — schedule, sessions, speakers,
-  all on a monochrome green HUD. Put them on; you're at the venue."
+  He built a real SIGGRAPH 2026 guide app for these — schedule, sessions,
+  his own contact info — all on a monochrome green HUD. Put them on;
+  you're at the venue."
 - **Retroreflective hand** — "Marker-based object tracking, hackathon
   style. Jeff's own words: 'Yes, I put retroreflective tape on my fingers
   and forehead.'"
@@ -833,14 +845,17 @@ past the projector wall — the loop closes: from light made of math back to
 sunlight on a polder).
 
 **(h) Open questions.**
-- **Reveal image: your portrait or the three cats?** (Need the cat photo
-  either way for coat colors.) A third option: the AfterNow logo — safest,
-  least fun.
+- ~~Reveal image~~ RESOLVED: Jeff's own G2/R1 portrait, bit-plane
+  decomposition, 80x80 grid.
 - NDA comfort check on the whole Zone 1 framing — I've kept hardware
-  generic and procedures invented; veto anything.
-- G1 HUD: exact green you want (I'd match the real G1's ~550nm phosphor
-  green), and should the guide-app layout mimic your actual app screens?
-- `veel succes` in the HUD — right register, or too cute?
+  generic and procedures invented; still open, see tracker.
+- ~~G1 HUD content~~ RESOLVED: real SIGGRAPH 2026 guide app branding
+  from Jeff's reference render (wordmark, dates, byline) — no more
+  placeholder schedule copy. Green tone: match the render's phosphor
+  green.
+- `veel succes` line: dropped now that real app content is in — replaced
+  by nothing in particular; revisit if a companion Easter-egg notification
+  is still wanted.
 
 **Audio (Mint):**
 - Ambient loop: `dense data center server hum, layered fan whir, deep
@@ -895,7 +910,7 @@ credits → 4-5 retries banked, weighted toward S1/S5.
 **Tripo queue (the moment tokens land — hero interactions first):**
 1. Data glove (image-conditioned — S2 hero#2 blocker)
 2. HTC Vive (S3 hero — the door)
-3. Even Realities G1 (S5 finale)
+3. Even Realities G2 (S5 finale)
 4. Rubber hand + brush + hammer (S2 hero#1 set)
 5. Server sled + modules (S5 zone 1)
 6. Sculpting tool + two avatars (S4 hero)
@@ -909,7 +924,7 @@ credits → 4-5 retries banked, weighted toward S1/S5.
    fallback specced)
 2. Additive projector planes + sum reveal (S5 hero — shader-simple, test
    early anyway)
-3. G1 HUD screen-space overlay (S5)
+3. G2 HUD screen-space overlay (S5) — content RESOLVED, real app branding
 4. Vive-don transition overlay reusing teleport (S3→S4)
 5. Proxie anim states: idle / twitch / flinch / nod
 6. Spline-ribbon drawing (S4)
@@ -936,7 +951,7 @@ NEXT_STEPS.)
 5. **NDA pass** over every S5 placard above (I believe they're all
    public-site-derived, but you're the arbiter).
 6. **Reference photos** you can drop in `reference/` tomorrow morning:
-   data glove, Vive, G1 glasses, any RNLAF-era shot, Prez captures.
+   data glove, Vive, any RNLAF-era shot, Prez captures. (G2 glasses + S5 portrait source already received.)
    Each strong photo converts a risky text-only generation into a safe
    image-led one.
 7. **Path A blessing** for S4 (Mint world) — pipeline uniformity vs. a

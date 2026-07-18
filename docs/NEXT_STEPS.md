@@ -135,6 +135,33 @@ installation's chunky individually-lit-panel look).
   implement it") — build as speced in WORLD_DESIGNS S2(d)/TECH_SPEC, no
   mannequin-arm fallback needed.
 
+- **80x80 grid resolution confirmed** for the bit-plane bake (tested
+  30/45/60/80 side by side, plus proved each of the 4 individual
+  projector layers is genuinely uncorrelated noise on its own, and that
+  the incremental tap-one-at-a-time reveal already matches the existing
+  lever interaction design — no new plumbing needed).
+- **S5 Even Realities design refined** from Jeff's reference render:
+  glasses rest on a **desk with a warm lamp** (not a shelf), with a
+  gaze-glow affordance to draw the eye; the in-world HUD uses his REAL
+  SIGGRAPH 2026 guide app branding (wordmark, dates, byline) instead of
+  placeholder schedule copy; confirmed the HUD should be ONE head-locked
+  panel, matching the real G2's binocular fusion (not per-eye renders).
+  `docs/WORLD_DESIGNS.md` and `docs/TECH_SPEC.md` §C.2 updated
+  throughout (also fixed stale "G1" -> "G2" references). **Blocked on**:
+  the reference render image itself landing on disk (shared inline,
+  same gap as the portrait before — ask Jeff to push it, e.g. to
+  `planning/reference/s5-lightworks/`).
+
+**Tooling note**: lost `scripts/build_tracker.py` (the scratchpad
+generator, never committed) to a self-truncating write-then-read bug —
+`open(f,'w').write(open(f).read())` truncates before the read executes.
+Tracker rows are now hand-patched directly via targeted CSV/openpyxl
+edits, which is safe but slower for bulk changes; rebuild the generator
+if another big restructuring is needed. `recalc.py` on the xlsx has
+timed out 3x in this environment (LibreOffice cold-start cost) — not
+blocking since Excel/Sheets recalculate on open, but the Summary sheet's
+cached COUNTIF values may show stale in a raw preview until then.
+
 4 decisions remain: S5 NDA pass, reference photos, S4 Mint-vs-Marble,
 coupons check.
 

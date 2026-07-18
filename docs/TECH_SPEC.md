@@ -341,17 +341,32 @@ Nothing gated.
 
 ### C.2 Even Realities glasses -> green HUD — 2h
 
+> **REFINED (2026-07-19, Jeff's reference render)**: glasses sit on a
+> **desk** (not a shelf) with a warm-lit lamp beside it for ambience,
+> and a **gaze-glow affordance** on the glasses themselves to draw the
+> eye — both already fall out of the existing framework, no new systems.
+> Jeff confirmed the single-head-locked-quad approach is correct: the
+> real G2's two micro-displays combine perceptually into ONE floating
+> image at a comfortable focal distance ("binocular vision") — we do
+> not render separate per-eye content, exactly as already specced below.
+> Jeff also supplied the REAL app branding to use as HUD content instead
+> of a generic placeholder (see updated content block).
+
 Manifest:
 
 ```js
 {
   id: "even-realities-glasses", kind: "glb", src: "…",
-  label: "Even Realities G1 smart glasses",
-  description: "Minimalist smart glasses with a monochrome green HUD. Try them on.",
-  position: [0, 1.1, -1.5],
-  interaction: { click: { effect: "pulse", sfx: "hud-on" }, pickup: true },
+  label: "Even Realities G2 smart glasses",
+  description: "Minimalist smart glasses with a monochrome green HUD -- Jeff's own SIGGRAPH 2026 guide app runs on them. Try them on.",
+  position: [0, 0.75, -1.2],   // resting on the Zone 3 desk, not a shelf
+  interaction: {
+    click: { effect: "pulse", sfx: "hud-on" },
+    gaze: { dwellMs: 900, effect: "glow", sfx: "hum" },  // draws the eye per Jeff's reference render
+    pickup: true,
+  },
   role: "wearable-hud",
-  hud: { content: "siggraph-schedule" },   // key into a static content table
+  hud: { content: "siggraph-guide" },   // key into a static content table
 }
 ```
 
@@ -361,16 +376,28 @@ plus `Esc`/`G` key and an on-overlay ✕):
 
 - **Desktop/mobile**: DOM overlay — monochrome green (#3dff9c on
   rgba(0,10,4,0.55)), monospace, subtle scanline via repeating-linear-
-  gradient, CSS only. Content: fake SIGGRAPH schedule + speaker info
-  (hardcoded HTML template; content table lives next to the system, not
-  in manifest — manifest only carries the key).
+  gradient, CSS only.
 - **XR**: head-locked quad, 0.9m x 0.45m at z=-1.0 from camera, tilted
   -8°; `CanvasTexture` 1024x512 **rendered once** at first toggle (static
   content — no per-frame canvas work), `transparent:true, opacity:0.9,
   depthTest:false, renderOrder:998`. 1 draw call, 2MB texture, zero
-  per-frame cost. (True `layers`-based viewport overlay is a stretch
-  polish; the head-locked quad is the ship-it version and reads perfectly
-  on Quest.)
+  per-frame cost. ONE quad, not one per eye — matches the real G2's
+  binocular fusion Jeff described. (True `layers`-based viewport overlay
+  is a stretch polish; the head-locked quad is the ship-it version and
+  reads perfectly on Quest.)
+- **Content** (real, from Jeff's own guide app, not invented): SIGGRAPH
+  2026 wordmark/logo mark, "Los Angeles · 19-23 JUL", "Unofficial
+  SIGGRAPH 2026 Guide for the Even Realities G2", "by Jeffrey Breugelmans
+  / afternow.io · jeffxr.com", same green-phosphor monochrome style as
+  Jeff's reference render. **Source image pending** (Jeff shared inline,
+  not yet on disk — same as the S5 portrait before he pushed it via git;
+  ask him to push this one too) to trace the exact logo mark and layout.
+
+**Discoverability (the "glow effect to draw attention" ask)**: the
+`gaze.effect:"glow"` config above is the existing Interactive framework
+doing exactly this — no bespoke code. A subtle idle emissive pulse tuned
+to Jeff's reference (glasses catching the lamp's warm light) is a
+material/prop-authoring detail, not a systems change.
 
 Events: `hud-toggled {on: boolean}` (AudioManager plays on/off blips;
 CompanionSystem can comment). Register the worn state as a gaze-context
@@ -592,9 +619,10 @@ no new runtime dependency) takes a source image and produces ONE packed
 mask texture:
 
 1. Crop/letterbox to the station's aspect ratio, downsample to a coarse
-   grid (default **32x24 cells** — matches the chunky, individually-lit
-   feel of Jeff's reference photo of the real installation while staying
-   legible for a portrait; tune per source image).
+   grid (**80x80 cells**, confirmed 2026-07-19 after Jeff compared
+   30/45/60/80 side by side — 80 was the clear best likeness; texture
+   memory is trivial at any of these sizes so resolution was purely an
+   aesthetic call, not a perf one).
 2. Quantize luminance to 5 levels (0-4) per cell.
 3. For each cell with target level N, **randomly choose which N of the 4
    projectors are "on"** for that cell (seeded RNG for reproducibility).
@@ -705,8 +733,8 @@ Wave on levers optional garnish via manifest. Nothing VR-only.
 ### Perf budget
 
 - Bake path: one texture2D sample + a 4-component dot product per pixel
-  — cheaper than the procedural hash version. 32x24 RGBA8 texture is
-  ~3KB, trivial VRAM.
+  — cheaper than the procedural hash version. 80x80 RGBA8 texture is
+  ~25KB, trivial VRAM.
 - Plan B (procedural) fragment cost: pure ALU hash math on a 2m plane —
   negligible even fullscreen-ish on Quest (<0.2ms worst case standing at
   the screen).
