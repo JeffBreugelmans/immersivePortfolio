@@ -9,8 +9,13 @@ __pycache__/
 
 # Reference materials (photos, videos, source GLBs used to prompt Marble)
 # stay local -- Marble generation only ever runs from Jeff's laptop, and
-# the Spark only needs the final scene.glb output, not the prompting
-# inputs. Keep the folder structure itself (.gitkeep) so a fresh clone
-# still has the right layout to drop new reference material into.
+# the Spark only needs the final scene assets, not the prompting inputs.
+# Keep the folder structure itself (.gitkeep) so a fresh clone still has
+# the right layout to drop new reference material into.
 public/**/reference/*
 !public/**/reference/.gitkeep
+
+# Full-resolution Marble splats (~2M splats) are for local comparison
+# only -- the app ships the committed 500k scene.spz. Keep the big ones
+# out of git; rsync straight to the Spark if one is ever needed live.
+public/**/marble/scene-fullres.spz

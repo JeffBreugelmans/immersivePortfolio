@@ -33,11 +33,12 @@ like `/worlds/worlds/afternow/...`, and worse, an actual runtime bug under
 one of the two possible ways Tailscale might forward a path-mounted Funnel
 request. Flattening this was part of that fix.
 
-## Single-page, model-swap approach (not multi-page navigation)
+## Single-page, scene-swap approach (not multi-page navigation)
 
-Rather than a separate HTML page per scene, the app is a single `<a-scene>`
-that swaps which glTF model is loaded and repositions portal hotspots when
-you teleport. This was chosen over multi-page navigation because:
+Rather than a separate HTML page per scene, the app is a single IWSDK
+world that swaps which Gaussian splat is loaded and respawns portals/props
+when you teleport (`src/sceneManager.ts`). This was chosen over multi-page
+navigation because:
 
 - No page reload / WebXR session teardown when moving between scenes --
   important for staying in an active XR session on Quest 3.
@@ -47,20 +48,53 @@ you teleport. This was chosen over multi-page navigation because:
   adding/rewiring scenes doesn't touch routing code.
 
 The tradeoff: all scene metadata loads up front (cheap -- it's just a JS
-object), but glTF assets load lazily per scene, so scene file size isn't a
-concern until you're actually standing in it.
+object), but splat/prop assets load lazily per scene, so scene file size
+isn't a concern until you're actually standing in it.
+
+Environment swaps reuse ONE persistent splat-host entity: SparkJS splat
+disposal is handled inside `GaussianSplatLoaderSystem` (from the SensAI
+template), whose `load()` auto-unloads the previous splat for the same
+entity -- leak-free by construction. Portals, props, and the per-scene
+collision mesh ARE torn down and rebuilt each swap, with explicit
+geometry/material disposal in `sceneManager.ts`.
+
+## Frontend module map (post IWSDK migration)
+
+- `src/index.ts` -- `World.create` bootstrap: XR session config (offered
+  VR, hand tracking), system registration, the invisible fallback
+  locomotion floor, loading overlay, Enter VR button. Also pauses IWSDK's
+  `LocomotionSystem` outside immersive sessions (it writes the physics
+  engine's position onto the player every frame, which would fight the
+  desktop controls) and hands it the current position on XR entry.
+- `src/desktopControls.ts` -- drag-to-look + WASD for the desktop-first
+  audience; inert during XR sessions and scene loads.
+- `src/portals.ts` -- portal ring/label entities + `PortalSystem`
+  (pulse animation, 1.3m proximity trigger, click trigger, arrival
+  cooldown guard).
+- `src/gazeContext.ts` -- center-of-view raycast + frustum check over
+  registered objects; publishes `window.__gazeContext` / `gaze-changed`
+  for the chat overlay.
+- `src/gaussianSplatLoader.ts`, `src/gaussianSplatAnimator.ts` -- SparkJS
+  splat lifecycle + GPU fly-in, taken from the sensai-webxr-worldmodels
+  template together with its required workarounds (camera-clone patch;
+  see also `deduplicateThree` in `vite.config.ts`).
+- `src/proxie-chat.js` -- DOM chat overlay: SSE streaming, scene + gaze
+  context assembly, Web Speech push-to-talk input, speechSynthesis
+  replies, avatar states.
 
 ## How Proxie triggers a teleport
 
-`src/scene-manager.js` exposes `window.teleportTo(sceneId)`. Portal clicks
-(`src/portal.js` dispatches a `teleport-request` event that
-`scene-manager.js` listens for) go through this function today. Confirmed
-working in practice -- portal navigation between scenes has been tested
-live on the deployed Spark app.
+`src/sceneManager.ts` exposes `window.teleportTo(sceneId)`. Portal
+triggers (`src/portals.ts` dispatches a `teleport-request` event that
+`sceneManager.ts` listens for) go through the same path.
 
 Proxie's real `/chat` endpoint (verified against `avatar-chat/main.py`)
 streams SSE tokens plus an optional trailing `---LINKS---` block -- there's
-no scene-transition field in the response at all yet. `src/proxie-chat.js`
+no scene-transition field in the response at all yet. The frontend also
+feeds Proxie *gaze context* on every message: `scene_context` now includes
+what the visitor is looking at and which key objects are on screen
+(`src/gazeContext.ts`), which required zero backend changes since it rides
+inside the existing `scene_context` string. `src/proxie-chat.js`
 parses defensively for a proposed `---TELEPORT:<sceneId>---` marker
 (same style as the existing `---LINKS---` convention), but nothing on the
 backend emits it yet -- see `docs/DEPLOYMENT.md` §7 for what adding that
