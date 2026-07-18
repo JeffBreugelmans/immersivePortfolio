@@ -173,8 +173,20 @@ timed out 3x in this environment (LibreOffice cold-start cost) — not
 blocking since Excel/Sheets recalculate on open, but the Summary sheet's
 cached COUNTIF values may show stale in a raw preview until then.
 
-4 decisions remain: S5 NDA pass, reference photos, S4 Mint-vs-Marble,
-coupons check.
+- **S5 NDA pass: APPROVED with one fix.** "Million-dollar hardware"
+  dramatic license approved as-is. The "sum wall" placard was factually
+  wrong ("bypasses the network entirely") — Jeff corrected the real
+  mechanism: it skips sequential collect-and-sum, computing the sum in
+  one parallel step. Placard text fixed in WORLD_DESIGNS to match.
+  **GUARDRAIL**: Jeff mentioned the optical all-reduce work has a paper
+  accepted to Nature Communications, release date unknown — this is
+  *not* on his public site and he flagged it as still NDA-adjacent.
+  **Do not put this in any in-game text, placard, or public-facing
+  content** — site and placards stay at "papers pending," matching what
+  jeffxr.com/work/msr already says. Noted here only as an internal
+  planning guardrail.
+
+3 decisions remain: reference photos, S4 Mint-vs-Marble, coupons check.
 
 ## Overnight build progress (2026-07-19, pre-review)
 

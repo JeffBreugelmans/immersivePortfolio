@@ -832,10 +832,11 @@ in Dutch.
   projectors, four data streams, and light itself does the addition.
   One projector is noise. Four is an answer. Try it."
 - **The sum wall** — "In the real system, overlapping projected grids
-  summed GPU data mid-air — an optical all-reduce for AI training,
-  bypassing the network entirely. Papers pending; the light is already
-  convinced. Watch closely — the fourth projector reveals more than
-  data."
+  summed GPU data mid-air — an optical all-reduce for AI training that
+  skips the usual sequential collect-and-sum: instead of gathering each
+  sender's data one at a time, the sum appears in a single parallel
+  glance. Papers pending; the light is already convinced. Watch closely
+  — the fourth projector reveals more than data."
 - **Even Realities glasses** — "Jeff's current frontier: AI on your face.
   He built a real SIGGRAPH 2026 guide app for these — schedule, sessions,
   his own contact info — all on a monochrome green HUD. Put them on;
