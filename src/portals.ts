@@ -23,11 +23,15 @@ import {
 } from "@iwsdk/core";
 import { registerGazeTarget } from "./gazeContext";
 
-const PROXIMITY_TRIGGER_DISTANCE = 1.3; // meters, height-agnostic
+const PROXIMITY_TRIGGER_DISTANCE = 1.3; // meters, height-agnostic (default)
 
 export const Portal = createComponent("Portal", {
   targetScene: { type: Types.String, default: "" },
   triggered: { type: Types.Boolean, default: false },
+  // Per-portal walk-in radius: scenes fenced to a small walk box place
+  // portals closer to the spawn, so the trigger shrinks with them to
+  // preserve the anti-bounce margin (see sceneManager).
+  proximity: { type: Types.Float32, default: PROXIMITY_TRIGGER_DISTANCE },
 });
 
 declare global {
@@ -70,9 +74,13 @@ export interface PortalOptions {
   targetScene: string;
   label: string;
   position: [number, number, number];
+  proximity?: number;
 }
 
-export function createPortal(world: World, { targetScene, label, position }: PortalOptions): Entity {
+export function createPortal(
+  world: World,
+  { targetScene, label, position, proximity = PROXIMITY_TRIGGER_DISTANCE }: PortalOptions
+): Entity {
   const group = new THREE.Group();
 
   const ring = new THREE.Mesh(
@@ -89,7 +97,7 @@ export function createPortal(world: World, { targetScene, label, position }: Por
   const entity = world
     .createTransformEntity(group)
     .addComponent(Interactable)
-    .addComponent(Portal, { targetScene });
+    .addComponent(Portal, { targetScene, proximity });
 
   // Click path: IWSDK forwards DOM pointer events onto scene objects on
   // desktop, and routes controller/hand rays in XR -- both surface as
@@ -143,7 +151,7 @@ export class PortalSystem extends createSystem({
       // Match height so walking through at head-height counts as passing
       // through the ring (same trick as the old portal.js).
       _portalPos.y = _camPos.y;
-      if (_portalPos.distanceTo(_camPos) < PROXIMITY_TRIGGER_DISTANCE) {
+      if (_portalPos.distanceTo(_camPos) < entity.getValue(Portal, "proximity")!) {
         triggerPortal(entity);
       }
     }

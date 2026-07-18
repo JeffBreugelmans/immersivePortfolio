@@ -124,8 +124,25 @@ export const worlds = [
         // see DEPLOYMENT.md): served to desktop browsers; Quest and
         // anything missing the file falls back to the 500k scene.spz.
         splatHiRes: `${BASE}roots/scene-01-hangar-polder/marble/scene-fullres.spz`,
+        // Walkable sweet zone (meters, centered on spawn; 4x4 is also the
+        // code default). Splat quality collapses a few meters out from the
+        // generation camera, so the visitor stays behind safety tape --
+        // fitting for a maintenance floor.
+        walkBounds: { width: 4, depth: 4 },
         entryPortals: ["scene-02-perception-lab", "scene-03-lightworks"],
-        props: [],
+        props: [
+          {
+            id: "placard-rnlaf-internship",
+            kind: "placard",
+            source: "custom",
+            title: "Where It Started",
+            text:
+              "During his Bachelor's in Electrical Engineering, Jeff interned with the Royal Netherlands Air Force, working on maintenance efficiency and repair task scheduling -- his first taste of engineering for the people who keep complex machines flying.",
+            label: "RNLAF internship placard",
+            position: [0.9, 0.45, -1.95],
+            width: 0.9,
+          },
+        ],
       },
       {
         id: "scene-02-perception-lab",

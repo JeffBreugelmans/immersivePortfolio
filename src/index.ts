@@ -30,6 +30,7 @@ import { FadeSystem } from "./fade";
 import { AudioManagerSystem } from "./audio";
 import { CompanionSystem } from "./companion";
 import { DebugOverlaySystem } from "./debugOverlay";
+import { WalkBoundsSystem } from "./walkBounds";
 import { initSceneManager } from "./sceneManager";
 import { initChatOverlay } from "./proxie-chat.js";
 
@@ -131,7 +132,8 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
       .registerSystem(FadeSystem)
       .registerSystem(AudioManagerSystem)
       .registerSystem(CompanionSystem)
-      .registerSystem(DebugOverlaySystem);
+      .registerSystem(DebugOverlaySystem)
+      .registerSystem(WalkBoundsSystem);
 
     // Invisible floor so XR teleport/slide locomotion always has a
     // walkable surface, even before a scene's collider.glb exists.

@@ -35,6 +35,7 @@ import {
   type InteractionConfig,
 } from "./interactions";
 import { sceneById, defaultSceneId } from "./manifest.js";
+import { WALK_BOUNDS_DEFAULT } from "./walkBounds";
 
 const PORTAL_RADIUS = 2.5;
 
@@ -71,6 +72,91 @@ function disposeObject3D(root: THREE.Object3D | undefined | null): void {
 
 const gltfLoader = new GLTFLoader();
 
+// Diegetic edge of the walkable "sweet zone" (see src/walkBounds.ts):
+// four low posts + a sagging band of black/yellow safety tape at the
+// clamp perimeter, so the movement limit reads as set dressing.
+function makeSafetyTapeTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#e8c50a";
+  ctx.fillRect(0, 0, 256, 64);
+  ctx.fillStyle = "#141414";
+  for (let x = -64; x < 256 + 64; x += 64) {
+    ctx.beginPath();
+    ctx.moveTo(x, 64);
+    ctx.lineTo(x + 32, 0);
+    ctx.lineTo(x + 64, 0);
+    ctx.lineTo(x + 32, 64);
+    ctx.closePath();
+    ctx.fill();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  return texture;
+}
+
+function spawnSafetyBarrier(
+  world: World,
+  halfW: number,
+  halfD: number,
+  floorY: number
+): Entity {
+  const group = new THREE.Group();
+  const postGeo = new THREE.CylinderGeometry(0.035, 0.045, 1.0, 10);
+  const postMat = new THREE.MeshBasicMaterial({ color: 0x2a2a2e });
+  const tapeTexture = makeSafetyTapeTexture();
+  const tapeHeight = 0.09;
+
+  const corners: [number, number][] = [
+    [-halfW, -halfD],
+    [halfW, -halfD],
+    [halfW, halfD],
+    [-halfW, halfD],
+  ];
+  for (const [x, z] of corners) {
+    const post = new THREE.Mesh(postGeo, postMat);
+    post.position.set(x, floorY + 0.5, z);
+    group.add(post);
+  }
+  for (let i = 0; i < 4; i++) {
+    const [x1, z1] = corners[i];
+    const [x2, z2] = corners[(i + 1) % 4];
+    const length = Math.hypot(x2 - x1, z2 - z1);
+    const tapeMat = new THREE.MeshBasicMaterial({
+      map: tapeTexture.clone(),
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.92,
+    });
+    tapeMat.map!.repeat.set(length / 0.6, 1);
+    const tape = new THREE.Mesh(new THREE.PlaneGeometry(length, tapeHeight, 8, 1), tapeMat);
+    // Slight sag: bow the middle rows down a touch so it reads as tape,
+    // not a solid rail.
+    const positionAttr = tape.geometry.getAttribute("position") as THREE.BufferAttribute;
+    for (let v = 0; v < positionAttr.count; v++) {
+      const vx = positionAttr.getX(v);
+      const t = 1 - Math.abs(vx) / (length / 2);
+      positionAttr.setY(v, positionAttr.getY(v) - 0.05 * Math.sin(Math.PI * 0.5 * t));
+    }
+    positionAttr.needsUpdate = true;
+    tape.position.set((x1 + x2) / 2, floorY + 0.85, (z1 + z2) / 2);
+    tape.rotation.y = Math.atan2(x2 - x1, z2 - z1) + Math.PI / 2;
+    tape.renderOrder = 1;
+    group.add(tape);
+  }
+
+  registerGazeTarget(group, {
+    id: "safety-barrier",
+    label: "Safety tape barrier",
+    description:
+      "Black-and-yellow safety tape marking the visitor area. The rest of the space is view-only, like a real maintenance floor.",
+  });
+  return world.createTransformEntity(group);
+}
+
 // Marble -> three.js orientation fix (see the envEntity comment in
 // initSceneManager): applies to every Marble-generated splat + collider.
 const MARBLE_FLIP_X = Math.PI;
@@ -93,10 +179,67 @@ async function spawnCollider(world: World, url: string, scale = 1): Promise<Enti
   }
 }
 
+// Museum-placard prop: canvas-rendered text panel, no asset file needed.
+// The body text doubles as the gaze description, so looking at a placard
+// and asking Proxie about it feeds him exactly what it says.
+function makePlacardMesh(title: string, body: string, widthM: number): THREE.Mesh {
+  const canvas = document.createElement("canvas");
+  const W = 1024;
+  const PAD = 56;
+  const ctx = canvas.getContext("2d")!;
+  const bodyFont = "38px Georgia, 'Times New Roman', serif";
+  const titleFont = "600 52px system-ui, sans-serif";
+
+  // Wrap body text to the panel width.
+  ctx.font = bodyFont;
+  const words = body.split(/\s+/);
+  const lines: string[] = [];
+  let line = "";
+  for (const word of words) {
+    const attempt = line ? `${line} ${word}` : word;
+    if (ctx.measureText(attempt).width > W - PAD * 2 && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = attempt;
+    }
+  }
+  if (line) lines.push(line);
+
+  const lineHeight = 52;
+  const H = PAD + 66 + 26 + lines.length * lineHeight + PAD;
+  canvas.width = W;
+  canvas.height = H;
+
+  ctx.fillStyle = "#1b1d22";
+  ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = "#c9a227";
+  ctx.lineWidth = 4;
+  ctx.strokeRect(10, 10, W - 20, H - 20);
+  ctx.fillStyle = "#f5f0e6";
+  ctx.font = titleFont;
+  ctx.fillText(title, PAD, PAD + 48);
+  ctx.fillStyle = "#d8d3c8";
+  ctx.font = bodyFont;
+  lines.forEach((text, i) => ctx.fillText(text, PAD, PAD + 66 + 26 + (i + 0.8) * lineHeight));
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  const mesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(widthM, widthM * (H / W)),
+    new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })
+  );
+  mesh.renderOrder = 1; // draw after the splat, same as portal rings
+  return mesh;
+}
+
 interface PropEntry {
   id: string;
-  kind: "glb" | "image" | "video";
-  src: string;
+  kind: "glb" | "image" | "video" | "placard";
+  src?: string;
+  title?: string;
+  text?: string;
   source?: string;
   label?: string;
   description?: string;
@@ -114,9 +257,17 @@ async function spawnProp(world: World, prop: PropEntry, sceneId: string): Promis
   let cleanupVideo: HTMLVideoElement | null = null;
 
   switch (prop.kind) {
+    case "placard": {
+      object3D = makePlacardMesh(
+        prop.title ?? prop.label ?? "",
+        prop.text ?? prop.description ?? "",
+        prop.width ?? 0.9
+      );
+      break;
+    }
     case "glb": {
       try {
-        const gltf = await gltfLoader.loadAsync(prop.src);
+        const gltf = await gltfLoader.loadAsync(prop.src!);
         object3D = gltf.scene;
       } catch {
         // Same 404-quietly behavior as the old scene-manager: safe to list
@@ -131,7 +282,7 @@ async function spawnProp(world: World, prop: PropEntry, sceneId: string): Promis
       break;
     }
     case "image": {
-      const texture = await new THREE.TextureLoader().loadAsync(prop.src).catch(() => null);
+      const texture = await new THREE.TextureLoader().loadAsync(prop.src!).catch(() => null);
       if (!texture) return null;
       texture.colorSpace = THREE.SRGBColorSpace;
       object3D = new THREE.Mesh(
@@ -142,7 +293,7 @@ async function spawnProp(world: World, prop: PropEntry, sceneId: string): Promis
     }
     case "video": {
       const video = document.createElement("video");
-      video.src = prop.src;
+      video.src = prop.src!;
       video.crossOrigin = "anonymous";
       video.loop = true;
       video.muted = true; // required for autoplay
@@ -194,8 +345,10 @@ async function spawnProp(world: World, prop: PropEntry, sceneId: string): Promis
 
   registerGazeTarget(object3D, {
     id: prop.id,
-    label: prop.label ?? prop.id,
-    description: prop.description,
+    label: prop.label ?? prop.title ?? prop.id,
+    // Placards feed their own text to the gaze context, so Proxie can
+    // literally read the sign the visitor is looking at.
+    description: prop.description ?? prop.text,
   });
 
   return entity;
@@ -362,22 +515,37 @@ export function initSceneManager(world: World): SceneManager {
       }
     }
 
-    // Portals on the 2.5m circle around the spawn, ring centers at
-    // chest height above the actual floor.
+    // Walkable sweet zone: WalkBoundsSystem clamps the player to this box
+    // (default 4x4m); the safety-tape barrier makes the limit diegetic.
+    // Only fence scenes with a REAL splat -- the placeholder is a demo
+    // space and the tape would just be clutter there.
+    const halfW = (scene.walkBounds?.width ?? WALK_BOUNDS_DEFAULT.width) / 2;
+    const halfD = (scene.walkBounds?.depth ?? WALK_BOUNDS_DEFAULT.depth) / 2;
+    if (splatLoaded) {
+      sceneEntities.push(spawnSafetyBarrier(world, halfW, halfD, floorY));
+    }
+
+    // Portals ring the spawn just INSIDE the tape (the fence would make
+    // the old 2.5m circle unreachable), rings at chest height above the
+    // actual floor. Their walk-in trigger shrinks proportionally so
+    // spawning at the center keeps a safe anti-bounce margin.
+    const portalRadius = Math.min(PORTAL_RADIUS, Math.min(halfW, halfD) - 0.2);
+    const portalProximity = Math.min(1.3, portalRadius * 0.45);
     scene.entryPortals.forEach((targetId: string, i: number) => {
       const angle = (i / Math.max(scene.entryPortals.length, 1)) * Math.PI * 2;
       sceneEntities.push(
         createPortal(world, {
           targetScene: targetId,
           label: sceneById[targetId]?.title ?? targetId,
-          position: [Math.sin(angle) * PORTAL_RADIUS, floorY + 1.2, -Math.cos(angle) * PORTAL_RADIUS],
+          position: [Math.sin(angle) * portalRadius, floorY + 1.2, -Math.cos(angle) * portalRadius],
+          proximity: portalProximity,
         })
       );
     });
 
     // Props: Tripo objects, custom GLBs, images/video screens.
     for (const prop of scene.props ?? []) {
-      sceneEntities.push(await spawnProp(world, prop, sceneId));
+      sceneEntities.push(await spawnProp(world, prop as PropEntry, sceneId));
       if (token !== loadToken) return;
     }
 
