@@ -524,10 +524,11 @@ export const worlds = [
             label: "Second Studio in action",
             description:
               "Real footage of Second Studio's collaborative VR sculpting -- the software this mountaintop construct ran on. Multiple artists sharing one virtual space, sculpting at human scale.",
-            position: [2.0, 1.5, -2.8],
+            position: [4.24, 1.89, 0.03],
             rotation: [0, -35, 0],
             width: 3.2,
             height: 1.8,
+            scale: 1.517,
           },
           {
             id: "placard-second-studio",
@@ -537,7 +538,7 @@ export const worlds = [
             text:
               "Second Studio was collaborative VR creation: multiple artists sharing one virtual space, sculpting and building at human scale, walking around work-in-progress like it was already real. This platform above the peaks recreates that feeling -- a studio with no walls, where the only limit is what you can imagine standing inside.",
             label: "Second Studio placard",
-            position: [-2.4, 1.25, -2.2],
+            position: [0.09, 1.36, 2.93],
             rotation: [0, 40, 0],
             width: 0.9,
             scale: 2.5,
