@@ -20,3 +20,6 @@ public/**/reference/*
 # out of git; rsync straight to the Spark if one is ever needed live.
 public/**/marble/scene-fullres.spz
 ~$*
+# Raw Tripo HD exports are huge; keep them local only -- the optimized
+# copies under public/ are the committed versions.
+planning/reference/**/hammer.glb

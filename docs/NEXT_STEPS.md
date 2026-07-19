@@ -358,37 +358,80 @@ Mint MCP note: needs OAuth, which this laptop session can't complete --
 generate images in the Mint web app (12k tokens available), or connect
 the MCP in a fresh session and ask for "review mode".
 
-## SESSION HANDOFF (2026-07-18 evening) -- start here
+## SESSION HANDOFF (2026-07-18 END OF BUILD DAY) -- start here
 
-State: S1 Hangar v1 is LIVE at jeffxr.com/worlds (spark serving latest
-main) with today's full fix stack: orientation flip, envScale 1.75,
-ground-snapped spawn, 4x4 safety-tape walk box, portals inside the
-tape, RNLAF placard, 500k-then-full-res background splat upgrade.
-QA evidence + verdicts: `planning/reference/s1-hangar-qa/README.md`.
+**ALL FIVE WORLDS ARE LIVE** at https://dgxspark.tail8341fc.ts.net/worlds
+(spark serves latest main; avatar-chat companion mode IS deployed and
+chat-driven teleports verified by Jeff in the browser).
 
-**Mint is set up, pending OAuth**: the Mint MCP is registered in this
-project's Claude Code config (`claude mcp add --transport http mint
-https://mcp.mint.gg/mcp`, local scope) and the official
-`mint-threejs-skills` skill is installed globally
-(`~\.claude\skills\`). First session after restart: run `/mcp`,
-complete the Mint sign-in, then ask Mint for **review mode** so
-generations need approval before spending from the 12k pool.
+Per-scene state:
+- **S1 Hangar** -- v2 splat (empty hangar from Jeff's ChatGPT plate,
+  Chinook baked outside), F-16 (display scale 7.8) + 5 Mint service
+  props placed by Jeff via `?edit`; his layout is final in manifest.
+- **S2 Perception Lab** -- splat live (envScale 2.5); Jeff's Tripo
+  rubber hand / paintbrush / reflex hammer rough-placed on the left
+  bench (needs his `?edit` polish). Still to generate: data glove
+  (image-conditioned), Tobii bar, smart lamp.
+- **S3 Holo Stage** -- splat live (2.76); Jeff's Tripo HTC Vive on the
+  museum shelf = first **wearable-teleport** (click -> vive-don SFX ->
+  fade to S4) via the generic manifest `teleportTo` prop field.
+- **S4 Construct** -- prompt-only splat live (0.43 -- Marble
+  OVER-scaled this one). Jeff made an image-conditioned v2 on his
+  Marble WEB account (world f4482364-e691-4e0e-acba-e2ce3274bffc) but
+  that login is a DIFFERENT account than the laptop API key -- needs a
+  key from that account (`MARBLE_API_KEY_WEB` in .env.local) to fetch.
+  Jeff lukewarm on v2; v1 is shippable.
+- **S5 Lightworks** -- splat live (2.5); white projection end-wall came
+  out as speced for the T083/84 projector reveal.
+- **Audio** -- Mint kit fully wired: 5 scene ambients + real
+  portal-whoosh + chinook-whomp / lamp-click / hologram-bloom /
+  vive-don in `sfxLibrary` (~330 credits; ~4.1k Mint remains).
+- **JB Proxie** -- rigged Mint avatar (8 clips) drives the companion,
+  grounded to the raycast floor, calmed idle (0.45x timeScale + facing
+  hysteresis). Jeff still not sold on the 3D look; `?proxie=billboard`
+  forces his 2D art. DECISION OPEN -- billboard default is the safe
+  judging call.
 
-First moves for the next session, in order:
-1. Mint 2D pre-viz for S1 v2 + the other 4 scenes per the 2D-first
-   workflow below (composition rules there). Jeff approves each image.
-2. S1 v2 Marble regen from the approved image (`--image`), keep v1
-   until v2 verifies better in the same headless screenshot pass.
-3. Parallel Mint queue while worlds cook: per-scene ambient audio
-   (final-only in MCP beta, start early), rigged Proxie avatar
-   candidate.
-4. Placard texts for S2-S5 from Jeff -> `placard` props (see S1's
-   manifest entry for the pattern).
-Deploy after each green run: push main -> spark `git pull && npm run
-build` (nvm node 22; plain `ssh spark` gets v18). scp any new
-`scene-fullres.spz` (gitignored) into the matching `marble/` folder.
-avatar-chat companion deploy: `bash scripts/deploy-companion-mode.sh`
-on the spark (status unknown -- verify with Jeff whether he ran it).
+Workflows added today (use these, don't re-derive):
+- `?edit` visual editor: click prop -> gizmo (1/2/3 modes, scale is
+  clamped), right-drag look, `[`/`]` rotates the whole env (bake angle
+  as `envYawDeg`), "Copy props JSON" -> paste over the scene's `props:`.
+- Marble scale: probe collider floor at origin, `envScale = 1.6/|floorY|`
+  (S2 2.5, S3 2.76, S4 0.43, S5 2.5). Spawn ray casts from y=0 (origin
+  is the generation camera INSIDE the room) -- do not regress.
+- Bench props: authored y is height above whatever the ground ray hits
+  under the prop (desks are in the collider) -- use tiny y (~0.03).
+- Cache: index.html is no-cache (worlds_static.py patched ON THE SPARK
+  -- that file's fix is NOT in this repo, don't clobber the deployed
+  copy), splat URLs carry `?v=` -- bump per regen.
+- Big Tripo HD exports: `npx @gltf-transform/cli optimize in.glb
+  out.glb --texture-size 1024 --compress draco` (hammer 68MB -> 2.6MB);
+  shared loader already decodes Draco.
+- Tripo API wallet is EMPTY (separate from Jeff's web Pro credits).
+  Props come from Jeff's Tripo web studio -> GLB into the scene's
+  `props/` folder or `planning/reference/`.
+
+Next moves, in order:
+1. Jeff's `?edit` polish of S2/S3 prop placement; remaining S2 props
+   from his Tripo studio.
+2. Interaction beats: rubber-hand stroke -> Proxie twitch, hammer tap ->
+   `companion-flinch` (hook exists) + yelp SFX (still to generate);
+   S5 projector bake script (T084) + ProjectorGridSystem (T083).
+3. S3 shelf headsets (HoloLens 2, Quest 3) + Prez slide panels (site
+   assets, zero cost).
+4. Quest 3 pass on the deployed URL (T093) -- NOTHING verified in a
+   real headset yet: TTS voices, audio unlock, frame budget, XR fade
+   quad, wave gestures.
+5. Proxie look decision; optional in-VR voice input (Quest lacks
+   SpeechRecognition; DOM overlay invisible in-session -- would need
+   push-to-talk MediaRecorder -> STT endpoint on the Spark).
+
+Deploy after each green run: push main -> spark `git pull` +
+`source ~/.nvm/nvm.sh && npx vite build` (no service restart needed).
+scp any new gitignored `scene-fullres.spz` into the matching spark
+`public/.../marble/` folder before building. jeff-worlds.service is a
+SYSTEM unit: restarts need Jeff's sudo, and Restart=on-failure means a
+clean kill does NOT respawn it.
 
 ## Deploy reminders
 
