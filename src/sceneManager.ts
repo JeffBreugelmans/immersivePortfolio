@@ -41,7 +41,29 @@ import {
   unregisterInteractive,
   type InteractionConfig,
 } from "./interactions";
-import { sceneById, defaultSceneId } from "./manifest.js";
+import { sceneById as sceneByIdRaw, defaultSceneId } from "./manifest.js";
+
+// The manifest is plain JS; not every scene sets every optional tuning
+// key, and TS's union of the object literals would otherwise reject
+// accessing a key that only some scenes define.
+interface SceneEntry {
+  worldId: string;
+  worldTitle: string;
+  id: string;
+  title: string;
+  description: string;
+  splat: string;
+  collider: string;
+  ambient: string;
+  entryPortals: string[];
+  props: unknown[];
+  spawnYawDeg?: number;
+  envScale?: number;
+  envYawDeg?: number;
+  splatHiRes?: string;
+  walkBounds?: { width: number; depth: number };
+}
+const sceneById = sceneByIdRaw as Record<string, SceneEntry>;
 import { WALK_BOUNDS_DEFAULT } from "./walkBounds";
 
 const PORTAL_RADIUS = 2.5;
@@ -498,9 +520,10 @@ export function initSceneManager(world: World): SceneManager {
       // Download fully first, then swap, so the visitor never stares
       // at an unloading environment. Blob first (no double-download),
       // plain URL as fallback in case the loader needs the extension.
+      const hiResUrl = scene.splatHiRes; // narrow once for the closure
       void (async () => {
         try {
-          const res = await fetch(scene.splatHiRes);
+          const res = await fetch(hiResUrl);
           if (!res.ok || token !== loadToken) return;
           const blob = await res.blob();
           if (token !== loadToken) return;
@@ -510,7 +533,7 @@ export function initSceneManager(world: World): SceneManager {
             await splatSystem.load(envEntity, { animate: false });
           } catch {
             if (token !== loadToken) return;
-            envEntity.setValue(GaussianSplatLoader, "splatUrl", scene.splatHiRes);
+            envEntity.setValue(GaussianSplatLoader, "splatUrl", hiResUrl);
             await splatSystem.load(envEntity, { animate: false });
           } finally {
             URL.revokeObjectURL(blobUrl);
@@ -548,7 +571,12 @@ export function initSceneManager(world: World): SceneManager {
       if (colliderEntity?.object3D) {
         colliderObj = colliderEntity.object3D;
         colliderObj.updateMatrixWorld(true);
-        const down = new THREE.Raycaster(new THREE.Vector3(0, 50, 0), new THREE.Vector3(0, -1, 0));
+        // Cast from y=0: Marble's origin IS the generation camera, which
+        // sat inside the room at eye height -- floor below it, ceiling
+        // above it, always. Casting from any height above origin risks
+        // starting above a low ceiling and standing the player on the
+        // roof (y=50 broke the S2 lab; +1.0 still did).
+        const down = new THREE.Raycaster(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -1, 0));
         const hit = down.intersectObject(colliderObj, true)[0];
         if (hit) {
           floorY = hit.point.y;
@@ -564,7 +592,9 @@ export function initSceneManager(world: World): SceneManager {
     const _floorRay = new THREE.Raycaster();
     const floorAt = (x: number, z: number): number => {
       if (!colliderObj) return floorY;
-      _floorRay.set(new THREE.Vector3(x, floorY + 2.5, z), new THREE.Vector3(0, -1, 0));
+      // Start 1.5m over the spawn floor: above furniture, but safely
+      // below even a low ceiling (see the spawn-raycast note above).
+      _floorRay.set(new THREE.Vector3(x, floorY + 1.5, z), new THREE.Vector3(0, -1, 0));
       const hit = _floorRay.intersectObject(colliderObj, true)[0];
       return hit ? hit.point.y : floorY;
     };

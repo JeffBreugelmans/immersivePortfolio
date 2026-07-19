@@ -234,7 +234,12 @@ export const worlds = [
           "One research lab spanning Jeff's Master's (rubber hand illusion) and PhD (eye-tracker + data-glove accessibility rig) -- Eindhoven on one bench, Northeastern on the other.",
         splat: `${BASE}roots/scene-02-perception-lab/marble/scene.spz`,
         collider: `${BASE}roots/scene-02-perception-lab/marble/collider.glb`,
+        splatHiRes: `${BASE}roots/scene-02-perception-lab/marble/scene-fullres.spz`,
         ambient: `${BASE}roots/scene-02-perception-lab/audio/ambient.mp3`,
+        // Marble generated the lab at ~40% size (collider showed a 1.38m
+        // floor-to-ceiling at origin); 2.5x restores a ~3.5m ceiling and
+        // puts the 1.6m eye height back inside the room.
+        envScale: 2.5,
         entryPortals: ["scene-01-hangar-polder", "scene-01-holo-stage"],
         props: [],
       },

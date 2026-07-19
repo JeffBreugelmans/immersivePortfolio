@@ -123,6 +123,23 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
     world.scene.add(new THREE.AmbientLight(0xffffff, 1.0));
     world.camera.position.set(0, 1.6, 0);
 
+    // Keep the canvas exactly at container size (Jeff saw the view render
+    // slightly larger than his laptop screen). setSize(w, h, true) also
+    // rewrites the canvas CSS size; skip while an XR session presents.
+    const container = document.getElementById("scene-container") as HTMLDivElement;
+    const fitDisplay = () => {
+      if (world.renderer.xr.isPresenting) return;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      world.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      world.renderer.setSize(w, h, true);
+      const camera = world.camera as THREE.PerspectiveCamera;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    };
+    window.addEventListener("resize", fitDisplay);
+    fitDisplay();
+
     world
       .registerSystem(GaussianSplatLoaderSystem)
       .registerSystem(PortalSystem)

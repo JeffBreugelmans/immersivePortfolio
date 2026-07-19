@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-07-19T03:09:19.073Z",
+  "worldId": "3ecb4e09-5031-4681-9bbd-283b6b787016",
+  "worldMarbleUrl": "https://marble.worldlabs.ai/world/3ecb4e09-5031-4681-9bbd-283b6b787016",
+  "prompt": "Interior of a cozy university human-factors research lab, camera at standing eye height at the room's center. Late-afternoon sun enters through venetian blinds on one wall, casting warm gold stripes across the floor; overall interior light is neutral and soft. Two workbench stations: on the left, a wooden desk with a low vertical partition screen standing on the desktop and a chair pulled up to it; on the right, a desk with a large computer monitor, a keyboard, and a desktop PC tower beneath. White walls with a corkboard of pinned notes and diagrams, a tall bookshelf with journals and a few small trophies, a whiteboard with faded sketches, a potted plant, a small side table with a coffee machine. Palette: birch wood, white walls, navy blue chair fabric, warm gold window light. Wooden floor, completely clear and walkable in the center, at least six meters of open space between the benches. Atmosphere: quiet, studious, end-of-day calm, faint monitor glow on the right bench. No people, no readable text, no clutter on the floor, no fluorescent glare, not a hospital, not a classroom with rows of desks.",
+  "image": null,
+  "model": "marble-1.1",
+  "spzVariant": "500k",
+  "fullResDownloaded": true,
+  "colliderDownloaded": true,
+  "texturedMeshExported": false
+}
