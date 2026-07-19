@@ -331,7 +331,7 @@ export const worlds = [
               "The sensor-laden data glove from Jeff's PhD at Northeastern. Click it to put it on, then flex your hand -- exactly how it once turned a hand gesture into a continuous accessibility signal -- and watch the desk lamp answer.",
             position: [3.2, 1.43, 0],
             rotation: [0, -20, 0],
-            scale: 1.142,
+            scale: 0.569,
             snapToGround: false, // desk collider coverage is unreliable
             role: "data-glove",
             interaction: {
@@ -348,7 +348,7 @@ export const worlds = [
             label: "Tobii eye tracker",
             description:
               "The eye-tracker bar from Jeff's PhD rig -- it watched where players looked so games could be driven by gaze alone, no hands needed. The Boston Globe covered it: 'Eye-tracking video game device subs for mouse.'",
-            position: [3.24, 1.52, -1.15],
+            position: [3.24, 1.52, -0.94],
             rotation: [0, 170, 0],
             scale: 0.827,
             snapToGround: false,
@@ -383,10 +383,10 @@ export const worlds = [
             text:
               "Two chapters of research share this room. On the left bench: the rubber hand illusion from Jeff's Master's at TU Eindhoven -- stroke a fake hand in sync with a hidden real one and the brain claims it as its own. On the right: his PhD at Northeastern, where eye trackers and a sensor-laden data glove turned video games into rehabilitation and accessibility tools.",
             label: "Perception Lab placard",
-            position: [-1.4, 1.5, -2.7],
+            position: [-1.61, 1.87, -0.33],
             rotation: [0, 20, 0],
             width: 0.9,
-            scale: 2.5,
+            scale: 1.98,
             snapToGround: false,
           },
         ],
@@ -589,7 +589,7 @@ export const worlds = [
             text:
               "Light that teaches, light that computes, light you can wear. Jeff's current chapter: immersive training inside working datacenters, research into computing with overlapping projections -- watch the wall at the end of the aisle, where four noisy projectors sum into a portrait in a single optical step (papers pending) -- and everyday smart glasses that put a quiet green HUD in your line of sight.",
             label: "Lightworks placard",
-            position: [-2.83, 1.3, 0.48],
+            position: [-2.83, 1.54, 0.48],
             rotation: [0, 150, 0],
             width: 0.9,
             scale: 2.5,

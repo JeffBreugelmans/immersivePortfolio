@@ -41,6 +41,7 @@ import {
   unregisterInteractive,
   type InteractionConfig,
 } from "./interactions";
+import { billboardTargets } from "./billboard";
 import { sceneById as sceneByIdRaw, defaultSceneId } from "./manifest.js";
 
 // The manifest is plain JS; not every scene sets every optional tuning
@@ -427,6 +428,10 @@ async function spawnProp(
     description: prop.description ?? prop.text,
   });
 
+  // Placards turn to face the visitor (billboard.ts) -- their manifest
+  // rotation no longer matters, which retires the mirrored-text problem.
+  if (prop.kind === "placard") billboardTargets.add(object3D);
+
   return entity;
 }
 
@@ -525,6 +530,7 @@ export function initSceneManager(world: World): SceneManager {
       if (!entity) continue;
       if (entity.object3D) {
         unregisterGazeTarget(entity.object3D);
+        billboardTargets.delete(entity.object3D);
         if (entity.object3D.userData.propId) {
           unregisterInteractive(entity.object3D.userData.propId);
           livePropObjects.delete(entity.object3D.userData.propId);
