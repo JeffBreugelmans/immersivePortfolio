@@ -434,6 +434,22 @@ export function initSceneManager(world: World): SceneManager {
   const splatSystem = world.getSystem(GaussianSplatLoaderSystem)!;
   const sceneLabel = document.querySelector("#scene-label");
 
+  // SparkJS's loader is NOT reentrant on a shared entity: two concurrent
+  // load() calls (e.g. a teleport fired while the previous scene's splat
+  // or its background hi-res upgrade was still streaming) can strand a
+  // promise that never resolves, deadlocking the scene swap with the
+  // fade stuck at black. Serialize every splatUrl swap + load through
+  // one chain; last enqueued wins the final visible state.
+  let splatChain: Promise<unknown> = Promise.resolve();
+  const loadSplat = (url: string): Promise<void> => {
+    const task = splatChain.then(async () => {
+      envEntity.setValue(GaussianSplatLoader, "splatUrl", url);
+      await splatSystem.load(envEntity, { animate: false });
+    });
+    splatChain = task.catch(() => {});
+    return task;
+  };
+
   // ONE persistent environment entity reused across all scenes --
   // GaussianSplatLoaderSystem.load() auto-unloads the previous splat for
   // the same entity, so swapping is leak-free by construction.
@@ -544,9 +560,8 @@ export function initSceneManager(world: World): SceneManager {
     const glRenderer = dbgExt ? String(glCtx.getParameter(dbgExt.UNMASKED_RENDERER_WEBGL)) : "";
     const isSoftwareGL = /swiftshader|llvmpipe|software/i.test(glRenderer);
     let splatLoaded = false;
-    envEntity.setValue(GaussianSplatLoader, "splatUrl", scene.splat);
     try {
-      await splatSystem.load(envEntity, { animate: false });
+      await loadSplat(scene.splat);
       splatLoaded = true;
     } catch {
       if (token !== loadToken) return;
@@ -568,12 +583,10 @@ export function initSceneManager(world: World): SceneManager {
           if (token !== loadToken) return;
           const blobUrl = URL.createObjectURL(blob);
           try {
-            envEntity.setValue(GaussianSplatLoader, "splatUrl", blobUrl);
-            await splatSystem.load(envEntity, { animate: false });
+            await loadSplat(blobUrl);
           } catch {
             if (token !== loadToken) return;
-            envEntity.setValue(GaussianSplatLoader, "splatUrl", hiResUrl);
-            await splatSystem.load(envEntity, { animate: false });
+            await loadSplat(hiResUrl);
           } finally {
             URL.revokeObjectURL(blobUrl);
           }
@@ -587,8 +600,7 @@ export function initSceneManager(world: World): SceneManager {
       console.info(`[sceneManager] No splat at ${scene.splat} yet -- using placeholder`);
       envEntity.object3D!.rotation.x = 0; // placeholder is already y-up
       envEntity.object3D!.scale.setScalar(1);
-      envEntity.setValue(GaussianSplatLoader, "splatUrl", PLACEHOLDER_SPLAT);
-      await splatSystem.load(envEntity, { animate: false }).catch((err) => {
+      await loadSplat(PLACEHOLDER_SPLAT).catch((err) => {
         console.error("[sceneManager] Placeholder splat failed to load too:", err);
       });
     }

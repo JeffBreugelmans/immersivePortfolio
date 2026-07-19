@@ -16,9 +16,18 @@ const CHROME_CANDIDATES = [
 const executablePath = CHROME_CANDIDATES.find((p) => existsSync(p));
 if (!executablePath) throw new Error("No chromium found; set CHROME_PATH");
 
+// SwiftShader is the default for cloud-sandbox parity, but its GL stack
+// intermittently fails Spark's splat shader validation (see EXPECTED
+// below), which then breaks scene swaps -- a software-GL artifact, not
+// an app bug. SMOKE_GL=real runs on the actual GPU for deterministic
+// local QA.
+const glArgs =
+  process.env.SMOKE_GL === "real"
+    ? ["--use-angle=default"]
+    : ["--use-gl=swiftshader", "--enable-unsafe-swiftshader"];
 const browser = await chromium.launch({
   executablePath,
-  args: ["--ignore-certificate-errors", "--use-gl=swiftshader", "--enable-unsafe-swiftshader"],
+  args: ["--ignore-certificate-errors", ...glArgs],
 });
 const page = await browser.newPage({ ignoreHTTPSErrors: true });
 const pageErrors = [];
