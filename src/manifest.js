@@ -339,9 +339,12 @@ export const worlds = [
               gaze: { dwellMs: 600, effect: "glow" },
               click: { effect: "pulse", sfx: "vive-don" },
             },
-            // Wearable-teleport (TECH_SPEC C.1, simplified): clicking the
-            // headset fades into the world it used to render.
+            // Wearable-teleport (TECH_SPEC C.1): clicking the headset
+            // plays the don animation (wearableFx.ts) -- off the shelf,
+            // 180 flip, over your head, slide down -- then fades into
+            // the world it used to render. Returning flies it back.
             teleportTo: "scene-02-second-studio-construct",
+            wearable: true,
           },
         ],
       },
@@ -374,6 +377,14 @@ export const worlds = [
         ambient: `${BASE}career/scene-03-lightworks/audio/ambient.mp3`,
         // Marble under-scale (collider floor -0.64 at origin) -> 2.5x.
         envScale: 2.5,
+        // Self-running bit-plane exhibit on the baked white end-wall
+        // (projectorWall.ts): position tuned via headless screenshots.
+        projectorWall: {
+          position: [0.4, 0.9, -16],
+          rotationYDeg: 0,
+          width: 4.5,
+          height: 4.5,
+        },
         entryPortals: ["scene-01-holo-stage", "scene-01-hangar-polder"],
         props: [],
       },

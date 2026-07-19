@@ -62,6 +62,12 @@ interface SceneEntry {
   envYawDeg?: number;
   splatHiRes?: string;
   walkBounds?: { width: number; depth: number };
+  projectorWall?: {
+    position: [number, number, number];
+    rotationYDeg?: number;
+    width?: number;
+    height?: number;
+  };
 }
 const sceneById = sceneByIdRaw as Record<string, SceneEntry>;
 import { WALK_BOUNDS_DEFAULT } from "./walkBounds";

@@ -29,6 +29,7 @@ import { InteractionSystem } from "./interactions";
 import { FadeSystem } from "./fade";
 import { AudioManagerSystem } from "./audio";
 import { CompanionSystem } from "./companion";
+import { ProjectorWallSystem } from "./projectorWall";
 import { DebugOverlaySystem } from "./debugOverlay";
 import { WalkBoundsSystem } from "./walkBounds";
 import { initSceneManager } from "./sceneManager";
@@ -149,6 +150,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
       .registerSystem(FadeSystem)
       .registerSystem(AudioManagerSystem)
       .registerSystem(CompanionSystem)
+      .registerSystem(ProjectorWallSystem)
       .registerSystem(DebugOverlaySystem)
       .registerSystem(WalkBoundsSystem);
 
