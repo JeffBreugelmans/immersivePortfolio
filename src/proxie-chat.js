@@ -333,7 +333,9 @@ export function initChatOverlay(sceneManager) {
   window.addEventListener("scene-changed", () => {
     commentedProps = new Set();
   });
+  const inEditMode = new URLSearchParams(location.search).has("edit");
   window.addEventListener("prop-interaction", (e) => {
+    if (inEditMode) return; // arranging props, not conversing
     const d = e.detail || {};
     if (input.disabled) return; // a reply is already streaming
     if (d.propId === "jb-proxie" && d.trigger === "click") {

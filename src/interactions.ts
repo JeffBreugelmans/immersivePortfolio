@@ -28,6 +28,7 @@
 
 import * as THREE from "three";
 import { createComponent, createSystem, Types, VisibilityState, type World } from "@iwsdk/core";
+import { editModeEnabled } from "./editor";
 
 export interface InteractionConfig {
   click?: { effect?: EffectName; sfx?: string };
@@ -167,6 +168,10 @@ function runEffect(entry: Registered, effect: EffectName | undefined, on = true)
 }
 
 export function triggerInteraction(propId: string, trigger: "click" | "gaze" | "wave"): void {
+  // ?edit: props are inert -- clicks belong to the gizmo/selection, and
+  // downstream listeners (Proxie commentary, wearable teleports) firing
+  // mid-edit reloaded the scene under Jeff's cursor.
+  if (editModeEnabled) return;
   const entry = registry.get(propId);
   if (!entry) return;
   const cfg = entry.config[trigger === "click" ? "click" : trigger === "gaze" ? "gaze" : "wave"];
