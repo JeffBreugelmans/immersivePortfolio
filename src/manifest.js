@@ -97,6 +97,12 @@ export const sfxLibrary = {
   hum: `${BASE}shared/audio/hum.mp3`,
   "headset-don": `${BASE}shared/audio/headset-don.mp3`,
   lever: `${BASE}shared/audio/lever.mp3`,
+  // Mint-generated one-shots (2026-07-18): portal-whoosh above is now a
+  // real file too, no longer a placeholder.
+  "chinook-whomp": `${BASE}shared/audio/chinook-whomp.mp3`,
+  "lamp-click": `${BASE}shared/audio/lamp-click.mp3`,
+  "hologram-bloom": `${BASE}shared/audio/hologram-bloom.mp3`,
+  "vive-don": `${BASE}shared/audio/vive-don.mp3`,
 };
 
 export const worlds = [

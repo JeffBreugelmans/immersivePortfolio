@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-07-19T03:51:45.993Z",
+  "worldId": "08fc7929-4657-41ce-aabc-81e35f997faf",
+  "worldMarbleUrl": "https://marble.worldlabs.ai/world/08fc7929-4657-41ce-aabc-81e35f997faf",
+  "prompt": "Interior of a sleek dark presentation studio, camera at standing eye height facing a low circular stage platform at the room's center. Matte charcoal walls and a matte black floor with a subtle reflective sheen. A single volumetric cone of soft cyan-blue light falls on the stage from a high rig; thin haze makes the light beam visible. On the stage, a slim dark podium. Around the room's edge, low warm accent lighting along the base of the walls; one long wall carries an empty display shelf unit with warm spot lighting, museum-style. Palette: charcoal, matte black, cyan-blue key light, small warm amber accents. The floor is flat, open, and walkable everywhere, with the stage platform only ankle height. Atmosphere: quiet anticipation, a theater before the show. No people, no chairs or audience seating, no readable text, no bright ceiling lights, not an office, not a cinema with rows of seats.",
+  "image": null,
+  "model": "marble-1.1",
+  "spzVariant": "500k",
+  "fullResDownloaded": true,
+  "colliderDownloaded": true,
+  "texturedMeshExported": false
+}
