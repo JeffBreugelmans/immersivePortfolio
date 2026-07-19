@@ -160,7 +160,7 @@ export const worlds = [
             // Jeff's final ?edit layout 2026-07-18 (scale 7.8 = display
             // model size rather than 1:1, his call -- fits the splat
             // hangar's proportions better).
-            position: [-5.68, 1.46, -1.33],
+            position: [-6.52, 1.46, -1.36],
             rotation: [0, 155, 0],
             scale: [10.833, 8.12, 8.12],
             interaction: { pickup: false },
@@ -228,7 +228,7 @@ export const worlds = [
             text:
               "During his Bachelor's in Electrical Engineering, Jeff interned with the Royal Netherlands Air Force, working on maintenance efficiency and repair task scheduling -- his first taste of engineering for the people who keep complex machines flying.",
             label: "RNLAF internship placard",
-            position: [0.58, 1.91, -6.68],
+            position: [5.12, 1.72, -5.54],
             rotation: [0, 90, 0],
             width: 0.9,
             scale: 3.415,
@@ -324,9 +324,9 @@ export const worlds = [
             label: "Data glove -- flex to bring the lamp up",
             description:
               "The sensor-laden data glove from Jeff's PhD at Northeastern. Click it to put it on, then flex your hand -- exactly how it once turned a hand gesture into a continuous accessibility signal -- and watch the desk lamp answer.",
-            position: [1.85, 0.84, -1.35],
+            position: [3.2, 1.43, 0],
             rotation: [0, -20, 0],
-            scale: 0.25,
+            scale: 1.142,
             snapToGround: false, // desk collider coverage is unreliable
             role: "data-glove",
             interaction: {
@@ -343,9 +343,9 @@ export const worlds = [
             label: "Tobii eye tracker",
             description:
               "The eye-tracker bar from Jeff's PhD rig -- it watched where players looked so games could be driven by gaze alone, no hands needed. The Boston Globe covered it: 'Eye-tracking video game device subs for mouse.'",
-            position: [1.45, 0.9, -1.6],
+            position: [3.24, 1.52, -1.15],
             rotation: [0, -10, 0],
-            scale: 0.35,
+            scale: 0.827,
             snapToGround: false,
             interaction: {
               pickup: false,
@@ -360,8 +360,8 @@ export const worlds = [
             label: "Smart lamp",
             description:
               "A Hue-style smart lamp -- an Eindhoven joke that writes itself: Jeff studied human-technology interaction in Philips' hometown. Wave at it.",
-            position: [0.85, 0.98, -1.55],
-            scale: 0.4,
+            position: [3.32, 1.48, -2.11],
+            scale: 0.692,
             snapToGround: false,
             interaction: {
               pickup: false,
