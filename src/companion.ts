@@ -29,6 +29,7 @@
 import * as THREE from "three";
 import { createSystem } from "@iwsdk/core";
 import { registerGazeTarget, unregisterGazeTarget } from "./gazeContext";
+import { registerInteractive, unregisterInteractive } from "./interactions";
 import { CompanionAvatar } from "./companionAvatar";
 import { editModeEnabled } from "./editor";
 
@@ -120,6 +121,11 @@ export class CompanionSystem extends createSystem({}) {
     this.sprite.renderOrder = 1;
     this.world.scene.add(this.sprite);
     registerGazeTarget(this.sprite, GAZE_META);
+    // Clickable: tapping Proxie makes him speak (proxie-chat.js listens
+    // for this propId and fires a hidden greeting prompt).
+    registerInteractive(this.sprite, "jb-proxie", "companion", {
+      click: { effect: "pulse" },
+    });
 
     // Rigged avatar streams in behind the billboard and takes over
     // seamlessly; any failure leaves the billboard path untouched.
@@ -200,6 +206,10 @@ export class CompanionSystem extends createSystem({}) {
     unregisterGazeTarget(this.sprite);
     this.sprite.visible = false;
     registerGazeTarget(avatar.group, GAZE_META);
+    unregisterInteractive("jb-proxie");
+    registerInteractive(avatar.group, "jb-proxie", "companion", {
+      click: { effect: "pulse" },
+    });
 
     this.applyPresentation();
   }
@@ -427,6 +437,7 @@ export class CompanionSystem extends createSystem({}) {
 
   destroy() {
     unregisterGazeTarget(this.sprite);
+    unregisterInteractive("jb-proxie");
     if (this.avatar) {
       unregisterGazeTarget(this.avatar.group);
       this.avatar.dispose();

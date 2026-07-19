@@ -217,11 +217,14 @@ export function initChatOverlay(sceneManager) {
     };
   }
 
-  async function sendMessage(message) {
+  async function sendMessage(message, { hidden = false } = {}) {
     if (!message) return;
 
     if (ttsSupported) window.speechSynthesis.cancel();
-    appendMessage("user", message);
+    // Hidden prompts (companion taps, gaze commentary) skip the user
+    // bubble -- only Proxie's reply appears, so he seems to speak up on
+    // his own instead of echoing a stage direction.
+    if (!hidden) appendMessage("user", message);
     input.value = "";
     input.disabled = true;
 
@@ -310,6 +313,46 @@ export function initChatOverlay(sceneManager) {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     sendMessage(input.value.trim());
+  });
+
+  // ----------------------------------------------------------------
+  // Companion-initiated conversation (Jeff's ask 2026-07-19: "he was
+  // just there, but I wasn't able to trigger any responses"). Two ways
+  // the walking Proxie now speaks without the visitor typing anything:
+  //   1. Click/tap him -> a hidden greeting prompt; only his reply shows.
+  //   2. Gaze-dwell on an interactive prop -> he walks over (companion
+  //      state machine already does this) AND comments on it, using the
+  //      gaze target already embedded in scene_context.
+  // Hidden prompts never render a user bubble, are skipped while a
+  // reply is streaming, and gaze commentary is throttled: once per prop
+  // per scene visit, minimum 45s between comments.
+  // ----------------------------------------------------------------
+  const GAZE_COMMENT_COOLDOWN_MS = 45000;
+  let lastGazeCommentAt = 0;
+  let commentedProps = new Set();
+  window.addEventListener("scene-changed", () => {
+    commentedProps = new Set();
+  });
+  window.addEventListener("prop-interaction", (e) => {
+    const d = e.detail || {};
+    if (input.disabled) return; // a reply is already streaming
+    if (d.propId === "jb-proxie" && d.trigger === "click") {
+      sendMessage(
+        "(The visitor just tapped you on the shoulder in the scene. Greet them warmly in one or two sentences and invite them to ask about whatever they're looking at.)",
+        { hidden: true }
+      );
+      return;
+    }
+    if (d.trigger === "gaze" && d.propId && d.propId !== "jb-proxie") {
+      const now = Date.now();
+      if (commentedProps.has(d.propId) || now - lastGazeCommentAt < GAZE_COMMENT_COOLDOWN_MS) return;
+      commentedProps.add(d.propId);
+      lastGazeCommentAt = now;
+      sendMessage(
+        "(Unprompted: the visitor has been looking at the object named in your scene context. Walk over and offer one or two enthusiastic sentences about it -- no greeting, just the interesting bit.)",
+        { hidden: true }
+      );
+    }
   });
 
   // ----------------------------------------------------------------
