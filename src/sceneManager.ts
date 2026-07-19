@@ -445,6 +445,7 @@ export function initSceneManager(world: World): SceneManager {
   let sceneEntities: (Entity | null)[] = [];
   let currentSceneId: string | null = null;
   let loadToken = 0;
+  const prefetchedUrls = new Set<string>();
 
   editorInit(world); // no-op unless the URL has ?edit
 
@@ -666,6 +667,31 @@ export function initSceneManager(world: World): SceneManager {
 
     // Fly-in reveal (not awaited; purely cosmetic).
     splatSystem.replayAnimation(envEntity).catch(() => {});
+
+    // TECH_SPEC H / tracker T092: warm the HTTP cache for the scenes
+    // this one links to, 3s after arrival and only when idle. Fetch-only
+    // (bytes are discarded); the real load later hits the browser cache,
+    // which the server marks immutable. 500k splat + collider only --
+    // never the full-res file.
+    setTimeout(() => {
+      if (token !== loadToken) return; // already left this scene
+      if ((navigator as { connection?: { saveData?: boolean } }).connection?.saveData) return;
+      const idle = (window as { requestIdleCallback?: (cb: () => void) => void })
+        .requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 500));
+      idle(() => {
+        for (const targetId of scene.entryPortals ?? []) {
+          const target = sceneById[targetId];
+          if (!target) continue;
+          for (const url of [target.splat, target.collider]) {
+            if (!url || prefetchedUrls.has(url)) continue;
+            prefetchedUrls.add(url);
+            fetch(url)
+              .then((res) => (res.ok ? res.arrayBuffer() : null))
+              .catch(() => prefetchedUrls.delete(url));
+          }
+        }
+      });
+    }, 3000);
   }
 
   // Every teleport goes through a fade-to-black (FadeSystem) so the splat
