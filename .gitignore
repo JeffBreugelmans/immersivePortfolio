@@ -19,3 +19,4 @@ public/**/reference/*
 # only -- the app ships the committed 500k scene.spz. Keep the big ones
 # out of git; rsync straight to the Spark if one is ever needed live.
 public/**/marble/scene-fullres.spz
+~$*
