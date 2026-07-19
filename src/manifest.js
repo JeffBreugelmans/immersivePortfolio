@@ -407,6 +407,8 @@ export const worlds = [
         // video/placard placed; shelf headsets still need re-placement
         // against the rotated splat.
         envYawDeg: 87,
+        // Stage ended up on the -x side after the rotation; face it.
+        spawnYawDeg: 90,
         entryPortals: ["scene-02-perception-lab", "scene-03-lightworks", "scene-02-second-studio-construct"],
         props: [
           {
@@ -417,9 +419,10 @@ export const worlds = [
             label: "HTC Vive -- put it on",
             description:
               "The original HTC Vive: the headset Second Studio's collaborative VR sculpting ran on. Click it to put it on and step into the Construct.",
-            position: [0, 1.42, 6.0],
-            rotation: [0, 180, 0],
+            position: [3.0, 1.35, 0],
+            rotation: [0, 90, 0],
             scale: 0.5,
+            snapToGround: false,
             interaction: {
               pickup: false,
               gaze: { dwellMs: 600, effect: "glow" },
@@ -443,9 +446,10 @@ export const worlds = [
             label: "Microsoft HoloLens 2",
             description:
               "The HoloLens 2 -- AfterNow's home platform. Prez presentations ran on this: holographic slides you walk around, pinned to the real room.",
-            position: [-0.9, 1.42, 6.0],
-            rotation: [0, 180, 0],
+            position: [3.0, 1.3, -1.1],
+            rotation: [0, 90, 0],
             scale: 0.4,
+            snapToGround: false,
             interaction: {
               pickup: false,
               gaze: { dwellMs: 600, effect: "glow" },
@@ -459,9 +463,10 @@ export const worlds = [
             label: "Meta Quest 3",
             description:
               "Meta Quest 3 -- the headset this very portfolio is built for. If you are reading this inside one: hello, you found the recursion.",
-            position: [0.9, 1.42, 6.0],
-            rotation: [0, 180, 0],
+            position: [3.0, 1.3, 1.1],
+            rotation: [0, 90, 0],
             scale: 0.4,
+            snapToGround: false,
             interaction: {
               pickup: false,
               gaze: { dwellMs: 600, effect: "glow" },
@@ -490,7 +495,7 @@ export const worlds = [
               "At AfterNow, Jeff built Prez: a holographic presentation platform for HoloLens that turns slides into spaces. Instead of projecting flat rectangles, presenters stage 3D exhibits around the room -- cars, Mars rovers, living data -- and walk their audience through them.",
             label: "Holo Stage placard",
             position: [-0.44, 2.14, 4.29],
-            rotation: [0, -40, 0],
+            rotation: [0, 140, 0],
             width: 0.9,
             scale: 3.199,
           },
