@@ -248,6 +248,9 @@ export const worlds = [
         // floor-to-ceiling at origin); 2.5x restores a ~3.5m ceiling and
         // puts the 1.6m eye height back inside the room.
         envScale: 2.5,
+        // Jeff's ?edit alignment pass 2026-07-19 (rotation only; bench
+        // props still need re-placement against the rotated splat).
+        envYawDeg: 31,
         entryPortals: ["scene-01-hangar-polder", "scene-01-holo-stage"],
         // Flex-lamp desk toy (TECH_SPEC G, simplified fallback):
         // dataGloveFx.ts spawns a procedural lamp here once the scene's

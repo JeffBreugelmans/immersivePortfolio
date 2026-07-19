@@ -43,6 +43,7 @@ let gizmoHelper: THREE.Object3D | null = null;
 let editables: Editable[] = [];
 let selected: Editable | null = null;
 let floorAt: (x: number, z: number) => number = () => 0;
+let spawnFloorY = 0;
 let panel: HTMLDivElement | null = null;
 let readout: HTMLDivElement | null = null;
 let envLine: HTMLDivElement | null = null;
@@ -132,8 +133,11 @@ function updateEnvLine(): void {
   }
 }
 
-export function editorSetFloorSampler(fn: typeof floorAt): void {
-  if (editModeEnabled) floorAt = fn;
+export function editorSetFloorSampler(fn: typeof floorAt, floorY = 0): void {
+  if (editModeEnabled) {
+    floorAt = fn;
+    spawnFloorY = floorY;
+  }
 }
 
 export function editorRegisterProp(entry: PropEntryLike, object: THREE.Object3D): void {
@@ -193,9 +197,15 @@ const round = (v: number, p = 2) => Number(v.toFixed(p));
 /** Manifest-shaped entry for one editable, with floor-relative y. */
 function entryFor({ object, entry }: Editable): PropEntryLike {
   const out: PropEntryLike = { ...entry };
+  // Mirror spawnProp's semantics: snapToGround: false props measure y
+  // from the spawn floor, everything else from the per-prop ground ray.
+  const base =
+    (entry as { snapToGround?: boolean }).snapToGround === false
+      ? spawnFloorY
+      : floorAt(object.position.x, object.position.z);
   out.position = [
     round(object.position.x),
-    round(object.position.y - floorAt(object.position.x, object.position.z)),
+    round(object.position.y - base),
     round(object.position.z),
   ];
   const deg = (r: number) => round(THREE.MathUtils.radToDeg(r), 1);

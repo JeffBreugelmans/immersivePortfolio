@@ -653,7 +653,7 @@ export function initSceneManager(world: World): SceneManager {
       const hit = _floorRay.intersectObject(colliderObj, true)[0];
       return hit ? hit.point.y : floorY;
     };
-    editorSetFloorSampler(floorAt);
+    editorSetFloorSampler(floorAt, floorY);
     editorRegisterEnv([envEntity.object3D!, colliderObj], scene.envYawDeg ?? 0);
 
     // Walkable sweet zone: WalkBoundsSystem clamps the player to this box
