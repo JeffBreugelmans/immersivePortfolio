@@ -1,32 +1,35 @@
 // billboard.ts
 //
-// Placards are double-sided text planes: readable from the front,
-// mirrored from the back. Placing them by hand meant every scene
-// rotation left some facing away (mirrored text). Rather than hand-flip
-// each one, placards now turn to face the visitor every frame on the Y
-// axis only (staying upright) -- the museum-info-card ideal, and it
-// eliminates the backwards-text problem for good. Their manifest
-// rotation is ignored at runtime; position still places them.
+// Placards and video screens are double-sided planes: readable from the
+// front, mirrored/dark from the back. Hand-placing them meant scene
+// rotations left some facing away. They now turn to face the visitor
+// (upright, Y-axis only) so orientation stops mattering entirely.
+//
+// IMPLEMENTATION NOTE (why not a normal System): an earlier version set
+// object3D.rotation from a per-frame ECS system, but IWSDK re-syncs each
+// entity's Transform onto its object3D during the update phase, which
+// silently overwrote the billboard rotation before render -- placards
+// stayed at their authored angle (Jeff: "always at 45 degrees"). Doing
+// it in onBeforeRender instead runs at draw time, strictly AFTER any ECS
+// transform sync, and is called once per rendered camera -- so it is
+// also correct per-eye in an XR session.
 
 import * as THREE from "three";
-import { createSystem } from "@iwsdk/core";
-
-// Populated by sceneManager.spawnProp for placard props, cleared on
-// scene teardown.
-export const billboardTargets = new Set<THREE.Object3D>();
 
 const _camPos = new THREE.Vector3();
 const _objPos = new THREE.Vector3();
 
-export class BillboardSystem extends createSystem({}) {
-  update() {
-    if (billboardTargets.size === 0) return;
-    this.world.camera.getWorldPosition(_camPos);
-    for (const obj of billboardTargets) {
-      obj.getWorldPosition(_objPos);
-      // Face the camera, but only yaw -- keep the card vertical.
-      const yaw = Math.atan2(_camPos.x - _objPos.x, _camPos.z - _objPos.z);
-      obj.rotation.set(0, yaw, 0);
-    }
-  }
+/** Make an object yaw-face the rendering camera every frame, at render
+ *  time (survives the ECS transform sync). Upright: only Y rotates. */
+export function attachBillboard(object3D: THREE.Object3D): void {
+  object3D.onBeforeRender = function (_renderer, _scene, camera) {
+    camera.getWorldPosition(_camPos);
+    this.getWorldPosition(_objPos);
+    // PlaneGeometry's front (+Z, where the readable texture is) should
+    // point at the camera.
+    this.rotation.set(0, Math.atan2(_camPos.x - _objPos.x, _camPos.z - _objPos.z), 0);
+    // matrixWorld was already computed for this frame; recompute it from
+    // the new rotation so this draw uses the billboarded orientation.
+    this.updateWorldMatrix(true, false);
+  };
 }
