@@ -130,8 +130,14 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
     // slightly larger than his laptop screen). setSize(w, h, true) also
     // rewrites the canvas CSS size; skip while an XR session presents.
     const container = document.getElementById("scene-container") as HTMLDivElement;
+    // XR-safety: resize events fire DURING the Enter-VR handshake, and
+    // isPresenting only flips true late in it -- calling setSize in that
+    // window hard-freezes Quest Browser. Track the session explicitly
+    // from sessionstart, and re-fit only after sessionend.
+    let xrSessionActive = false;
     const fitDisplay = () => {
-      if (world.renderer.xr.isPresenting) return;
+      if (xrSessionActive || world.renderer.xr.isPresenting || world.renderer.xr.getSession?.())
+        return;
       const w = container.clientWidth;
       const h = container.clientHeight;
       world.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -140,6 +146,13 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
     };
+    world.renderer.xr.addEventListener("sessionstart", () => {
+      xrSessionActive = true;
+    });
+    world.renderer.xr.addEventListener("sessionend", () => {
+      xrSessionActive = false;
+      setTimeout(fitDisplay, 100);
+    });
     window.addEventListener("resize", fitDisplay);
     fitDisplay();
 
