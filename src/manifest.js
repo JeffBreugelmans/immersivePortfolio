@@ -558,11 +558,15 @@ export const worlds = [
         envScale: 2.5,
         // Self-running bit-plane exhibit on the baked white end-wall
         // (projectorWall.ts): position tuned via headless screenshots.
+        // Jeff's ?edit placement 2026-07-19: panel on the right rack
+        // face, mid-aisle. Export was floor-relative (y 1.58) + uniform
+        // scale 0.398 on the 4.5m plane -- baked here as absolute y
+        // (S5 floor -1.6) and real dimensions.
         projectorWall: {
-          position: [0.4, 0.9, -16],
-          rotationYDeg: 0,
-          width: 4.5,
-          height: 4.5,
+          position: [3.38, -0.02, 0.44],
+          rotationYDeg: -90,
+          width: 1.79,
+          height: 1.79,
         },
         entryPortals: ["scene-01-holo-stage", "scene-01-hangar-polder"],
         props: [
@@ -574,7 +578,7 @@ export const worlds = [
             text:
               "Light that teaches, light that computes, light you can wear. Jeff's current chapter: immersive training inside working datacenters, research into computing with overlapping projections -- watch the wall at the end of the aisle, where four noisy projectors sum into a portrait in a single optical step (papers pending) -- and everyday smart glasses that put a quiet green HUD in your line of sight.",
             label: "Lightworks placard",
-            position: [2.0, 1.3, -4.0],
+            position: [-2.83, 1.3, 0.48],
             rotation: [0, -30, 0],
             width: 0.9,
             scale: 2.5,
