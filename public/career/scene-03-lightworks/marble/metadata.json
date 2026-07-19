@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-07-19T04:04:51.997Z",
+  "worldId": "e7bac7d8-42f8-4518-ae41-e345185351e9",
+  "worldMarbleUrl": "https://marble.worldlabs.ai/world/e7bac7d8-42f8-4518-ae41-e345185351e9",
+  "prompt": "Interior of a dark modern data center aisle, camera at standing eye height in the center of a wide central walkway. Two long rows of tall black server racks with dense green and occasional amber LED points, cool white-blue overhead strip lighting, visible thin haze catching the light. At the far end of the walkway, one large clean matte white wall section, empty and evenly lit dimly, like a projection screen. Midway along one side, a single rack stands under a focused warm spotlight with a work area in front of it and space for a small cart. Near the entrance, a small recessed alcove with warm amber shelf lighting, contrasting with the cold room. Polished dark concrete floor, completely flat and walkable, central walkway at least four meters wide and fifteen meters long. Palette: black racks, emerald green LEDs, cold white-blue light, one warm amber alcove. Atmosphere: deep server hum implied, cathedral-like, slightly hazy. No people, no readable text or logos, no cable mess on the floor, no ceiling clutter, not a hallway with doors, not an office.",
+  "image": null,
+  "model": "marble-1.1",
+  "spzVariant": "500k",
+  "fullResDownloaded": true,
+  "colliderDownloaded": true,
+  "texturedMeshExported": false
+}

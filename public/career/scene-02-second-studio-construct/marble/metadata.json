@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-07-19T03:58:45.454Z",
+  "worldId": "54b0a5c2-8f8d-4257-b7fe-ed4646eb2c6f",
+  "worldMarbleUrl": "https://marble.worldlabs.ai/world/54b0a5c2-8f8d-4257-b7fe-ed4646eb2c6f",
+  "prompt": "A modern minimalist observation platform floating high above a dramatic snow-capped mountain range, camera at standing eye height near the platform's center. Endless jagged peaks stretch to the horizon under a bright daytime sky, soft clouds drifting in the valleys far below. The platform is a simple pale circular deck with a low glass guardrail at the edge, open to the sky and mountains on all sides -- no walls, no roof. A plain wooden work table with two simple modern chairs sits to one side, unoccupied. The deck is clean, minimal, and flat, walkable in every direction, at least eight meters across. Palette: pale platform grey, warm wood table, crisp white clouds, cool blue-grey mountain rock, bright open sky. Atmosphere: high-altitude clarity, thin drifting mist at the platform edge, quiet vastness. No people, no readable text or logos, no furniture beyond the one table and two chairs, not indoors, not nighttime, not a city skyline.",
+  "image": null,
+  "model": "marble-1.1",
+  "spzVariant": "500k",
+  "fullResDownloaded": true,
+  "colliderDownloaded": true,
+  "texturedMeshExported": false
+}

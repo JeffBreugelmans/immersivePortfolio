@@ -277,7 +277,11 @@ export const worlds = [
           "Inside the Vive you just put on -- a mountaintop observation platform where Second Studio's VR sculpting tools once ran. Walk around a human-scale skyscraper sculpture.",
         splat: `${BASE}career/scene-02-second-studio-construct/marble/scene.spz`,
         collider: `${BASE}career/scene-02-second-studio-construct/marble/collider.glb`,
+        splatHiRes: `${BASE}career/scene-02-second-studio-construct/marble/scene-fullres.spz`,
         ambient: `${BASE}career/scene-02-second-studio-construct/audio/ambient.mp3`,
+        // Marble generated this one OVER-scale (deck 3.76m below the
+        // camera); 0.43x brings the eye back to standing height.
+        envScale: 0.43,
         // Cul-de-sac: reachable via the Vive wearable-teleport prop in
         // scene-01-holo-stage (TECH_SPEC C.1), not a ring portal. Listed
         // here so window.teleportTo / Proxie can still jump directly.
@@ -291,7 +295,10 @@ export const worlds = [
           "A datacenter cathedral in three zones: server-repair training bay, four-projector optical-computing gallery, and the Even Realities frontier desk. Light that teaches, light that computes, light you can wear.",
         splat: `${BASE}career/scene-03-lightworks/marble/scene.spz`,
         collider: `${BASE}career/scene-03-lightworks/marble/collider.glb`,
+        splatHiRes: `${BASE}career/scene-03-lightworks/marble/scene-fullres.spz`,
         ambient: `${BASE}career/scene-03-lightworks/audio/ambient.mp3`,
+        // Marble under-scale (collider floor -0.64 at origin) -> 2.5x.
+        envScale: 2.5,
         entryPortals: ["scene-01-holo-stage", "scene-01-hangar-polder"],
         props: [],
       },
