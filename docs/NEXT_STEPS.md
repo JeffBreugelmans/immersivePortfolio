@@ -482,8 +482,68 @@ depending on how it feels through the headset's own near clip plane.
 
 Not touched (left for Jeff per the plan doc's own notes): S5 projector
 wall floor-height polish, S4 video screen placement, remaining S2 props
-(data glove/Tobii/lamp, blocked on his Tripo studio exports). No merge
-to main, no Spark deploy -- pushed to `claude/wearable-fx` only.
+(Tobii, blocked on his Tripo studio exports). No merge to main, no
+Spark deploy -- pushed to `claude/wearable-fx` only.
+
+## SESSION UPDATE (2026-07-19, cloud session #2) -- PhD flex-lamp fallback
+
+Jeff's ask: if the render-to-texture island mini-game (TECH_SPEC §G,
+the single riskiest custom build in the whole project) doesn't land in
+time, the PhD bench shouldn't go interactive-less. He proposed reusing
+the Vive's click-to-wear language on the data glove, then driving
+something simple (a toy helicopter's height, or a lamp's brightness)
+off finger-flex. Picked the **lamp**: zero new asset/generation cost
+(procedural emissive mesh, no Tripo/Marble/Mint spend) vs. a helicopter
+needing a new model plus flight-mechanic code -- the simpler, lower-risk
+choice given the wallet is basically dry and time is short. Docs updated
+in `docs/TECH_SPEC.md` §G and `docs/WORLD_DESIGNS.md` (new §2a) marking
+this the build-first fallback; the island stays the stretch goal.
+
+Implemented (`src/dataGloveFx.ts`, registered in `src/index.ts` after
+`WearableFxSystem`):
+- Click the data glove (new S2 manifest prop, `id: "data-glove"`,
+  `role: "data-glove"`, `roots/scene-02-perception-lab/props/
+  data-glove.glb` -- still pending Jeff's Tripo export, 404s quietly
+  like every other stubbed prop until it lands) -> same lift/fly/settle
+  language as the Vive don, but it ends
+  reparented onto `world.camera` at a fixed local offset instead of
+  teleporting, so it just rides along in view from then on -- no
+  per-frame tracking code needed (three.js parent-child transforms
+  handle it for free).
+- Once worn, a continuous 0-1 flex value drives a small procedural desk
+  lamp (`scene.flexLamp` in the manifest, S2 only so far -- same
+  pattern as `projectorWall`, no new asset): bulb color lerps dim ember
+  -> warm bright, plus a canvas-gradient glow sprite that fades/grows
+  with it. Flex source: desktop click-and-hold (pointerdown/up, eased
+  toward 0 or 1 each frame); XR reads the standard `xr-standard-squeeze`
+  gamepad button's analog `.value` off `renderer.xr.getSession()
+  .inputSources` directly (bypasses IWSDK's own squeeze wrapper, which
+  only exposes boolean start/end) -- same "real pinch/squeeze strength"
+  convention TECH_SPEC §G already committed to for the island's walk
+  control, just applied here too, so it's not a new unverified idea.
+- Verified: `tsc --noEmit` clean, `vite build` clean, smoke test run 3x
+  -- same pre-existing 2-flake pattern as the wearableFx work above
+  (see that entry), no new failures, no new console/page errors.
+
+**Still needs Jeff's eyes**, same caveat as the Vive don/doff: the
+lift/fly/settle-onto-hand motion and the lamp glow have never been
+watched in a real browser. The XR squeeze-value path is a bigger
+unknown than the Vive's camera-pose code was -- it's only verified
+against the WebXR spec on paper, never against Quest's actual hand-
+tracking-to-gamepad emulation on a real device. If squeeze doesn't come
+through in practice, the desktop click-hold path is the safe fallback
+demo path regardless (matches the project's existing "the fallback IS
+the mechanic" philosophy from §G). Also: the "worn" hand offset is a
+fixed stylized spot in view, not a tracked hand position -- there's no
+per-joint curl detection here (that would need real `XRHand` joint
+access, out of scope for this pass).
+
+Not touched: the actual glove GLB (blocked on Jeff's Tripo export --
+position/rotation on the manifest entry are a placeholder mirror of the
+Bench A layout, retune via `?edit` once real), any finger-curl
+animation on the glove mesh itself (needs blend shapes/bones on an
+asset that doesn't exist yet), the island mini-game (still open as the
+stretch goal). No merge to main, no Spark deploy.
 
 ## Deploy reminders
 

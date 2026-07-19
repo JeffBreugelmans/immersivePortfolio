@@ -247,6 +247,12 @@ export const worlds = [
         // puts the 1.6m eye height back inside the room.
         envScale: 2.5,
         entryPortals: ["scene-01-hangar-polder", "scene-01-holo-stage"],
+        // Flex-lamp desk toy (TECH_SPEC G, simplified fallback):
+        // dataGloveFx.ts spawns a procedural lamp here once the scene's
+        // `role: "data-glove"` prop exists -- no separate asset, position
+        // is a placeholder next to the (not-yet-generated) PhD bench,
+        // tune alongside the glove once it lands via `?edit`.
+        flexLamp: { position: [1.6, 0.75, -1.8] },
         props: [
           {
             id: "rubber-hand",
@@ -299,6 +305,33 @@ export const worlds = [
             interaction: {
               gaze: { dwellMs: 600, effect: "glow" },
               click: { effect: "pulse" },
+            },
+          },
+          {
+            // PhD bench (Northeastern) -- Tripo asset still pending Jeff's
+            // web-studio export (NEXT_STEPS "remaining S2 props"); spawnProp
+            // 404s quietly until data-glove.glb lands, same as every other
+            // stubbed prop in this file. `role: "data-glove"` is the
+            // routing key dataGloveFx.ts (TECH_SPEC G simplified fallback)
+            // looks for -- click it to don it on your hand, then flex
+            // (hold-click desktop / squeeze-strength XR) to drive the
+            // flexLamp above. Position/rotation are a placeholder mirror
+            // of the Bench A layout; retune via `?edit` once real.
+            id: "data-glove",
+            kind: "glb",
+            source: "tripo",
+            src: `${BASE}roots/scene-02-perception-lab/props/data-glove.glb`,
+            label: "Data glove -- flex to bring the lamp up",
+            description:
+              "The sensor-laden data glove from Jeff's PhD at Northeastern. Click it to put it on, then flex your hand -- exactly how it once turned a hand gesture into a continuous accessibility signal -- and watch the desk lamp answer.",
+            position: [2.1, 0.04, -1.6],
+            rotation: [-90, 0, 0],
+            scale: 0.45,
+            role: "data-glove",
+            interaction: {
+              pickup: false,
+              gaze: { dwellMs: 600, effect: "glow" },
+              click: { effect: "pulse", sfx: "chime" },
             },
           },
           {

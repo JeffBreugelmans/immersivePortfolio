@@ -816,6 +816,23 @@ hard below; built after B/C/D because those de-risk the demo first.
 > only if time allows. One confirmed addition: the physical glove prop
 > should visibly perform the flex input (see below), not just sit inert.
 
+> **SIMPLIFIED FALLBACK BUILT FIRST (2026-07-19, cloud session)**: Jeff's
+> call — if the render-to-texture island (the single riskiest custom
+> build here, per the feasibility flag below) doesn't come together in
+> time, don't let the whole PhD bench go interactive-less. Built and
+> shipped as the reliable baseline: click the data glove the same way
+> you click the Vive (see `docs/PLAN-wearable-fx.md`) and it animates
+> onto your hand and stays there; flexing (hold-click on desktop, real
+> squeeze/pinch strength in XR — same signal this section already
+> specs for the walk control below) drives a small desk lamp's glow up
+> and down in real time. No new asset beyond the glove itself (still
+> blocked on Jeff's Tripo export) — the lamp is a procedural emissive
+> mesh, zero extra generation cost. Implementation: `src/dataGloveFx.ts`
+> + the `flexLamp` field on the S2 manifest entry. The full island game
+> above stays the stretch goal if there's time; this fallback is what a
+> visitor gets either way, since the glove-donning + flex signal is
+> shared infrastructure either build reuses.
+
 ### Station composition
 
 - **Monitor prop**: GLB shell (<=8k tris) + separate screen plane whose

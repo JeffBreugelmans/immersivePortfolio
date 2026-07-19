@@ -349,6 +349,18 @@ eye-level.
    Jeff's existing demo video (site asset) as a `video` prop with
    gaze-highlighted hotspots, which still honors the mechanics in
    narration.
+2a. **SIMPLIFIED FALLBACK, built first (2026-07-19)** — the island game
+   above is the reach goal; the mechanic that's guaranteed to ship is
+   simpler and reuses the same don + flex-signal plumbing: click the
+   data glove (same click-to-wear language as the Holo Stage Vive) and
+   it lifts off the desk and settles onto your hand. From then on,
+   flexing — hold-click on desktop, real squeeze/pinch strength in XR —
+   brings a small desk lamp up from a dim ember to a warm bright glow
+   and back down as you release, live, every frame. It's the same
+   research point (the glove turns a hand gesture into a continuous
+   analog signal) without needing the render-to-texture island to be
+   working — no monitor, no third-person controller, no second scene
+   render. Implemented in `src/dataGloveFx.ts`.
 2b. **Thumb-pad bubble (STRETCH, hand-tracking only)** — a small glowing
    nub on the glove's thumb pad, poppable via a real pinch gesture
    (reuses the pinch-strength signal already computed for walk control —

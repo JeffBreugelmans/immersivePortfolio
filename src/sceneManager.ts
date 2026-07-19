@@ -68,6 +68,10 @@ interface SceneEntry {
     width?: number;
     height?: number;
   };
+  flexLamp?: {
+    position: [number, number, number];
+    rotationYDeg?: number;
+  };
 }
 const sceneById = sceneByIdRaw as Record<string, SceneEntry>;
 import { WALK_BOUNDS_DEFAULT } from "./walkBounds";

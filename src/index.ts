@@ -30,6 +30,7 @@ import { FadeSystem } from "./fade";
 import { AudioManagerSystem } from "./audio";
 import { CompanionSystem } from "./companion";
 import { WearableFxSystem } from "./wearableFx";
+import { DataGloveFxSystem } from "./dataGloveFx";
 import { ProjectorWallSystem } from "./projectorWall";
 import { DebugOverlaySystem } from "./debugOverlay";
 import { WalkBoundsSystem } from "./walkBounds";
@@ -152,6 +153,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
       .registerSystem(AudioManagerSystem)
       .registerSystem(CompanionSystem)
       .registerSystem(WearableFxSystem)
+      .registerSystem(DataGloveFxSystem)
       .registerSystem(ProjectorWallSystem)
       .registerSystem(DebugOverlaySystem)
       .registerSystem(WalkBoundsSystem);
