@@ -688,14 +688,22 @@ export function initSceneManager(world: World): SceneManager {
   });
   window.teleportTo = (sceneId: string) => fadedLoad(sceneId);
 
-  // Initial load: no fade (the loading overlay covers it). ?scene=<id>
+  // Initial load: no fade (the loading overlay covers it). ?scene=<n>
+  // (index in manifest order: 0=hangar .. 4=lightworks) or ?scene=<id>
   // overrides the default -- mainly so ?edit sessions can jump straight
   // into any scene (edit mode suppresses portal travel).
   const requestedScene = new URLSearchParams(location.search).get("scene");
-  const initialScene =
-    requestedScene && sceneById[requestedScene] ? requestedScene : defaultSceneId;
-  if (requestedScene && !sceneById[requestedScene]) {
-    console.warn(`[sceneManager] Unknown ?scene=${requestedScene}; valid ids:`, Object.keys(sceneById));
+  const orderedIds = Object.keys(sceneById);
+  const resolvedScene =
+    requestedScene && /^\d+$/.test(requestedScene)
+      ? orderedIds[Number(requestedScene)]
+      : requestedScene;
+  const initialScene = resolvedScene && sceneById[resolvedScene] ? resolvedScene : defaultSceneId;
+  if (requestedScene && (!resolvedScene || !sceneById[resolvedScene])) {
+    console.warn(
+      `[sceneManager] Unknown ?scene=${requestedScene}; use 0-${orderedIds.length - 1} or an id:`,
+      orderedIds
+    );
   }
   loadScene(initialScene).catch((err) =>
     console.error("[sceneManager] Initial scene load failed:", err)

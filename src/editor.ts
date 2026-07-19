@@ -17,6 +17,11 @@
 
 import * as THREE from "three";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls.js";
+import { sceneById } from "./manifest.js";
+
+// Scene index in manifest order -- the number Jeff uses in ?scene=<n>
+// and the one stamped into the export JSON.
+const sceneIndexOf = (id: string): number => Object.keys(sceneById).indexOf(id);
 
 export const editModeEnabled =
   typeof location !== "undefined" && new URLSearchParams(location.search).has("edit");
@@ -118,10 +123,12 @@ function nudgeEnvYaw(deltaDeg: number): void {
 
 function updateEnvLine(): void {
   if (envLine) {
+    const index = sceneIndexOf(currentSceneId);
+    const last = Object.keys(sceneById).length - 1;
     envLine.textContent =
-      `${currentSceneId || "(loading)"}\n` +
+      `scene ${index >= 0 ? index : "?"}: ${currentSceneId || "(loading)"}\n` +
       `env yaw ${envYawDeg}°  ( [ / ] adjust, shift = 5° )\n` +
-      `other scenes: add &scene=<id> to the URL`;
+      `other scenes: &scene=0..${last} in the URL`;
   }
 }
 
@@ -228,7 +235,8 @@ async function copyProps(): Promise<void> {
   // because only the props array was copied.
   const json = JSON.stringify(
     {
-      scene: currentSceneId,
+      scene: sceneIndexOf(currentSceneId),
+      sceneId: currentSceneId,
       envYawDeg,
       props: editables.map((p) => entryFor(p)),
     },
