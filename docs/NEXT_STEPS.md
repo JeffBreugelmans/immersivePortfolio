@@ -4,6 +4,75 @@ State of the branch as of the IWSDK migration commit, plus the agreed plan
 for what comes next. Written as a handoff so any session (or teammate) can
 pick up without archaeology. Delete sections as they get done.
 
+## POST-JUDGING WRAP (2026-07-19) -- read this first
+
+Hackathon judging is DONE. The experience was demoed web-only (desktop
+browser); the Quest headset path was not used for judging. Everything is
+committed to `main` and deployed to the Spark
+(https://dgxspark.tail8341fc.ts.net/worlds). Jeff intends to keep
+iterating on this repo later.
+
+**All five worlds are built, dressed, and hand-placed:** S1 Hangar (F-16
++ service props), S2 Perception Lab (rubber hand + brush + hammer flinch
+beat, data glove/Tobii/lamp display row), S3 Holo Stage (gear-wall
+headsets HoloLens/Vive/Quest, Prez video, Vive wearable-teleport to S4),
+S4 Second Studio (real footage video screen), S5 Lightworks (self-running
+bit-plane projector portrait). Full Mint audio kit (ambients + SFX).
+Rigged JB Proxie companion with calm idle; billboard 2D fallback.
+
+**Editor workflow that made this possible:** open any scene with
+`?edit&scene=<0-4>`. Left-click selects, 1/2/3 = move/rotate/scale gizmo,
+right-drag looks, `[`/`]` rotates the whole splat env. "Copy props JSON"
+exports `{ scene, envYawDeg, props }` -- floor-relative y, snapToGround
+aware. Paste it and it gets applied to `src/manifest.js`.
+
+**Key architecture gotcha (bit us repeatedly):** props live in the
+UNROTATED world root; the splat env is a separate entity rotated by
+`envYawDeg`. So rotating the env in `?edit` spins the splat UNDER the
+props -- you then re-place props against the new wall positions. Global
+coords, not splat-relative.
+
+### KNOWN ISSUES / where to resume
+
+1. **Billboard placards+videos (JUST FIXED, unverified in a real
+   browser):** placards/videos are meant to yaw-face the visitor so
+   their rotation never matters. First attempt used an ECS System setting
+   object3D.rotation -- IWSDK re-syncs each entity's Transform onto its
+   object3D every update, silently overwriting it (Jeff at judging:
+   placards "always at 45 degrees"). Refixed in `src/billboard.ts` via
+   `attachBillboard()` = an `onBeforeRender` hook that runs at draw time,
+   after the transform sync, once per camera (XR-correct per-eye).
+   FIRST THING NEXT SESSION: load the deployed site, walk around a
+   placard, confirm it faces you. NOTE the headless screenshot tool
+   can't verify this -- it only rotates the view from a fixed spawn
+   point, so the camera never moves relative to the placard.
+2. **Quest Enter-VR:** the hard-freeze was fixed (canvas resize was
+   firing during the Enter-VR handshake and hanging Quest Browser; now
+   locked from the button click in `index.ts`). It then just "loads for
+   a while" -- splat + props streaming/decoding over venue wifi, not a
+   hang. Untested to completion in-headset. If slow, add an in-VR
+   loading state and/or defer non-essential props until the splat renders.
+3. **Proxie look:** Jeff not fully sold on the rigged avatar's texture
+   ("grid finish"). Calm idle (catalog Idle 3) already deployed. Optional
+   regen ~600 Mint credits; `?proxie=billboard` forces the 2D art.
+4. **Scene-label overlay** shows the wrong scene title when loading via
+   `?scene=`/defaultSceneId direct-load (cosmetic; correct via normal
+   portal nav). Low priority.
+
+### Deploy loop (unchanged)
+push `main` -> on Spark: `git pull` + `source ~/.nvm/nvm.sh && npx vite
+build`. No service restart (index.html is no-cache; hashed bundles bust
+themselves). scp new gitignored `scene-fullres.spz` into the Spark's
+`public/.../marble/` before building. Access the Spark funnel URL
+directly, NOT jeffxr.com (Cloudflare caches the redirect). `?x=N` forces
+a fresh index.html. Local QA: `SMOKE_GL=real` for the deterministic
+11/11 smoke run; SwiftShader default flakes ~2 checks harmlessly.
+
+### Credits left (2026-07-19)
+Mint ~3,500 · Tripo API ~5k · Marble/World Labs 42k pool barely touched.
+Two demo BGM tracks generated into Jeff's Downloads (warm-piano,
+ambient-tech) for the video edit.
+
 ## Where things stand
 
 The A-Frame front end has been fully replaced with the official hackathon
