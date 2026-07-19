@@ -22,6 +22,7 @@ import {
   type World,
 } from "@iwsdk/core";
 import { registerGazeTarget } from "./gazeContext";
+import { editModeEnabled } from "./editor";
 
 const PROXIMITY_TRIGGER_DISTANCE = 1.3; // meters, height-agnostic (default)
 
@@ -145,6 +146,9 @@ export class PortalSystem extends createSystem({
       if (!object3D) continue;
       object3D.scale.setScalar(pulse);
 
+      // ?edit mode: no walk-in teleports while arranging props (clicking
+      // a portal on purpose still works via its click handler).
+      if (editModeEnabled) continue;
       if (cooldownActive || entity.getValue(Portal, "triggered")) continue;
 
       object3D.getWorldPosition(_portalPos);

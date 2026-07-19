@@ -30,6 +30,13 @@ import * as THREE from "three";
 import { createSystem } from "@iwsdk/core";
 import { registerGazeTarget, unregisterGazeTarget } from "./gazeContext";
 import { CompanionAvatar } from "./companionAvatar";
+import { editModeEnabled } from "./editor";
+
+// ?proxie=billboard forces the 2D sprite (skip the rigged GLB entirely)
+// -- quick escape hatch while the 3D look is still being decided.
+const FORCE_BILLBOARD =
+  typeof location !== "undefined" &&
+  new URLSearchParams(location.search).get("proxie") === "billboard";
 
 // Same hosted art as the chat overlay -- one character across surfaces.
 const ART = {
@@ -116,14 +123,19 @@ export class CompanionSystem extends createSystem({}) {
 
     // Rigged avatar streams in behind the billboard and takes over
     // seamlessly; any failure leaves the billboard path untouched.
-    CompanionAvatar.load()
-      .then((avatar) => this.adoptAvatar(avatar))
-      .catch((error) => {
-        console.warn("[companion] rigged avatar unavailable, billboard fallback stays", error);
-      });
+    // ?proxie=billboard skips it; ?edit hides the companion entirely so
+    // he doesn't wander through prop-arrangement shots.
+    if (!FORCE_BILLBOARD && !editModeEnabled) {
+      CompanionAvatar.load()
+        .then((avatar) => this.adoptAvatar(avatar))
+        .catch((error) => {
+          console.warn("[companion] rigged avatar unavailable, billboard fallback stays", error);
+        });
+    }
 
     window.addEventListener("scene-loading", () => this.setState("hidden"));
     window.addEventListener("scene-changed", () => {
+      if (editModeEnabled) return; // stay hidden while arranging props
       this.appearAt = performance.now() + APPEAR_DELAY_MS;
       this.waveOnAppear = true;
     });

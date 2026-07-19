@@ -19,6 +19,7 @@
 
 import { MathUtils } from "three";
 import { createSystem, VisibilityState } from "@iwsdk/core";
+import { editModeEnabled } from "./editor";
 
 const LOOK_SPEED = 0.004; // rad per px dragged
 const MOVE_SPEED = 3; // m/s
@@ -39,8 +40,13 @@ export class DesktopControlsSystem extends createSystem({}) {
   init() {
     const canvas = this.world.renderer.domElement;
 
+    // In ?edit mode the left button belongs to the gizmo/selection, so
+    // look-drag moves to the right button (contextmenu is suppressed by
+    // the editor); gizmo drags also flag __editorDragging to be safe.
+    const lookButton = editModeEnabled ? 2 : 0;
     canvas.addEventListener("pointerdown", (e: PointerEvent) => {
-      if (e.button === 0) this.dragging = true;
+      if ((window as unknown as { __editorDragging?: boolean }).__editorDragging) return;
+      if (e.button === lookButton) this.dragging = true;
     });
     window.addEventListener("pointerup", () => {
       this.dragging = false;

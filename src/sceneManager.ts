@@ -15,6 +15,12 @@
 import * as THREE from "three";
 import { createMintGltfLoader } from "./gltfRuntime";
 import {
+  editorInit,
+  editorRegisterProp,
+  editorReset,
+  editorSetFloorSampler,
+} from "./editor";
+import {
   DistanceGrabbable,
   EnvironmentType,
   Interactable,
@@ -337,6 +343,7 @@ async function spawnProp(
   }
   object3D.userData.propId = prop.id;
   object3D.userData.propSource = prop.source ?? "unknown";
+  editorRegisterProp(prop as never, object3D);
   if (cleanupVideo) object3D.userData.video = cleanupVideo;
 
   const entity = world.createTransformEntity(object3D).addComponent(Interactable);
@@ -399,6 +406,8 @@ export function initSceneManager(world: World): SceneManager {
   let currentSceneId: string | null = null;
   let loadToken = 0;
 
+  editorInit(world); // no-op unless the URL has ?edit
+
   async function loadScene(sceneId: string): Promise<void> {
     const scene = sceneById[sceneId];
     if (!scene) {
@@ -407,6 +416,7 @@ export function initSceneManager(world: World): SceneManager {
     }
     const token = ++loadToken; // guards against overlapping teleports
     window.dispatchEvent(new CustomEvent("scene-loading", { detail: { sceneId, scene } }));
+    editorReset();
 
     // Tear down the previous scene's portals/props/collider. destroy()
     // detaches the object3D from the scene graph; geometry/material
@@ -541,6 +551,7 @@ export function initSceneManager(world: World): SceneManager {
       const hit = _floorRay.intersectObject(colliderObj, true)[0];
       return hit ? hit.point.y : floorY;
     };
+    editorSetFloorSampler(floorAt);
 
     // Walkable sweet zone: WalkBoundsSystem clamps the player to this box
     // (default 4x4m); the safety-tape barrier makes the limit diegetic.
