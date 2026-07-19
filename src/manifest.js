@@ -356,7 +356,7 @@ export const worlds = [
             id: "smart-lamp",
             kind: "glb",
             source: "tripo",
-            src: `${BASE}roots/scene-02-perception-lab/props/smart-lamp.glb`,
+            src: `${BASE}roots/scene-02-perception-lab/props/smart-lamp.glb?v=2`,
             label: "Smart lamp",
             description:
               "A Hue-style smart lamp -- an Eindhoven joke that writes itself: Jeff studied human-technology interaction in Philips' hometown. Wave at it.",
