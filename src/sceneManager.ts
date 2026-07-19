@@ -442,6 +442,24 @@ export function initSceneManager(world: World): SceneManager {
 
   editorInit(world); // no-op unless the URL has ?edit
 
+  // Manifest-driven wearable/portal props: a prop with `teleportTo`
+  // jumps to that scene when clicked (TECH_SPEC C.1 simplified -- the
+  // Vive in the Holo Stage is the first). Slight delay lets the click
+  // SFX (e.g. the vive-don whoosh) breathe before the fade.
+  window.addEventListener("prop-interaction", (e) => {
+    const detail = (e as CustomEvent).detail as
+      | { propId?: string; sceneId?: string; trigger?: string }
+      | undefined;
+    if (!detail || detail.trigger !== "click") return;
+    const scene = detail.sceneId ? sceneById[detail.sceneId] : null;
+    const entry = (scene?.props as { id?: string; teleportTo?: string }[] | undefined)?.find(
+      (p) => p.id === detail.propId
+    );
+    if (entry?.teleportTo) {
+      setTimeout(() => window.teleportTo?.(entry.teleportTo!), 500);
+    }
+  });
+
   async function loadScene(sceneId: string): Promise<void> {
     const scene = sceneById[sceneId];
     if (!scene) {

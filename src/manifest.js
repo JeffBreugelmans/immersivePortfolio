@@ -268,7 +268,28 @@ export const worlds = [
         // restores a 1.6m eye height.
         envScale: 2.76,
         entryPortals: ["scene-02-perception-lab", "scene-03-lightworks", "scene-02-second-studio-construct"],
-        props: [],
+        props: [
+          {
+            id: "htc-vive",
+            kind: "glb",
+            source: "tripo",
+            src: `${BASE}career/scene-01-holo-stage/props/htc-vive.glb`,
+            label: "HTC Vive -- put it on",
+            description:
+              "The original HTC Vive: the headset Second Studio's collaborative VR sculpting ran on. Click it to put it on and step into the Construct.",
+            position: [0, 1.42, 6.0],
+            rotation: [0, 180, 0],
+            scale: 0.5,
+            interaction: {
+              pickup: false,
+              gaze: { dwellMs: 600, effect: "glow" },
+              click: { effect: "pulse", sfx: "vive-don" },
+            },
+            // Wearable-teleport (TECH_SPEC C.1, simplified): clicking the
+            // headset fades into the world it used to render.
+            teleportTo: "scene-02-second-studio-construct",
+          },
+        ],
       },
       {
         id: "scene-02-second-studio-construct",
