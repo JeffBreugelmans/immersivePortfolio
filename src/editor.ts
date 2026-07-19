@@ -43,6 +43,7 @@ let readout: HTMLDivElement | null = null;
 let envLine: HTMLDivElement | null = null;
 let envObjects: THREE.Object3D[] = [];
 let envYawDeg = 0;
+let currentSceneId = "";
 
 const _raycaster = new THREE.Raycaster();
 const _pointer = new THREE.Vector2();
@@ -78,6 +79,10 @@ export function editorInit(w: typeof world): void {
   canvas.addEventListener("contextmenu", (e) => e.preventDefault());
   canvas.addEventListener("pointerdown", onPointerDown);
   window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("scene-changed", (e) => {
+    currentSceneId = ((e as CustomEvent).detail?.sceneId as string) ?? currentSceneId;
+    updateEnvLine();
+  });
 
   buildPanel();
   console.info("[editor] edit mode active -- click a prop to select it");
@@ -113,7 +118,10 @@ function nudgeEnvYaw(deltaDeg: number): void {
 
 function updateEnvLine(): void {
   if (envLine) {
-    envLine.textContent = `env yaw ${envYawDeg}°  ( [ / ] adjust, shift = 5° )`;
+    envLine.textContent =
+      `${currentSceneId || "(loading)"}\n` +
+      `env yaw ${envYawDeg}°  ( [ / ] adjust, shift = 5° )\n` +
+      `other scenes: add &scene=<id> to the URL`;
   }
 }
 
@@ -216,16 +224,22 @@ function updateReadout(): void {
 }
 
 async function copyProps(): Promise<void> {
+  // envYawDeg rides along -- earlier exports lost the [ / ] rotation
+  // because only the props array was copied.
   const json = JSON.stringify(
-    editables.map((p) => entryFor(p)),
+    {
+      scene: currentSceneId,
+      envYawDeg,
+      props: editables.map((p) => entryFor(p)),
+    },
     null,
     2
   );
   try {
     await navigator.clipboard.writeText(json);
-    flash("props JSON copied -- paste into manifest.js");
+    flash("scene JSON copied (props + envYawDeg) -- paste it to Claude or manifest.js");
   } catch {
-    console.log("[editor] props JSON:\n" + json);
+    console.log("[editor] scene JSON:\n" + json);
     flash("clipboard blocked -- JSON logged to console");
   }
 }

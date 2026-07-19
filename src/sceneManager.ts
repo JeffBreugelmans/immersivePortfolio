@@ -688,8 +688,16 @@ export function initSceneManager(world: World): SceneManager {
   });
   window.teleportTo = (sceneId: string) => fadedLoad(sceneId);
 
-  // Initial load: no fade (the loading overlay covers it).
-  loadScene(defaultSceneId).catch((err) =>
+  // Initial load: no fade (the loading overlay covers it). ?scene=<id>
+  // overrides the default -- mainly so ?edit sessions can jump straight
+  // into any scene (edit mode suppresses portal travel).
+  const requestedScene = new URLSearchParams(location.search).get("scene");
+  const initialScene =
+    requestedScene && sceneById[requestedScene] ? requestedScene : defaultSceneId;
+  if (requestedScene && !sceneById[requestedScene]) {
+    console.warn(`[sceneManager] Unknown ?scene=${requestedScene}; valid ids:`, Object.keys(sceneById));
+  }
+  loadScene(initialScene).catch((err) =>
     console.error("[sceneManager] Initial scene load failed:", err)
   );
 
