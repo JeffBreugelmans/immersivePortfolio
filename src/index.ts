@@ -80,7 +80,7 @@ function syncLocomotionToVisibility(world: World): void {
   }
 }
 
-function wireEnterVRButton(world: World): void {
+function wireEnterVRButton(world: World, onEnterVR: () => void): void {
   const button = document.querySelector<HTMLButtonElement>("#enter-vr");
   if (!button) return;
 
@@ -91,6 +91,10 @@ function wireEnterVRButton(world: World): void {
       button.hidden = false;
       button.addEventListener("click", () => {
         if (world.visibilityState.value === VisibilityState.NonImmersive) {
+          // Lock out canvas resizing BEFORE launchXR: the Enter-VR
+          // handshake fires a window resize while isPresenting is still
+          // false, and a setSize in that window hangs Quest Browser.
+          onEnterVR();
           world.launchXR();
         } else {
           world.exitXR();
@@ -136,8 +140,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
     // from sessionstart, and re-fit only after sessionend.
     let xrSessionActive = false;
     const fitDisplay = () => {
-      if (xrSessionActive || world.renderer.xr.isPresenting || world.renderer.xr.getSession?.())
-        return;
+      if (xrSessionActive || world.renderer.xr.isPresenting) return;
       const w = container.clientWidth;
       const h = container.clientHeight;
       world.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -153,6 +156,11 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
       xrSessionActive = false;
       setTimeout(fitDisplay, 100);
     });
+    // Also lock the instant Enter VR is clicked (see wireEnterVRButton):
+    // the resize that hangs Quest fires before sessionstart.
+    const lockForXR = () => {
+      xrSessionActive = true;
+    };
     window.addEventListener("resize", fitDisplay);
     fitDisplay();
 
@@ -186,7 +194,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
     const sceneManager = initSceneManager(world);
     initChatOverlay(sceneManager);
     initLoadingOverlay();
-    wireEnterVRButton(world);
+    wireEnterVRButton(world, lockForXR);
   })
   .catch((err) => {
     console.error("[World] Failed to create the IWSDK world:", err);

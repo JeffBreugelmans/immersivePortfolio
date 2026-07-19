@@ -590,7 +590,7 @@ export const worlds = [
               "Light that teaches, light that computes, light you can wear. Jeff's current chapter: immersive training inside working datacenters, research into computing with overlapping projections -- watch the wall at the end of the aisle, where four noisy projectors sum into a portrait in a single optical step (papers pending) -- and everyday smart glasses that put a quiet green HUD in your line of sight.",
             label: "Lightworks placard",
             position: [-2.83, 1.3, 0.48],
-            rotation: [0, -30, 0],
+            rotation: [0, 150, 0],
             width: 0.9,
             scale: 2.5,
           },
