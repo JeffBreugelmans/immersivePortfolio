@@ -247,7 +247,61 @@ export const worlds = [
         // puts the 1.6m eye height back inside the room.
         envScale: 2.5,
         entryPortals: ["scene-01-hangar-polder", "scene-01-holo-stage"],
-        props: [],
+        props: [
+          {
+            id: "rubber-hand",
+            kind: "glb",
+            source: "tripo",
+            src: `${BASE}roots/scene-02-perception-lab/props/rubber-hand.glb`,
+            label: "Rubber hand",
+            description:
+              "The rubber hand illusion: stroke the fake hand while your real hand is hidden behind the partition, and your brain adopts it as its own. The heart of Jeff's Master's research on body ownership at TU Eindhoven.",
+            // Lying palm-down on the left bench, cuff toward the baked
+            // partition (real-illusion staging hides the arm's cut end).
+            // Bench props use TINY y: the per-prop ground ray hits the
+            // desk top (it's in the collider), so y is height above THAT.
+            position: [-2.3, 0.04, -1.6],
+            rotation: [-90, 0, 0],
+            scale: 0.45,
+            interaction: {
+              pickup: false,
+              gaze: { dwellMs: 600, effect: "glow" },
+              click: { effect: "pulse" },
+            },
+          },
+          {
+            id: "paintbrush",
+            kind: "glb",
+            source: "tripo",
+            src: `${BASE}roots/scene-02-perception-lab/props/paintbrush.glb`,
+            label: "Paintbrush",
+            description:
+              "The experimenter's brush -- in the rubber hand illusion this strokes the fake hand and the hidden real one in sync.",
+            position: [-1.9, 0.03, -1.2],
+            rotation: [-90, 0, 25],
+            scale: 0.25,
+            interaction: {
+              gaze: { dwellMs: 600, effect: "glow" },
+              click: { effect: "pulse" },
+            },
+          },
+          {
+            id: "reflex-hammer",
+            kind: "glb",
+            source: "tripo",
+            src: `${BASE}roots/scene-02-perception-lab/props/reflex-hammer.glb`,
+            label: "Reflex hammer",
+            description:
+              "The experimenter's reflex hammer. Once the illusion takes hold, a sudden tap toward the rubber hand makes people flinch for a hand that isn't theirs.",
+            position: [-2.0, 0.03, -2.1],
+            rotation: [-90, 0, -30],
+            scale: 0.22,
+            interaction: {
+              gaze: { dwellMs: 600, effect: "glow" },
+              click: { effect: "pulse" },
+            },
+          },
+        ],
       },
     ],
   },
