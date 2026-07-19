@@ -45,6 +45,14 @@ const DEFERRED_CLIPS: ClipName[] = ["talk", "explain", "nod", "wave", "listen", 
 const CROSSFADE_S = 0.2;
 const TARGET_HEIGHT = 1.8; // meters; matches the Mint rig request
 
+// Per-clip playback speed. The catalog "Neutral Idle" ships with busy
+// over-the-shoulder glances and weight shifts; slowed down it reads as
+// calm breathing instead of nervous swaying (Jeff's review 2026-07-18).
+const CLIP_TIMESCALE: Partial<Record<ClipName, number>> = {
+  idle: 0.45,
+  listen: 0.8,
+};
+
 export class CompanionAvatar {
   readonly group = new THREE.Group();
   readonly height: number;
@@ -125,6 +133,7 @@ export class CompanionAvatar {
   private registerClip(name: ClipName, clip?: THREE.AnimationClip) {
     if (!clip) return;
     const action = this.mixer.clipAction(clip);
+    action.timeScale = CLIP_TIMESCALE[name] ?? 1;
     this.actions.set(name, action);
   }
 

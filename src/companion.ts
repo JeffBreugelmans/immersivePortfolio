@@ -56,7 +56,12 @@ const APPEAR_DELAY_MS = 1000;
 const TALK_LINGER_MS = 2000;
 const BOB_HZ = 2;
 const BOB_AMPLITUDE = 0.05;
-const TURN_SPEED = 8; // rad/s yaw easing toward the facing target
+const TURN_SPEED = 2.5; // rad/s yaw easing toward the facing target
+// Facing hysteresis: while standing he only re-orients once the target
+// drifts >30deg off his nose, then settles to within 5deg -- constant
+// micro-tracking of the player read as unsettling swaying.
+const TURN_START_RAD = (30 * Math.PI) / 180;
+const TURN_STOP_RAD = (5 * Math.PI) / 180;
 
 const GAZE_META = {
   id: "jb-proxie",
@@ -251,14 +256,26 @@ export class CompanionSystem extends createSystem({}) {
     this.hasTarget = true;
   }
 
-  /** Ease the avatar's yaw toward a world-space direction (dx, dz). */
-  private faceToward(dx: number, dz: number, delta: number): void {
+  /**
+   * Ease the avatar's yaw toward a world-space direction (dx, dz).
+   * While standing (hysteresis=true) he ignores small drift and only
+   * turns once the target is well off his nose, then settles.
+   */
+  private turningToFace = false;
+
+  private faceToward(dx: number, dz: number, delta: number, hysteresis = false): void {
     if (!this.avatar) return; // sprites billboard on their own
     if (Math.abs(dx) < 1e-4 && Math.abs(dz) < 1e-4) return;
     const targetYaw = Math.atan2(dx, dz);
     let diff = targetYaw - this.facingYaw;
     while (diff > Math.PI) diff -= Math.PI * 2;
     while (diff < -Math.PI) diff += Math.PI * 2;
+    if (hysteresis) {
+      if (!this.turningToFace && Math.abs(diff) < TURN_START_RAD) return;
+      this.turningToFace = Math.abs(diff) > TURN_STOP_RAD;
+    } else {
+      this.turningToFace = false;
+    }
     const step = Math.min(Math.abs(diff), TURN_SPEED * delta) * Math.sign(diff);
     this.facingYaw += step;
     this.avatar.group.rotation.y = this.facingYaw;
@@ -371,12 +388,14 @@ export class CompanionSystem extends createSystem({}) {
     }
     if (this.moving !== wasMoving) this.applyPresentation();
 
-    // Stationary avatar keeps polite eye contact with the visitor.
+    // Stationary avatar keeps polite eye contact with the visitor --
+    // with hysteresis, so he doesn't micro-track every step.
     if (!this.moving) {
       this.faceToward(
         _playerPos.x - _companionPos.x,
         _playerPos.z - _companionPos.z,
-        delta
+        delta,
+        true
       );
     }
 

@@ -109,8 +109,10 @@ export const worlds = [
         title: "The Hangar on the Polder",
         description:
           "Royal Netherlands Air Force maintenance hangar at golden hour -- F-16, Chinook, doors open onto a Dutch polder with a turning windmill. Where Jeff's engineering story begins.",
-        splat: `${BASE}roots/scene-01-hangar-polder/marble/scene.spz`,
-        collider: `${BASE}roots/scene-01-hangar-polder/marble/collider.glb`,
+        // ?v= busts the year-long immutable browser cache after a Marble
+        // regen -- bump it whenever scene/collider files are replaced.
+        splat: `${BASE}roots/scene-01-hangar-polder/marble/scene.spz?v=2`,
+        collider: `${BASE}roots/scene-01-hangar-polder/marble/collider.glb?v=2`,
         ambient: `${BASE}roots/scene-01-hangar-polder/audio/ambient.mp3`,
         // Regenerated 2026-07-18 from Jeff's empty-hangar reference plate
         // (v2: empty interior, Chinook outside on the apron). Orientation
@@ -120,7 +122,7 @@ export const worlds = [
         // Full-res 2M-splat variant (gitignored, rsync'd to the Spark --
         // see DEPLOYMENT.md): served to desktop browsers; Quest and
         // anything missing the file falls back to the 500k scene.spz.
-        splatHiRes: `${BASE}roots/scene-01-hangar-polder/marble/scene-fullres.spz`,
+        splatHiRes: `${BASE}roots/scene-01-hangar-polder/marble/scene-fullres.spz?v=2`,
         // Walkable sweet zone (meters, centered on spawn; 4x4 is also the
         // code default). Splat quality collapses a few meters out from the
         // generation camera, so the visitor stays behind safety tape --
