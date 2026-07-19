@@ -54,7 +54,19 @@ export function editorInit(w: typeof world): void {
       e as { value?: unknown }
     ).value;
   });
-  gizmo.addEventListener("objectChange", updateReadout);
+  gizmo.addEventListener("objectChange", () => {
+    // Scale-drag multiplies the object's current scale, so on a 15x prop
+    // one flick reaches the millions -- clamp to something recoverable.
+    if (selected) {
+      const s = selected.object.scale;
+      s.set(
+        THREE.MathUtils.clamp(s.x, 0.005, 100),
+        THREE.MathUtils.clamp(s.y, 0.005, 100),
+        THREE.MathUtils.clamp(s.z, 0.005, 100)
+      );
+    }
+    updateReadout();
+  });
   // three r169+: the visual part of TransformControls is a separate helper.
   const maybeHelper = (gizmo as unknown as { getHelper?: () => THREE.Object3D }).getHelper;
   gizmoHelper = maybeHelper ? maybeHelper.call(gizmo) : (gizmo as unknown as THREE.Object3D);

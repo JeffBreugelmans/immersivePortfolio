@@ -287,11 +287,6 @@ async function spawnProp(
         // props in the manifest before the actual asset exists.
         return null;
       }
-      if (prop.scale !== undefined) {
-        const s = prop.scale;
-        if (Array.isArray(s)) object3D.scale.set(...s);
-        else object3D.scale.setScalar(s);
-      }
       break;
     }
     case "image": {
@@ -324,6 +319,14 @@ async function spawnProp(
     default:
       console.warn(`[sceneManager] Unknown prop kind "${(prop as PropEntry).kind}" for prop "${prop.id}" -- skipping`);
       return null;
+  }
+
+  // Scale applies to every prop kind (placards included -- the ?edit
+  // exporter emits scale for whatever got resized).
+  if (prop.scale !== undefined) {
+    const s = prop.scale;
+    if (Array.isArray(s)) object3D.scale.set(...s);
+    else object3D.scale.setScalar(s);
   }
 
   // Prop y is authored ABOVE THE FLOOR; each prop raycasts the collider
