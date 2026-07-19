@@ -429,9 +429,10 @@ async function spawnProp(
     description: prop.description ?? prop.text,
   });
 
-  // Placards turn to face the visitor (billboard.ts) -- their manifest
-  // rotation no longer matters, which retires the mirrored-text problem.
-  if (prop.kind === "placard") billboardTargets.add(object3D);
+  // Placards AND video screens turn to face the visitor (billboard.ts) --
+  // their manifest rotation no longer matters at runtime, which retires
+  // the mirrored/backwards-facing problem for both.
+  if (prop.kind === "placard" || prop.kind === "video") billboardTargets.add(object3D);
 
   return entity;
 }
