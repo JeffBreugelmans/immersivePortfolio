@@ -545,6 +545,35 @@ animation on the glove mesh itself (needs blend shapes/bones on an
 asset that doesn't exist yet), the island mini-game (still open as the
 stretch goal). No merge to main, no Spark deploy.
 
+## TODO -- JB Proxie polish (Jeff's review, 2026-07-19)
+
+- [x] **Height** -- `src/companionAvatar.ts` `TARGET_HEIGHT` dropped
+  1.8m -> 1.65m (Jeff: "feels uncomfortable, he seems much taller than
+  the camera viewpoint"). Feet ground-snap to the visitor's floor y, so
+  the old 1.8m read as a real 0.2m loom over the ~1.6m eye height, not
+  just distance. First-pass number, not measured -- needs a real look
+  once Jeff's back in a browser; the constant is a one-line retune if
+  1.65 still isn't right.
+- [ ] **Look/material** -- Jeff: current rigged avatar has "weird
+  texture finishes with the grids" he wants gone. This is baked into
+  the Mint-generated `rigged_character_glb.glb` itself (`public/
+  assets/mint/proxie-avatar/`), not something a code tweak can fix --
+  needs a redesign pass in Mint (Jeff has 4000+ tokens left, should
+  cover it) and a re-export/reimport through `companionAvatar.ts`.
+  Jeff's call on new direction; this cloud session can't complete
+  Mint's OAuth (see the standing note above), so the generation side
+  needs to happen from Jeff's own Mint session -- happy to wire up
+  whatever comes out of it.
+- [ ] **Idle animation** -- Jeff: current idle reads "a bit creepy."
+  Likely the same Mint rigging pass fixes this alongside the look (new
+  idle clip authored/selected together with the new character), rather
+  than a separate fix -- flagging as one line item but expect it to
+  land as part of the look redesign above. (Note: idle is already
+  slowed 0.45x via `CLIP_TIMESCALE` in `companionAvatar.ts` from an
+  earlier "busy swaying" review pass -- if the new clip still reads
+  oddly, that's the first knob to check before requesting a full
+  re-rig.)
+
 ## Deploy reminders
 
 - Spark needs Node >= 20.19 to build now (`docs/DEPLOYMENT.md` §0).

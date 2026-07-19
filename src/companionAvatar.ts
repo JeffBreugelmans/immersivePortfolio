@@ -43,7 +43,13 @@ const CLIP_FILES: Record<ClipName, string> = {
 const DEFERRED_CLIPS: ClipName[] = ["talk", "explain", "nod", "wave", "listen", "flinch"];
 
 const CROSSFADE_S = 0.2;
-const TARGET_HEIGHT = 1.8; // meters; matches the Mint rig request
+// meters. Was 1.8 (the Mint rig request) -- Jeff's review 2026-07-19: at
+// 1.8 he loomed noticeably over the visitor's ~1.6m eye height (feet
+// ground-snap to the player's floor y, so the full 0.2m gap read as
+// height, not distance). 1.65 keeps him human-proportioned while putting
+// his head near the visitor's own eye line instead of above it. Tune
+// further by eye -- this is a first pass, not a measured fix.
+const TARGET_HEIGHT = 1.65;
 
 // Per-clip playback speed. The catalog "Neutral Idle" ships with busy
 // over-the-shoulder glances and weight shifts; slowed down it reads as
