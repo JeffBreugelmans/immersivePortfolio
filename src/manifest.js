@@ -364,7 +364,24 @@ export const worlds = [
         // scene-01-holo-stage (TECH_SPEC C.1), not a ring portal. Listed
         // here so window.teleportTo / Proxie can still jump directly.
         entryPortals: ["scene-01-holo-stage"],
-        props: [],
+        props: [
+          {
+            id: "second-studio-video",
+            kind: "video",
+            source: "custom",
+            // Self-hosted 640x360 remux of the jeffxr.com/work/second-studio
+            // clip -- cross-origin video can't feed a WebGL texture, so
+            // the file lives in public/. Muted+looping (autoplay-safe).
+            src: `${BASE}career/scene-02-second-studio-construct/props/second-studio-demo.mp4`,
+            label: "Second Studio in action",
+            description:
+              "Real footage of Second Studio's collaborative VR sculpting -- the software this mountaintop construct ran on. Multiple artists sharing one virtual space, sculpting at human scale.",
+            position: [2.0, 1.5, -2.8],
+            rotation: [0, -35, 0],
+            width: 3.2,
+            height: 1.8,
+          },
+        ],
       },
       {
         id: "scene-03-lightworks",
