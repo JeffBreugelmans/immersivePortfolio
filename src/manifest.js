@@ -258,7 +258,7 @@ export const worlds = [
         // `role: "data-glove"` prop exists -- no separate asset, position
         // is a placeholder next to the (not-yet-generated) PhD bench,
         // tune alongside the glove once it lands via `?edit`.
-        flexLamp: { position: [1.6, 0.75, -1.8] },
+        flexLamp: { position: [3.23, -1.575, -0.32], scale: 2.248 },
         props: [
           {
             id: "rubber-hand",
@@ -329,7 +329,7 @@ export const worlds = [
             label: "Data glove -- flex to bring the lamp up",
             description:
               "The sensor-laden data glove from Jeff's PhD at Northeastern. Click it to put it on, then flex your hand -- exactly how it once turned a hand gesture into a continuous accessibility signal -- and watch the desk lamp answer.",
-            position: [3.2, 1.43, 0],
+            position: [3.2, 1.43, 0.1],
             rotation: [0, -20, 0],
             scale: 0.569,
             snapToGround: false, // desk collider coverage is unreliable

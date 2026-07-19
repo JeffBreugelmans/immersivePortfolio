@@ -72,6 +72,7 @@ interface SceneEntry {
   flexLamp?: {
     position: [number, number, number];
     rotationYDeg?: number;
+    scale?: number;
   };
 }
 const sceneById = sceneByIdRaw as Record<string, SceneEntry>;

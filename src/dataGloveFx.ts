@@ -29,7 +29,7 @@ interface GloveProp {
   id: string;
   role?: string;
 }
-type FlexLampConfig = { position: [number, number, number]; rotationYDeg?: number };
+type FlexLampConfig = { position: [number, number, number]; rotationYDeg?: number; scale?: number };
 const sceneById = sceneByIdRaw as Record<
   string,
   { props?: GloveProp[]; flexLamp?: FlexLampConfig } | undefined
@@ -233,6 +233,7 @@ export class DataGloveFxSystem extends createSystem({}) {
     group.add(base, neck, bulb, this.glowSprite);
     group.position.set(...config.position);
     group.rotation.y = THREE.MathUtils.degToRad(config.rotationYDeg ?? 0);
+    if (config.scale) group.scale.setScalar(config.scale);
     this.world.scene.add(group);
     this.lampGroup = group;
 
