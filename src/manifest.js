@@ -119,6 +119,10 @@ export const worlds = [
         // and scale re-tuned below via headless screenshots.
         spawnYawDeg: 0,
         envScale: 1,
+        // Squares the splat+collider with the axis-aligned walk bounds
+        // (Marble's camera wasn't square to the hangar). Tune live in
+        // ?edit with [ / ], then bake the panel's number here.
+        envYawDeg: 0,
         // Full-res 2M-splat variant (gitignored, rsync'd to the Spark --
         // see DEPLOYMENT.md): served to desktop browsers; Quest and
         // anything missing the file falls back to the 500k scene.spz.

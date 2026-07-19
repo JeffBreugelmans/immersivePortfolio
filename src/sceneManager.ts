@@ -16,6 +16,7 @@ import * as THREE from "three";
 import { createMintGltfLoader } from "./gltfRuntime";
 import {
   editorInit,
+  editorRegisterEnv,
   editorRegisterProp,
   editorReset,
   editorSetFloorSampler,
@@ -169,10 +170,18 @@ function spawnSafetyBarrier(
 // initSceneManager): applies to every Marble-generated splat + collider.
 const MARBLE_FLIP_X = Math.PI;
 
-async function spawnCollider(world: World, url: string, scale = 1): Promise<Entity | null> {
+async function spawnCollider(
+  world: World,
+  url: string,
+  scale = 1,
+  yawRad = 0
+): Promise<Entity | null> {
   try {
     const gltf = await gltfLoader.loadAsync(url);
-    gltf.scene.rotation.x = MARBLE_FLIP_X; // same OpenCV->three.js flip as the splat
+    // YXZ order makes rotation = Ry(yaw) . Rx(flip): flip to y-up first,
+    // then yaw about world Y -- in lockstep with the splat env transform.
+    gltf.scene.rotation.order = "YXZ";
+    gltf.scene.rotation.set(MARBLE_FLIP_X, yawRad, 0);
     gltf.scene.scale.setScalar(scale); // keep in lockstep with the splat's envScale
     gltf.scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) child.visible = false;
@@ -459,7 +468,12 @@ export function initSceneManager(world: World): SceneManager {
     // heavy for git/Quest, present only where it was rsync'd); a 404
     // falls through to the 500k splat, then to the placeholder.
     const envScale = scene.envScale ?? 1;
-    envEntity.object3D!.rotation.x = MARBLE_FLIP_X;
+    // envYawDeg (manifest, optional) squares the generated world with the
+    // axis-aligned walk bounds when Marble's camera wasn't square to the
+    // architecture. YXZ = flip to y-up first, then yaw about world Y.
+    const envYawRad = THREE.MathUtils.degToRad(scene.envYawDeg ?? 0);
+    envEntity.object3D!.rotation.order = "YXZ";
+    envEntity.object3D!.rotation.set(MARBLE_FLIP_X, envYawRad, 0);
     envEntity.object3D!.scale.setScalar(envScale);
     const isMobileXrBrowser = /OculusBrowser|Quest|Pico|Android/i.test(navigator.userAgent);
     // Software GL (SwiftShader in headless/cloud harnesses, llvmpipe in
@@ -528,7 +542,7 @@ export function initSceneManager(world: World): SceneManager {
     let floorY = 0;
     let colliderObj: THREE.Object3D | null = null;
     if (scene.collider) {
-      const colliderEntity = await spawnCollider(world, scene.collider, envScale);
+      const colliderEntity = await spawnCollider(world, scene.collider, envScale, envYawRad);
       sceneEntities.push(colliderEntity);
       if (token !== loadToken) return;
       if (colliderEntity?.object3D) {
@@ -555,6 +569,7 @@ export function initSceneManager(world: World): SceneManager {
       return hit ? hit.point.y : floorY;
     };
     editorSetFloorSampler(floorAt);
+    editorRegisterEnv([envEntity.object3D!, colliderObj], scene.envYawDeg ?? 0);
 
     // Walkable sweet zone: WalkBoundsSystem clamps the player to this box
     // (default 4x4m); the safety-tape barrier makes the limit diegetic.

@@ -40,6 +40,9 @@ let selected: Editable | null = null;
 let floorAt: (x: number, z: number) => number = () => 0;
 let panel: HTMLDivElement | null = null;
 let readout: HTMLDivElement | null = null;
+let envLine: HTMLDivElement | null = null;
+let envObjects: THREE.Object3D[] = [];
+let envYawDeg = 0;
 
 const _raycaster = new THREE.Raycaster();
 const _pointer = new THREE.Vector2();
@@ -85,6 +88,33 @@ export function editorReset(): void {
   if (!editModeEnabled) return;
   deselect();
   editables = [];
+  envObjects = [];
+}
+
+/**
+ * Splat env + collider, rotated together live with [ / ] so the world can
+ * be squared against the axis-aligned walk bounds; the resulting angle is
+ * baked into the manifest as envYawDeg.
+ */
+export function editorRegisterEnv(objects: (THREE.Object3D | null)[], yawDeg: number): void {
+  if (!editModeEnabled) return;
+  envObjects = objects.filter((o): o is THREE.Object3D => !!o);
+  envYawDeg = yawDeg;
+  updateEnvLine();
+}
+
+function nudgeEnvYaw(deltaDeg: number): void {
+  envYawDeg = Math.round((envYawDeg + deltaDeg) * 10) / 10;
+  const rad = THREE.MathUtils.degToRad(envYawDeg);
+  for (const obj of envObjects) obj.rotation.y = rad;
+  updateEnvLine();
+  console.log(`[editor] envYawDeg: ${envYawDeg}`);
+}
+
+function updateEnvLine(): void {
+  if (envLine) {
+    envLine.textContent = `env yaw ${envYawDeg}°  ( [ / ] adjust, shift = 5° )`;
+  }
 }
 
 export function editorSetFloorSampler(fn: typeof floorAt): void {
@@ -124,6 +154,8 @@ function onKeyDown(e: KeyboardEvent): void {
   if (e.code === "Digit1") gizmo.setMode("translate");
   if (e.code === "Digit2") gizmo.setMode("rotate");
   if (e.code === "Digit3") gizmo.setMode("scale");
+  if (e.code === "BracketLeft") nudgeEnvYaw(e.shiftKey ? -5 : -1);
+  if (e.code === "BracketRight") nudgeEnvYaw(e.shiftKey ? 5 : 1);
 }
 
 function select(target: Editable): void {
@@ -216,9 +248,13 @@ function buildPanel(): void {
   panel.innerHTML =
     "<b>EDIT MODE</b>  1 move · 2 rotate · 3 scale\n" +
     "left-click select · right-drag look · Esc deselect\n";
+  envLine = document.createElement("div");
+  envLine.style.cssText = "margin-top:6px;color:#ffd28f";
   readout = document.createElement("div");
   readout.style.cssText = "margin:8px 0;color:#9fd6ff";
   readout.textContent = "click a prop to select";
+  panel.appendChild(envLine);
+  updateEnvLine();
   const button = document.createElement("button");
   button.textContent = "Copy props JSON";
   button.style.cssText =
