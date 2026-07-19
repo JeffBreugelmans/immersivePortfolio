@@ -1,5 +1,11 @@
 # PLAN: Vive don/doff animation (wearable magic)
 
+**STATUS (2026-07-19): implemented** on this branch -- see
+`src/wearableFx.ts` + the `livePropObjects` changes in
+`src/sceneManager.ts`, and the "SESSION UPDATE" entry at the bottom of
+`docs/NEXT_STEPS.md` for what was verified and what still needs a look
+in a real browser before merge.
+
 Jeff's ask (2026-07-18, verbatim intent): the Holo Stage HTC Vive should
 not just click-and-teleport. **Don**: the headset lifts off the museum
 shelf, rotates 180°, flies to a spot just above the visitor's head, then

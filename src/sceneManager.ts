@@ -90,6 +90,12 @@ declare global {
   }
 }
 
+// Live propId -> object3D lookup, populated by spawnProp and cleared on
+// scene teardown below. wearableFx.ts uses this to grab the actual
+// on-screen headset mesh for the don/doff animation without needing its
+// own copy of the spawn logic.
+export const livePropObjects = new Map<string, THREE.Object3D>();
+
 function disposeObject3D(root: THREE.Object3D | undefined | null): void {
   if (!root) return;
   root.traverse((child) => {
@@ -383,6 +389,7 @@ async function spawnProp(
   }
   object3D.userData.propId = prop.id;
   object3D.userData.propSource = prop.source ?? "unknown";
+  livePropObjects.set(prop.id, object3D);
   editorRegisterProp(prop as never, object3D);
   if (cleanupVideo) object3D.userData.video = cleanupVideo;
 
@@ -449,20 +456,22 @@ export function initSceneManager(world: World): SceneManager {
 
   editorInit(world); // no-op unless the URL has ?edit
 
-  // Manifest-driven wearable/portal props: a prop with `teleportTo`
-  // jumps to that scene when clicked (TECH_SPEC C.1 simplified -- the
-  // Vive in the Holo Stage is the first). Slight delay lets the click
-  // SFX (e.g. the vive-don whoosh) breathe before the fade.
+  // Manifest-driven portal props: a prop with `teleportTo` jumps to that
+  // scene when clicked. Slight delay lets the click SFX breathe before
+  // the fade. Props also marked `wearable: true` (the Holo Stage Vive)
+  // are owned by wearableFx.ts instead -- it plays the don animation and
+  // fires the teleport itself once the headset reaches the visitor's
+  // eyes, so skip them here.
   window.addEventListener("prop-interaction", (e) => {
     const detail = (e as CustomEvent).detail as
       | { propId?: string; sceneId?: string; trigger?: string }
       | undefined;
     if (!detail || detail.trigger !== "click") return;
     const scene = detail.sceneId ? sceneById[detail.sceneId] : null;
-    const entry = (scene?.props as { id?: string; teleportTo?: string }[] | undefined)?.find(
-      (p) => p.id === detail.propId
-    );
-    if (entry?.teleportTo) {
+    const entry = (
+      scene?.props as { id?: string; teleportTo?: string; wearable?: boolean }[] | undefined
+    )?.find((p) => p.id === detail.propId);
+    if (entry?.teleportTo && !entry.wearable) {
       setTimeout(() => window.teleportTo?.(entry.teleportTo!), 500);
     }
   });
@@ -486,6 +495,7 @@ export function initSceneManager(world: World): SceneManager {
         unregisterGazeTarget(entity.object3D);
         if (entity.object3D.userData.propId) {
           unregisterInteractive(entity.object3D.userData.propId);
+          livePropObjects.delete(entity.object3D.userData.propId);
         }
         entity.object3D.userData.video?.pause?.();
         disposeObject3D(entity.object3D);

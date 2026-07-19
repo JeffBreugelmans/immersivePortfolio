@@ -373,8 +373,11 @@ Per-scene state:
   bench (needs his `?edit` polish). Still to generate: data glove
   (image-conditioned), Tobii bar, smart lamp.
 - **S3 Holo Stage** -- splat live (2.76); Jeff's Tripo HTC Vive on the
-  museum shelf = first **wearable-teleport** (click -> vive-don SFX ->
-  fade to S4) via the generic manifest `teleportTo` prop field.
+  museum shelf = first **wearable-teleport**. UPGRADED 2026-07-19 (cloud
+  session, `src/wearableFx.ts`, see below): click now plays a real
+  don animation -- lifts off the shelf, flips 180, flies to just above
+  your head, slides down onto your eyes -- THEN fades to S4. Returning
+  through S4's ring portal plays the reverse (doff) back onto the shelf.
 - **S4 Construct** -- prompt-only splat live (0.43 -- Marble
   OVER-scaled this one). Jeff made an image-conditioned v2 on his
   Marble WEB account (world f4482364-e691-4e0e-acba-e2ce3274bffc) but
@@ -432,6 +435,55 @@ scp any new gitignored `scene-fullres.spz` into the matching spark
 `public/.../marble/` folder before building. jeff-worlds.service is a
 SYSTEM unit: restarts need Jeff's sudo, and Restart=on-failure means a
 clean kill does NOT respawn it.
+
+## SESSION UPDATE (2026-07-19, cloud session) -- Vive don/doff shipped
+
+Implemented `docs/PLAN-wearable-fx.md` in full on `claude/wearable-fx`
+(not merged to main -- Jeff's call on when/whether to merge + deploy):
+
+- `src/sceneManager.ts`: exports `livePropObjects` (propId -> live
+  object3D), populated in `spawnProp`, cleared on scene teardown. The
+  generic `teleportTo` click listener now skips props with
+  `wearable: true` so the new system owns their full click-to-teleport
+  flow instead of the old flat 500ms delay.
+- `src/wearableFx.ts` (new): `WearableFxSystem`, registered in
+  `src/index.ts` right after `CompanionSystem`. Manual phase/lerp state
+  machine (no tween lib, same pattern as CompanionSystem's steering),
+  driven entirely off world-space camera transforms
+  (`world.camera.getWorldPosition/getWorldDirection`) so it's correct
+  regardless of where the visitor is standing, desktop or XR:
+  - **Don** (click the Vive): lift off shelf + yaw 180 (0.45s) ->
+    fly to camera pos + 0.45m up (0.6s) -> slide down onto the exact
+    eye position (0.35s) -> `window.teleportTo()` fires (fade covers
+    the cut).
+  - **Doff** (arriving back at a scene whose wearable prop's
+    `teleportTo` matches the scene just left): snaps onto the eyes the
+    instant the scene appears, then reverse-plays the same three beats
+    (0.35 + 0.5 + 0.35s) back onto the shelf, restoring the exact
+    authored shelf pose at the end (captured live off the fresh spawn,
+    not hardcoded).
+- Verified: `npx tsc --noEmit` clean, `npx vite build` clean, 11-check
+  smoke test run twice against this build AND against the pre-change
+  baseline for comparison -- 9/11 pass both times; the 2 failures
+  ("faded teleport", "companion state machine") reproduce identically
+  on baseline with zero code changes, confirming they're a pre-existing
+  swiftshader/headless timing flake, not something this change broke.
+  No new console/page errors either run.
+
+**Still needs Jeff's eyes** (explicitly flagged in the plan doc as hard
+to verify headless): the actual don/doff motion has never been watched
+in a real browser. Load `?scene=2` (Holo Stage) locally, click the Vive,
+watch the lift/fly/slide-down read as intended, then walk back through
+S4's return portal and watch the reverse. Desktop and Quest share the
+exact same camera-pose code path, but the near-plane clip feel of the
+headset sliding onto the eyes should get a separate look on-device --
+it may want a touch more/less lead distance on the final "place" phase
+depending on how it feels through the headset's own near clip plane.
+
+Not touched (left for Jeff per the plan doc's own notes): S5 projector
+wall floor-height polish, S4 video screen placement, remaining S2 props
+(data glove/Tobii/lamp, blocked on his Tripo studio exports). No merge
+to main, no Spark deploy -- pushed to `claude/wearable-fx` only.
 
 ## Deploy reminders
 
