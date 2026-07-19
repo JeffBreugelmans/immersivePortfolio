@@ -13,7 +13,7 @@
 //   "scene-changed"    (out) -> swap done (chat overlay, controls, overlay)
 
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { createMintGltfLoader } from "./gltfRuntime";
 import {
   DistanceGrabbable,
   EnvironmentType,
@@ -70,7 +70,9 @@ function disposeObject3D(root: THREE.Object3D | undefined | null): void {
   });
 }
 
-const gltfLoader = new GLTFLoader();
+// Shared Draco-capable loader (gltfRuntime.ts): required for Mint GLB
+// props; also serves the Marble colliders, which are plain GLBs.
+const gltfLoader = createMintGltfLoader();
 
 // Diegetic edge of the walkable "sweet zone" (see src/walkBounds.ts):
 // four low posts + a sagging band of black/yellow safety tape at the
@@ -252,7 +254,12 @@ interface PropEntry {
   role?: string;
 }
 
-async function spawnProp(world: World, prop: PropEntry, sceneId: string): Promise<Entity | null> {
+async function spawnProp(
+  world: World,
+  prop: PropEntry,
+  sceneId: string,
+  floorAt: (x: number, z: number) => number = () => 0
+): Promise<Entity | null> {
   let object3D: THREE.Object3D;
   let cleanupVideo: HTMLVideoElement | null = null;
 
@@ -313,7 +320,14 @@ async function spawnProp(world: World, prop: PropEntry, sceneId: string): Promis
       return null;
   }
 
-  object3D.position.set(...prop.position);
+  // Prop y is authored ABOVE THE FLOOR; each prop raycasts the collider
+  // under its own XZ, so a sloped or uneven Marble ground can't leave
+  // props floating (the spawn-point floor height is only a fallback).
+  object3D.position.set(
+    prop.position[0],
+    floorAt(prop.position[0], prop.position[2]) + prop.position[1],
+    prop.position[2]
+  );
   if (prop.rotation) {
     object3D.rotation.set(
       THREE.MathUtils.degToRad(prop.rotation[0]),
@@ -499,14 +513,16 @@ export function initSceneManager(world: World): SceneManager {
     // it -- desktop eye height and XR locomotion then both start from
     // the actual ground instead of floating at the camera's altitude.
     let floorY = 0;
+    let colliderObj: THREE.Object3D | null = null;
     if (scene.collider) {
       const colliderEntity = await spawnCollider(world, scene.collider, envScale);
       sceneEntities.push(colliderEntity);
       if (token !== loadToken) return;
       if (colliderEntity?.object3D) {
-        colliderEntity.object3D.updateMatrixWorld(true);
+        colliderObj = colliderEntity.object3D;
+        colliderObj.updateMatrixWorld(true);
         const down = new THREE.Raycaster(new THREE.Vector3(0, 50, 0), new THREE.Vector3(0, -1, 0));
-        const hit = down.intersectObject(colliderEntity.object3D, true)[0];
+        const hit = down.intersectObject(colliderObj, true)[0];
         if (hit) {
           floorY = hit.point.y;
           world.player.position.y = floorY;
@@ -514,6 +530,17 @@ export function initSceneManager(world: World): SceneManager {
         }
       }
     }
+
+    // Ground sampler for props: cast from just above head height under
+    // each prop's own XZ so roof geometry in the collider can't shadow
+    // the floor hit, and sloped ground can't leave props hovering.
+    const _floorRay = new THREE.Raycaster();
+    const floorAt = (x: number, z: number): number => {
+      if (!colliderObj) return floorY;
+      _floorRay.set(new THREE.Vector3(x, floorY + 2.5, z), new THREE.Vector3(0, -1, 0));
+      const hit = _floorRay.intersectObject(colliderObj, true)[0];
+      return hit ? hit.point.y : floorY;
+    };
 
     // Walkable sweet zone: WalkBoundsSystem clamps the player to this box
     // (default 4x4m); the safety-tape barrier makes the limit diegetic.
@@ -545,7 +572,7 @@ export function initSceneManager(world: World): SceneManager {
 
     // Props: Tripo objects, custom GLBs, images/video screens.
     for (const prop of scene.props ?? []) {
-      sceneEntities.push(await spawnProp(world, prop as PropEntry, sceneId));
+      sceneEntities.push(await spawnProp(world, prop as PropEntry, sceneId, floorAt));
       if (token !== loadToken) return;
     }
 

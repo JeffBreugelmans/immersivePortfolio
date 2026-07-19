@@ -112,14 +112,11 @@ export const worlds = [
         splat: `${BASE}roots/scene-01-hangar-polder/marble/scene.spz`,
         collider: `${BASE}roots/scene-01-hangar-polder/marble/collider.glb`,
         ambient: `${BASE}roots/scene-01-hangar-polder/audio/ambient.mp3`,
-        // Generation camera sat by the hangar-door wall; the interior
-        // (aircraft, roof trusses, golden light) is behind the default
-        // facing. Verified via headless screenshots 2026-07-18.
-        spawnYawDeg: 180,
-        // Marble generated the hangar under-scale (floor-to-roof ~7.5m in
-        // the collider; a Chinook alone is 5.7m tall). Jeff's review:
-        // "very small... taller than the planes". Scales splat + collider.
-        envScale: 1.75,
+        // Regenerated 2026-07-18 from Jeff's empty-hangar reference plate
+        // (v2: empty interior, Chinook outside on the apron). Orientation
+        // and scale re-tuned below via headless screenshots.
+        spawnYawDeg: 0,
+        envScale: 1,
         // Full-res 2M-splat variant (gitignored, rsync'd to the Spark --
         // see DEPLOYMENT.md): served to desktop browsers; Quest and
         // anything missing the file falls back to the 500k scene.spz.
@@ -128,9 +125,87 @@ export const worlds = [
         // code default). Splat quality collapses a few meters out from the
         // generation camera, so the visitor stays behind safety tape --
         // fitting for a maintenance floor.
-        walkBounds: { width: 4, depth: 4 },
+        walkBounds: { width: 8, depth: 8 },
         entryPortals: ["scene-02-perception-lab", "scene-03-lightworks"],
+        // Layout (regen 2026-07-18, spawnYaw 0): roundel wall to the LEFT
+        // (-x), open hangar doors + Chinook + sunset to the RIGHT (+x),
+        // deep interior ahead (-z). Splat is empty inside by design; the
+        // F-16 and service props below are real GLBs -- the hackathon's
+        // splat+model composite. Prop y = height ABOVE the raycast floor
+        // (Mint GLBs are unit-normalized with center origin, so y is
+        // half-height x scale).
         props: [
+          {
+            id: "f16-hero",
+            kind: "glb",
+            source: "mint",
+            src: `${BASE}assets/mint/f16-hero/original_glb.glb`,
+            label: "RNLAF F-16 Fighting Falcon",
+            description:
+              "A Royal Netherlands Air Force F-16 -- the aircraft Jeff worked around during his RNLAF internship, where maintenance efficiency became his first engineering obsession.",
+            // y tuned by eye: no collider coverage this deep in the
+            // hangar (Marble only meshes near the camera) and the splat
+            // floor sags below the spawn-floor height out here.
+            position: [-2.2, 1.2, -11],
+            rotation: [0, 155, 0],
+            scale: 15,
+            interaction: { pickup: false },
+          },
+          {
+            id: "s1-maintenance-stand",
+            kind: "glb",
+            source: "mint",
+            src: `${BASE}assets/mint/s1-hangar-props/asset_pack_item_glb-vd74sdj4ynbc52j4f7q2vf80hs8at9jd-2-ks7558zknhj961pc1vbddkn6ys8attm1.glb`,
+            label: "Maintenance stand",
+            position: [2.4, 1.0, -7.0],
+            rotation: [0, -90, 0],
+            scale: 2.0,
+            interaction: { pickup: false },
+          },
+          {
+            id: "s1-tool-chest",
+            kind: "glb",
+            source: "mint",
+            src: `${BASE}assets/mint/s1-hangar-props/asset_pack_item_glb-vd74sdj4ynbc52j4f7q2vf80hs8at9jd-0-ks7f3eq57gt9vzhy6shssz978x8atrpq.glb`,
+            label: "Tool chest",
+            position: [-7.0, 0.8, -4.0],
+            rotation: [0, 90, 0],
+            scale: 1.6,
+            interaction: { pickup: false },
+          },
+          {
+            id: "s1-tool-cart",
+            kind: "glb",
+            source: "mint",
+            src: `${BASE}assets/mint/s1-hangar-props/asset_pack_item_glb-vd74sdj4ynbc52j4f7q2vf80hs8at9jd-1-ks75ntgtawfasbh139bw1r9fd98avrmn.glb`,
+            label: "Tool cart",
+            position: [-4.3, 0.51, -6.3],
+            rotation: [0, 25, 0],
+            scale: 1.1,
+            interaction: { pickup: false },
+          },
+          {
+            id: "s1-workbench",
+            kind: "glb",
+            source: "mint",
+            src: `${BASE}assets/mint/s1-hangar-props/asset_pack_item_glb-vd74sdj4ynbc52j4f7q2vf80hs8at9jd-3-ks75d8gtbp23cc4qdmpqgvd4rn8avgdy.glb`,
+            label: "Workbench",
+            position: [-7.2, 0.46, -7.5],
+            rotation: [0, 90, 0],
+            scale: 1.1,
+            interaction: { pickup: false },
+          },
+          {
+            id: "s1-hose-reel",
+            kind: "glb",
+            source: "mint",
+            src: `${BASE}assets/mint/s1-hangar-props/asset_pack_item_glb-vd74sdj4ynbc52j4f7q2vf80hs8at9jd-4-ks781kx485bz6a78bs1pwf821d8avm7d.glb`,
+            label: "Air hose reel",
+            position: [-7.0, 0.5, -1.0],
+            rotation: [0, 90, 0],
+            scale: 1.0,
+            interaction: { pickup: false },
+          },
           {
             id: "placard-rnlaf-internship",
             kind: "placard",
@@ -139,7 +214,8 @@ export const worlds = [
             text:
               "During his Bachelor's in Electrical Engineering, Jeff interned with the Royal Netherlands Air Force, working on maintenance efficiency and repair task scheduling -- his first taste of engineering for the people who keep complex machines flying.",
             label: "RNLAF internship placard",
-            position: [0.9, 0.45, -1.95],
+            position: [-6.8, 1.2, -2.6],
+            rotation: [0, 90, 0],
             width: 0.9,
           },
         ],

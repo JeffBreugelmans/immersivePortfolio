@@ -100,7 +100,8 @@ async function uploadImage(imagePath) {
     throw new Error(`image upload failed: HTTP ${putRes.status} ${await putRes.text()}`);
   }
 
-  return media_asset.id;
+  // Response field is media_asset_id (probed 2026-07-18), not id.
+  return media_asset.media_asset_id;
 }
 
 async function generateWorld({ displayName, prompt, imagePath }) {
