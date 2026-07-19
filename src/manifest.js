@@ -403,6 +403,10 @@ export const worlds = [
         // Marble under-scale (collider floor -0.58 at origin) -> 2.76x
         // restores a 1.6m eye height.
         envScale: 2.76,
+        // Jeff's ?edit pass 2026-07-19 ("progress placement"): rotation +
+        // video/placard placed; shelf headsets still need re-placement
+        // against the rotated splat.
+        envYawDeg: 87,
         entryPortals: ["scene-02-perception-lab", "scene-03-lightworks", "scene-02-second-studio-construct"],
         props: [
           {
@@ -471,8 +475,9 @@ export const worlds = [
             label: "Prez in action",
             description:
               "The AfterNow Prez trailer: presentations that are places -- walk-around holographic slides, 3D exhibits and data you stand inside, delivered on HoloLens.",
-            position: [-3.2, 1.9, -1.5],
+            position: [-9.53, 2.49, -0.22],
             rotation: [0, 55, 0],
+            scale: 1.92,
             width: 3.2,
             height: 1.8,
           },
@@ -484,10 +489,10 @@ export const worlds = [
             text:
               "At AfterNow, Jeff built Prez: a holographic presentation platform for HoloLens that turns slides into spaces. Instead of projecting flat rectangles, presenters stage 3D exhibits around the room -- cars, Mars rovers, living data -- and walk their audience through them.",
             label: "Holo Stage placard",
-            position: [2.6, 1.3, -3.0],
+            position: [-0.44, 2.14, 4.29],
             rotation: [0, -40, 0],
             width: 0.9,
-            scale: 2.5,
+            scale: 3.199,
           },
         ],
       },
