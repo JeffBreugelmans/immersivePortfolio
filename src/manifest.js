@@ -123,12 +123,14 @@ export const worlds = [
         // Regenerated 2026-07-18 from Jeff's empty-hangar reference plate
         // (v2: empty interior, Chinook outside on the apron). Orientation
         // and scale re-tuned below via headless screenshots.
-        spawnYawDeg: 0,
+        // After Jeff's -54 env rotation the hero view (F-16 nose + open
+        // doors + sunset) sits at yaw 90 -- spawn facing it.
+        spawnYawDeg: 90,
         envScale: 1,
         // Squares the splat+collider with the axis-aligned walk bounds
         // (Marble's camera wasn't square to the hangar). Tune live in
         // ?edit with [ / ], then bake the panel's number here.
-        envYawDeg: 0,
+        envYawDeg: -54,
         // Full-res 2M-splat variant (gitignored, rsync'd to the Spark --
         // see DEPLOYMENT.md): served to desktop browsers; Quest and
         // anything missing the file falls back to the 500k scene.spz.
@@ -158,9 +160,9 @@ export const worlds = [
             // Jeff's final ?edit layout 2026-07-18 (scale 7.8 = display
             // model size rather than 1:1, his call -- fits the splat
             // hangar's proportions better).
-            position: [-1.68, 1.54, 6.19],
+            position: [-5.68, 1.46, -1.33],
             rotation: [0, 155, 0],
-            scale: 7.835,
+            scale: [10.833, 8.12, 8.12],
             interaction: { pickup: false },
           },
           {
@@ -169,7 +171,7 @@ export const worlds = [
             source: "mint",
             src: `${BASE}assets/mint/s1-hangar-props/asset_pack_item_glb-vd74sdj4ynbc52j4f7q2vf80hs8at9jd-2-ks7558zknhj961pc1vbddkn6ys8attm1.glb`,
             label: "Maintenance stand",
-            position: [-2.72, 0.99, -5.53],
+            position: [-2.72, 1.02, -5.53],
             rotation: [0, -90, 0],
             scale: 2.0,
             interaction: { pickup: false },
@@ -180,7 +182,7 @@ export const worlds = [
             source: "mint",
             src: `${BASE}assets/mint/s1-hangar-props/asset_pack_item_glb-vd74sdj4ynbc52j4f7q2vf80hs8at9jd-0-ks7f3eq57gt9vzhy6shssz978x8atrpq.glb`,
             label: "Tool chest",
-            position: [-7.0, 0.8, -4.0],
+            position: [-4.96, 0.76, -4.0],
             rotation: [0, 90, 0],
             scale: 1.6,
             interaction: { pickup: false },
@@ -191,7 +193,7 @@ export const worlds = [
             source: "mint",
             src: `${BASE}assets/mint/s1-hangar-props/asset_pack_item_glb-vd74sdj4ynbc52j4f7q2vf80hs8at9jd-1-ks75ntgtawfasbh139bw1r9fd98avrmn.glb`,
             label: "Tool cart",
-            position: [-3.22, 0.67, 0.59],
+            position: [-5.16, 0.64, 1.47],
             rotation: [0, 25, 0],
             scale: 1.332,
             interaction: { pickup: false },
@@ -213,7 +215,7 @@ export const worlds = [
             source: "mint",
             src: `${BASE}assets/mint/s1-hangar-props/asset_pack_item_glb-vd74sdj4ynbc52j4f7q2vf80hs8at9jd-4-ks781kx485bz6a78bs1pwf821d8avm7d.glb`,
             label: "Air hose reel",
-            position: [-3.5, 0.84, 3.48],
+            position: [-3.29, 0.84, 3.52],
             rotation: [0, 90, 0],
             scale: 1.602,
             interaction: { pickup: false },
@@ -226,7 +228,7 @@ export const worlds = [
             text:
               "During his Bachelor's in Electrical Engineering, Jeff interned with the Royal Netherlands Air Force, working on maintenance efficiency and repair task scheduling -- his first taste of engineering for the people who keep complex machines flying.",
             label: "RNLAF internship placard",
-            position: [-6.66, 1.82, -0.94],
+            position: [0.58, 1.91, -6.68],
             rotation: [0, 90, 0],
             width: 0.9,
             scale: 3.415,
