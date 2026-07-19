@@ -149,12 +149,12 @@ export const worlds = [
             label: "RNLAF F-16 Fighting Falcon",
             description:
               "A Royal Netherlands Air Force F-16 -- the aircraft Jeff worked around during his RNLAF internship, where maintenance efficiency became his first engineering obsession.",
-            // Position from Jeff's ?edit session 2026-07-18; scale reset
-            // to 15 after the gizmo blew it up (scaling multiplies the
-            // already-15x object -- use the panel numbers, not the drag).
-            position: [-9.75, 2.75, 9.07],
+            // Jeff's final ?edit layout 2026-07-18 (scale 7.8 = display
+            // model size rather than 1:1, his call -- fits the splat
+            // hangar's proportions better).
+            position: [-1.68, 1.54, 6.19],
             rotation: [0, 155, 0],
-            scale: 15,
+            scale: 7.835,
             interaction: { pickup: false },
           },
           {
@@ -163,7 +163,7 @@ export const worlds = [
             source: "mint",
             src: `${BASE}assets/mint/s1-hangar-props/asset_pack_item_glb-vd74sdj4ynbc52j4f7q2vf80hs8at9jd-2-ks7558zknhj961pc1vbddkn6ys8attm1.glb`,
             label: "Maintenance stand",
-            position: [-1.37, 1.0, -7.0],
+            position: [-2.72, 0.99, -5.53],
             rotation: [0, -90, 0],
             scale: 2.0,
             interaction: { pickup: false },
@@ -185,9 +185,9 @@ export const worlds = [
             source: "mint",
             src: `${BASE}assets/mint/s1-hangar-props/asset_pack_item_glb-vd74sdj4ynbc52j4f7q2vf80hs8at9jd-1-ks75ntgtawfasbh139bw1r9fd98avrmn.glb`,
             label: "Tool cart",
-            position: [-5.79, 0.59, -0.52],
+            position: [-3.22, 0.67, 0.59],
             rotation: [0, 25, 0],
-            scale: 1.1,
+            scale: 1.332,
             interaction: { pickup: false },
           },
           {
@@ -207,9 +207,9 @@ export const worlds = [
             source: "mint",
             src: `${BASE}assets/mint/s1-hangar-props/asset_pack_item_glb-vd74sdj4ynbc52j4f7q2vf80hs8at9jd-4-ks781kx485bz6a78bs1pwf821d8avm7d.glb`,
             label: "Air hose reel",
-            position: [-7.0, 0.54, 2.13],
+            position: [-3.5, 0.84, 3.48],
             rotation: [0, 90, 0],
-            scale: 1.0,
+            scale: 1.602,
             interaction: { pickup: false },
           },
           {
@@ -220,10 +220,10 @@ export const worlds = [
             text:
               "During his Bachelor's in Electrical Engineering, Jeff interned with the Royal Netherlands Air Force, working on maintenance efficiency and repair task scheduling -- his first taste of engineering for the people who keep complex machines flying.",
             label: "RNLAF internship placard",
-            position: [-6.56, 1.75, -3.11],
+            position: [-6.66, 1.82, -0.94],
             rotation: [0, 90, 0],
             width: 0.9,
-            scale: 2.503,
+            scale: 3.415,
           },
         ],
       },
