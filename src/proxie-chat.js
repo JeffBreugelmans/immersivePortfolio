@@ -290,13 +290,19 @@ export function initChatOverlay(sceneManager) {
       if (parts[1]) renderLinks(parts[1]);
       speaker.finish(fullText);
 
-      // Proposed teleport marker -- inert until the backend actually emits
-      // it (see header comment). Safe to leave in: it just won't match
-      // anything today.
+      // Teleport marker in the reply. IMPORTANT: only honored for
+      // messages the visitor actually sent -- hidden prompts (tap
+      // greetings, gaze commentary) must never move the visitor; the
+      // model sometimes appends a marker for the scene it's describing,
+      // which yanked Jeff around mid-walkthrough.
       const teleportIdx = parts[0].indexOf(TELEPORT_MARKER);
       if (teleportIdx !== -1) {
-        const sceneId = parts[0].slice(teleportIdx + TELEPORT_MARKER.length).split(/[\s-]*$/)[0].trim();
-        if (sceneId && window.teleportTo) window.teleportTo(sceneId);
+        // Never show the raw marker text in the chat log.
+        replyEl.textContent = parts[0].slice(0, teleportIdx).trimEnd();
+        if (!hidden) {
+          const sceneId = parts[0].slice(teleportIdx + TELEPORT_MARKER.length).split(/[\s-]*$/)[0].trim();
+          if (sceneId && window.teleportTo) window.teleportTo(sceneId);
+        }
       }
 
       setAvatar(AVATAR_IDLE);

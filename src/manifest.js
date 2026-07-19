@@ -320,7 +320,7 @@ export const worlds = [
             id: "data-glove",
             kind: "glb",
             source: "tripo",
-            src: `${BASE}roots/scene-02-perception-lab/props/data-glove.glb`,
+            src: `${BASE}roots/scene-02-perception-lab/props/data-glove.glb?v=3`,
             label: "Data glove -- flex to bring the lamp up",
             description:
               "The sensor-laden data glove from Jeff's PhD at Northeastern. Click it to put it on, then flex your hand -- exactly how it once turned a hand gesture into a continuous accessibility signal -- and watch the desk lamp answer.",
@@ -344,7 +344,7 @@ export const worlds = [
             description:
               "The eye-tracker bar from Jeff's PhD rig -- it watched where players looked so games could be driven by gaze alone, no hands needed. The Boston Globe covered it: 'Eye-tracking video game device subs for mouse.'",
             position: [3.24, 1.52, -1.15],
-            rotation: [0, -10, 0],
+            rotation: [0, 170, 0],
             scale: 0.827,
             snapToGround: false,
             interaction: {
