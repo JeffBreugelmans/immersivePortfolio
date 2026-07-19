@@ -493,10 +493,18 @@ export function initSceneManager(world: World): SceneManager {
     if (!detail || detail.trigger !== "click") return;
     const scene = detail.sceneId ? sceneById[detail.sceneId] : null;
     const entry = (
-      scene?.props as { id?: string; teleportTo?: string; wearable?: boolean }[] | undefined
+      scene?.props as
+        | { id?: string; teleportTo?: string; wearable?: boolean; companionReaction?: string }[]
+        | undefined
     )?.find((p) => p.id === detail.propId);
     if (entry?.teleportTo && !entry.wearable) {
       setTimeout(() => window.teleportTo?.(entry.teleportTo!), 500);
+    }
+    // Manifest-driven companion one-shots: a prop with companionReaction
+    // makes Proxie play that clip on click (e.g. the reflex hammer's
+    // "flinch" -- companion.ts listens for companion-<reaction>).
+    if (entry?.companionReaction) {
+      window.dispatchEvent(new CustomEvent(`companion-${entry.companionReaction}`));
     }
   });
 

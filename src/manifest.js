@@ -103,6 +103,7 @@ export const sfxLibrary = {
   "lamp-click": `${BASE}shared/audio/lamp-click.mp3`,
   "hologram-bloom": `${BASE}shared/audio/hologram-bloom.mp3`,
   "vive-don": `${BASE}shared/audio/vive-don.mp3`,
+  yelp: `${BASE}shared/audio/yelp.mp3`,
 };
 
 export const worlds = [
@@ -309,8 +310,12 @@ export const worlds = [
             scale: 0.22,
             interaction: {
               gaze: { dwellMs: 600, effect: "glow" },
-              click: { effect: "pulse" },
+              click: { effect: "pulse", sfx: "yelp" },
             },
+            // The approved comedy beat (T087): tapping the hammer near
+            // the rubber hand makes Proxie flinch for a hand that is not
+            // his -- the illusion demonstrated on the demonstrator.
+            companionReaction: "flinch",
           },
           {
             // PhD bench (Northeastern), generated 2026-07-19 from Jeff's
