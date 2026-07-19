@@ -262,7 +262,11 @@ export const worlds = [
           "AfterNow Prez as a dark presentation theater -- podium HoloLens, floating hologram exhibits including Project Malta, a gear wall of headsets through the years.",
         splat: `${BASE}career/scene-01-holo-stage/marble/scene.spz`,
         collider: `${BASE}career/scene-01-holo-stage/marble/collider.glb`,
+        splatHiRes: `${BASE}career/scene-01-holo-stage/marble/scene-fullres.spz`,
         ambient: `${BASE}career/scene-01-holo-stage/audio/ambient.mp3`,
+        // Marble under-scale (collider floor -0.58 at origin) -> 2.76x
+        // restores a 1.6m eye height.
+        envScale: 2.76,
         entryPortals: ["scene-02-perception-lab", "scene-03-lightworks", "scene-02-second-studio-construct"],
         props: [],
       },
