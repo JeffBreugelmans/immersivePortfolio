@@ -30,17 +30,24 @@ export type ClipName =
 // state machine uses (clip files embed one animation each).
 //
 // idle NOTE (Jeff's review: Neutral Idle reads "creepy" even slowed):
-// until a calmer catalog idle is generated via Mint, idle reuses the
-// Listening Gesture loop -- an attentive, planted stance with no
-// shoulder-checking. ?idle=classic restores the original for A/B.
-const CLASSIC_IDLE = "clip-w97fsh531084t1cpztsgpvt7ex8aty9q-animation_glb.glb";
-const CALM_IDLE = "clip-w97aavseq7gan51vgb29ncehys8avpb5-animation_glb.glb";
-const useClassicIdle =
-  typeof location !== "undefined" &&
-  new URLSearchParams(location.search).get("idle") === "classic";
+// the default is now catalog "Idle 3" (action 243), a planted upright
+// stance generated 2026-07-19 specifically for this. A/B via URL:
+// ?idle=classic (original Neutral Idle), ?idle=listen (Listening loop
+// stopgap), ?idle=alt (catalog "Idle 4", the runner-up candidate).
+const IDLE_VARIANTS: Record<string, string> = {
+  classic: "clip-w97fsh531084t1cpztsgpvt7ex8aty9q-animation_glb.glb",
+  listen: "clip-w97aavseq7gan51vgb29ncehys8avpb5-animation_glb.glb",
+  alt: "clip-idle4-calm.glb",
+  calm: "clip-idle3-calm.glb",
+};
+const idleChoice =
+  (typeof location !== "undefined" &&
+    new URLSearchParams(location.search).get("idle")) ||
+  "calm";
+const useClassicIdle = idleChoice === "classic";
 
 const CLIP_FILES: Record<ClipName, string> = {
-  idle: useClassicIdle ? CLASSIC_IDLE : CALM_IDLE,
+  idle: IDLE_VARIANTS[idleChoice] ?? IDLE_VARIANTS.calm,
   walk: "clip-w97c4ac7hvv6h1rv8wcdyqq21x8avejw-animation_glb.glb",
   talk: "clip-w976vqkjy0xjvq7nr0cgs9hp958at7bd-animation_glb.glb",
   explain: "clip-w977m6c6qrf0d90tve2hbna2yd8atsbf-animation_glb.glb",
@@ -63,10 +70,10 @@ const CROSSFADE_S = 0.2;
 const TARGET_HEIGHT = 1.65;
 
 // Per-clip playback speed. The classic Neutral Idle needs a hard slow
-// (0.45) to hide its shoulder-checking; the calm Listening loop reads
-// naturally at a gentler 0.7.
+// (0.45) to hide its shoulder-checking; the purpose-picked calm idles
+// play near natural speed.
 const CLIP_TIMESCALE: Partial<Record<ClipName, number>> = {
-  idle: useClassicIdle ? 0.45 : 0.7,
+  idle: useClassicIdle ? 0.45 : 0.85,
   listen: 0.8,
 };
 

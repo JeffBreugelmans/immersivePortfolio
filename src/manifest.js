@@ -424,6 +424,41 @@ export const worlds = [
             wearable: true,
           },
           {
+            // Gear wall neighbors (T036/T038): the museum shelf becomes
+            // "headsets through the years" -- HoloLens left, Vive center
+            // (THE DOOR), Quest 3 right.
+            id: "hololens-2",
+            kind: "glb",
+            source: "tripo",
+            src: `${BASE}career/scene-01-holo-stage/props/hololens-2.glb`,
+            label: "Microsoft HoloLens 2",
+            description:
+              "The HoloLens 2 -- AfterNow's home platform. Prez presentations ran on this: holographic slides you walk around, pinned to the real room.",
+            position: [-0.9, 1.42, 6.0],
+            rotation: [0, 180, 0],
+            scale: 0.4,
+            interaction: {
+              pickup: false,
+              gaze: { dwellMs: 600, effect: "glow" },
+            },
+          },
+          {
+            id: "quest-3",
+            kind: "glb",
+            source: "tripo",
+            src: `${BASE}career/scene-01-holo-stage/props/quest-3.glb`,
+            label: "Meta Quest 3",
+            description:
+              "Meta Quest 3 -- the headset this very portfolio is built for. If you are reading this inside one: hello, you found the recursion.",
+            position: [0.9, 1.42, 6.0],
+            rotation: [0, 180, 0],
+            scale: 0.4,
+            interaction: {
+              pickup: false,
+              gaze: { dwellMs: 600, effect: "glow" },
+            },
+          },
+          {
             id: "prez-video",
             kind: "video",
             source: "custom",
