@@ -28,8 +28,19 @@ export type ClipName =
 
 // Registry localPath basenames, keyed by the semantic role the companion
 // state machine uses (clip files embed one animation each).
+//
+// idle NOTE (Jeff's review: Neutral Idle reads "creepy" even slowed):
+// until a calmer catalog idle is generated via Mint, idle reuses the
+// Listening Gesture loop -- an attentive, planted stance with no
+// shoulder-checking. ?idle=classic restores the original for A/B.
+const CLASSIC_IDLE = "clip-w97fsh531084t1cpztsgpvt7ex8aty9q-animation_glb.glb";
+const CALM_IDLE = "clip-w97aavseq7gan51vgb29ncehys8avpb5-animation_glb.glb";
+const useClassicIdle =
+  typeof location !== "undefined" &&
+  new URLSearchParams(location.search).get("idle") === "classic";
+
 const CLIP_FILES: Record<ClipName, string> = {
-  idle: "clip-w97fsh531084t1cpztsgpvt7ex8aty9q-animation_glb.glb",
+  idle: useClassicIdle ? CLASSIC_IDLE : CALM_IDLE,
   walk: "clip-w97c4ac7hvv6h1rv8wcdyqq21x8avejw-animation_glb.glb",
   talk: "clip-w976vqkjy0xjvq7nr0cgs9hp958at7bd-animation_glb.glb",
   explain: "clip-w977m6c6qrf0d90tve2hbna2yd8atsbf-animation_glb.glb",
@@ -51,11 +62,11 @@ const CROSSFADE_S = 0.2;
 // further by eye -- this is a first pass, not a measured fix.
 const TARGET_HEIGHT = 1.65;
 
-// Per-clip playback speed. The catalog "Neutral Idle" ships with busy
-// over-the-shoulder glances and weight shifts; slowed down it reads as
-// calm breathing instead of nervous swaying (Jeff's review 2026-07-18).
+// Per-clip playback speed. The classic Neutral Idle needs a hard slow
+// (0.45) to hide its shoulder-checking; the calm Listening loop reads
+// naturally at a gentler 0.7.
 const CLIP_TIMESCALE: Partial<Record<ClipName, number>> = {
-  idle: 0.45,
+  idle: useClassicIdle ? 0.45 : 0.7,
   listen: 0.8,
 };
 

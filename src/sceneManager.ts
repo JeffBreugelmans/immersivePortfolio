@@ -305,13 +305,15 @@ interface PropEntry {
   height?: number;
   interaction?: InteractionConfig;
   role?: string;
+  snapToGround?: boolean;
 }
 
 async function spawnProp(
   world: World,
   prop: PropEntry,
   sceneId: string,
-  floorAt: (x: number, z: number) => number = () => 0
+  floorAt: (x: number, z: number) => number = () => 0,
+  floorY = 0
 ): Promise<Entity | null> {
   let object3D: THREE.Object3D;
   let cleanupVideo: HTMLVideoElement | null = null;
@@ -379,11 +381,13 @@ async function spawnProp(
   // Prop y is authored ABOVE THE FLOOR; each prop raycasts the collider
   // under its own XZ, so a sloped or uneven Marble ground can't leave
   // props floating (the spawn-point floor height is only a fallback).
-  object3D.position.set(
-    prop.position[0],
-    floorAt(prop.position[0], prop.position[2]) + prop.position[1],
-    prop.position[2]
-  );
+  // snapToGround: false opts out of the per-prop ray -- y measures from
+  // the spawn floor instead. Use it for props on FURNITURE: Marble
+  // collider coverage of desks/shelves is unreliable (holes under some,
+  // stray shelf hits under others).
+  const baseY =
+    prop.snapToGround === false ? floorY : floorAt(prop.position[0], prop.position[2]);
+  object3D.position.set(prop.position[0], baseY + prop.position[1], prop.position[2]);
   if (prop.rotation) {
     object3D.rotation.set(
       THREE.MathUtils.degToRad(prop.rotation[0]),
@@ -682,7 +686,7 @@ export function initSceneManager(world: World): SceneManager {
 
     // Props: Tripo objects, custom GLBs, images/video screens.
     for (const prop of scene.props ?? []) {
-      sceneEntities.push(await spawnProp(world, prop as PropEntry, sceneId, floorAt));
+      sceneEntities.push(await spawnProp(world, prop as PropEntry, sceneId, floorAt, floorY));
       if (token !== loadToken) return;
     }
 

@@ -308,15 +308,10 @@ export const worlds = [
             },
           },
           {
-            // PhD bench (Northeastern) -- Tripo asset still pending Jeff's
-            // web-studio export (NEXT_STEPS "remaining S2 props"); spawnProp
-            // 404s quietly until data-glove.glb lands, same as every other
-            // stubbed prop in this file. `role: "data-glove"` is the
-            // routing key dataGloveFx.ts (TECH_SPEC G simplified fallback)
-            // looks for -- click it to don it on your hand, then flex
-            // (hold-click desktop / squeeze-strength XR) to drive the
-            // flexLamp above. Position/rotation are a placeholder mirror
-            // of the Bench A layout; retune via `?edit` once real.
+            // PhD bench (Northeastern), generated 2026-07-19 from Jeff's
+            // real glove photo (API queue). `role: "data-glove"` routes to
+            // dataGloveFx.ts: click to don, flex (hold-click desktop /
+            // squeeze XR) drives the flexLamp. Retune via ?edit.
             id: "data-glove",
             kind: "glb",
             source: "tripo",
@@ -324,14 +319,50 @@ export const worlds = [
             label: "Data glove -- flex to bring the lamp up",
             description:
               "The sensor-laden data glove from Jeff's PhD at Northeastern. Click it to put it on, then flex your hand -- exactly how it once turned a hand gesture into a continuous accessibility signal -- and watch the desk lamp answer.",
-            position: [2.1, 0.04, -1.6],
-            rotation: [-90, 0, 0],
-            scale: 0.45,
+            position: [1.85, 0.84, -1.35],
+            rotation: [0, -20, 0],
+            scale: 0.25,
+            snapToGround: false, // desk collider coverage is unreliable
             role: "data-glove",
             interaction: {
               pickup: false,
               gaze: { dwellMs: 600, effect: "glow" },
               click: { effect: "pulse", sfx: "chime" },
+            },
+          },
+          {
+            id: "tobii-eyetracker",
+            kind: "glb",
+            source: "tripo",
+            src: `${BASE}roots/scene-02-perception-lab/props/tobii-eyetracker.glb`,
+            label: "Tobii eye tracker",
+            description:
+              "The eye-tracker bar from Jeff's PhD rig -- it watched where players looked so games could be driven by gaze alone, no hands needed. The Boston Globe covered it: 'Eye-tracking video game device subs for mouse.'",
+            position: [1.45, 0.9, -1.6],
+            rotation: [0, -10, 0],
+            scale: 0.35,
+            snapToGround: false,
+            interaction: {
+              pickup: false,
+              gaze: { dwellMs: 600, effect: "glow" },
+            },
+          },
+          {
+            id: "smart-lamp",
+            kind: "glb",
+            source: "tripo",
+            src: `${BASE}roots/scene-02-perception-lab/props/smart-lamp.glb`,
+            label: "Smart lamp",
+            description:
+              "A Hue-style smart lamp -- an Eindhoven joke that writes itself: Jeff studied human-technology interaction in Philips' hometown. Wave at it.",
+            position: [0.85, 0.98, -1.55],
+            scale: 0.4,
+            snapToGround: false,
+            interaction: {
+              pickup: false,
+              gaze: { dwellMs: 600, effect: "glow" },
+              wave: { radius: 0.5, effect: "cycle-color", sfx: "chime" },
+              click: { effect: "cycle-color", sfx: "chime" },
             },
           },
           {
