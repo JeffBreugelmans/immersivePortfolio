@@ -378,10 +378,11 @@ export const worlds = [
             text:
               "Two chapters of research share this room. On the left bench: the rubber hand illusion from Jeff's Master's at TU Eindhoven -- stroke a fake hand in sync with a hidden real one and the brain claims it as its own. On the right: his PhD at Northeastern, where eye trackers and a sensor-laden data glove turned video games into rehabilitation and accessibility tools.",
             label: "Perception Lab placard",
-            position: [1.8, 1.3, -3.2],
-            rotation: [0, -30, 0],
+            position: [-1.4, 1.5, -2.7],
+            rotation: [0, 20, 0],
             width: 0.9,
             scale: 2.5,
+            snapToGround: false,
           },
         ],
       },
